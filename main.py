@@ -259,7 +259,10 @@ async def enforce_mime_types_and_headers(request: Request, call_next):
         elif path.endswith(".svg"):
             response.headers["content-type"] = "image/svg+xml"
             
-        if path.startswith("/js") or path.startswith("/css") or path in ["/", "/admin"]:
+        # Permissions-Policy orqali unload bloklanishini oldini olish
+        response.headers["Permissions-Policy"] = "unload=*"
+            
+        if path.startswith("/js") or path.startswith("/css") or path.startswith("/assets") or path in ["/", "/admin", "/admin.html"]:
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
