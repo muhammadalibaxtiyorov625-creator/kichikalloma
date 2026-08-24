@@ -706,9 +706,13 @@ def serve_admin_panel():
 # MOBIL ILOVA (MOBILE API) ENDPOINTS
 # ==============================================================================
 
-# 1. SEND OTP (/mobile/send-otp/ va /mobile/send-otp)
+# 1. SEND OTP (/mobile/send-otp/ va /api/website/send-otp/)
 @app.post("/mobile/send-otp/", tags=["Mobil Ilova (Mobile API)"], summary="1. SMS OTP Kod Yuborish (Register & Login bir xil)")
-@app.post("/mobile/send-otp", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/send-otp", include_in_schema=False)
+@app.post("/api/website/send-otp/", tags=["Web Sayt (Website)"], summary="Web: SMS OTP Kod Yuborish")
+@app.post("/api/website/send-otp", include_in_schema=False)
+@app.post("/api/send-otp/", include_in_schema=False)
+@app.post("/api/send-otp", include_in_schema=False)
 def mobile_send_otp(req: SendOtpRequest):
     phone = normalize_phone(req.phone)
     if not phone or len(phone) < 9:
@@ -742,9 +746,13 @@ def mobile_send_otp(req: SendOtpRequest):
 
 
 
-# 2. VERIFY OTP (/mobile/verify-otp/ va /mobile/verify-otp)
+# 2. VERIFY OTP (/mobile/verify-otp/ va /api/website/verify-otp/)
 @app.post("/mobile/verify-otp/", response_model=VerifyOtpResponse, tags=["Mobil Ilova (Mobile API)"], summary="2. SMS OTP Kodni Tasdiqlash (Access Token va is_new_user qaytaradi)")
-@app.post("/mobile/verify-otp", response_model=VerifyOtpResponse, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
+@app.post("/api/website/verify-otp/", response_model=VerifyOtpResponse, tags=["Web Sayt (Website)"], summary="Web: SMS OTP Kodni Tasdiqlash")
+@app.post("/api/website/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
+@app.post("/api/verify-otp/", response_model=VerifyOtpResponse, include_in_schema=False)
+@app.post("/api/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
 def mobile_verify_otp(req: VerifyOtpRequest):
     phone = normalize_phone(req.phone)
     code = req.code.strip()
@@ -810,11 +818,15 @@ def mobile_verify_otp(req: VerifyOtpRequest):
     }
 
 
-# 3. RESEND OTP (/mobile/resent-otp/ va /mobile/resent-otp)
+# 3. RESEND OTP (/mobile/resent-otp/ va /api/website/resent-otp/)
 @app.post("/mobile/resent-otp/", tags=["Mobil Ilova (Mobile API)"], summary="3. SMS OTP Kodni Qayta Yuborish (Resend OTP)")
-@app.post("/mobile/resent-otp", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/resend-otp/", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/resend-otp", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/resent-otp", include_in_schema=False)
+@app.post("/mobile/resend-otp/", include_in_schema=False)
+@app.post("/mobile/resend-otp", include_in_schema=False)
+@app.post("/api/website/resent-otp/", include_in_schema=False)
+@app.post("/api/website/resent-otp", include_in_schema=False)
+@app.post("/api/website/resend-otp/", include_in_schema=False)
+@app.post("/api/website/resend-otp", include_in_schema=False)
 def mobile_resend_otp(req: SendOtpRequest):
     phone = normalize_phone(req.phone)
     code = f"{random.randint(1000, 9999)}"
@@ -843,9 +855,11 @@ def mobile_resend_otp(req: SendOtpRequest):
     }
 
 
-# 4. CODE ACCESS (/mobile/code-access/ va /mobile/code-access)
+# 4. CODE ACCESS (/mobile/code-access/ va /api/website/code-access/)
 @app.post("/mobile/code-access/", tags=["Mobil Ilova (Mobile API)"], summary="4. 4-Xonali Kod O'rnatish / Tekshirish (Token orqali)")
-@app.post("/mobile/code-access", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/code-access", include_in_schema=False)
+@app.post("/api/website/code-access/", tags=["Web Sayt (Website)"], summary="Web: 4-Xonali Kod O'rnatish / Tekshirish")
+@app.post("/api/website/code-access", include_in_schema=False)
 def mobile_code_access(req: CodeAccessRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     code = req.code.strip()
@@ -957,9 +971,11 @@ def mobile_code_re_generate(current_user: dict = Depends(get_current_user)):
     }
 
 
-# 6. ADD CHILD (/mobile/add-child/ va /mobile/add-child)
+# 6. ADD CHILD (/mobile/add-child/ va /api/website/add-child/)
 @app.post("/mobile/add-child/", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="6. Yangi Farzand Qo'shish (Token orqali)")
-@app.post("/mobile/add-child", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/add-child", response_model=dict, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/api/website/add-child/", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Web Sayt (Website)"], summary="Web: Yangi Farzand Qo'shish")
+@app.post("/api/website/add-child", response_model=dict, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def mobile_add_child(child: AddChildRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
 
@@ -1003,9 +1019,11 @@ def mobile_add_child(child: AddChildRequest, request: Request, current_user: dic
     }
 
 
-# 7. GET MY CHILDREN (/mobile/my-children/ va /mobile/my-children)
+# 7. GET MY CHILDREN (/mobile/my-children/ va /api/website/my-children/)
 @app.get("/mobile/my-children/", response_model=List[ChildResponse], tags=["Mobil Ilova (Mobile API)"], summary="7. Foydalanuvchining Barcha Farzandlari Ro'yxati (Token orqali)")
 @app.get("/mobile/my-children", response_model=List[ChildResponse], include_in_schema=False)
+@app.get("/api/website/my-children/", response_model=List[ChildResponse], tags=["Web Sayt (Website)"], summary="Web: Barcha Farzandlar Ro'yxati")
+@app.get("/api/website/my-children", response_model=List[ChildResponse], include_in_schema=False)
 def mobile_get_my_children(request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     lang = get_accept_language(request)
@@ -1020,6 +1038,8 @@ def mobile_get_my_children(request: Request, current_user: dict = Depends(get_cu
 # 7.1 MAVJUD TILLAR RO'YXATI (/mobile/languages/ va /mobile/languages)
 @app.get("/mobile/languages/", response_model=List[LanguageOption], tags=["Mobil Ilova (Mobile API)"], summary="7.1. Mavjud Tillar Ro'yxati (uzb, rus, eng)")
 @app.get("/mobile/languages", response_model=List[LanguageOption], include_in_schema=False)
+@app.get("/api/website/languages/", response_model=List[LanguageOption], include_in_schema=False)
+@app.get("/api/website/languages", response_model=List[LanguageOption], include_in_schema=False)
 def get_supported_languages():
     return [
         {"code": "uzb", "name": "O'zbek tili", "native_name": "O'zbekcha", "flag": "🇺🇿"},
@@ -1030,6 +1050,7 @@ def get_supported_languages():
 
 # 7.2 FARZAND PROFILI TAFSILOTLARI (/mobile/child-profile/{child_id})
 @app.get("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.2. Farzand Profili Tafsilotlari (Token orqali)")
+@app.get("/api/website/child-profile/{child_id}", response_model=ChildResponse, include_in_schema=False)
 def get_child_profile(child_id: int, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     lang = get_accept_language(request)
@@ -1045,6 +1066,7 @@ def get_child_profile(child_id: int, request: Request, current_user: dict = Depe
 
 # 7.3 FARZAND PROFILINI TAHRIRLASH (/mobile/child-profile/{child_id})
 @app.put("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.3. Farzand Profilini Tahrirlash / Yangilash (Token orqali)")
+@app.put("/api/website/child-profile/{child_id}", response_model=ChildResponse, include_in_schema=False)
 def update_child_profile(child_id: int, req: UpdateChildProfileRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     lang = get_accept_language(request)
@@ -1080,9 +1102,13 @@ def update_child_profile(child_id: int, req: UpdateChildProfileRequest, request:
 
 # 7.4 FARZAND TILINI O'ZGARTIRISH (/mobile/child-profile/{child_id}/set-language/)
 @app.post("/mobile/child-profile/{child_id}/set-language/", response_model=dict, tags=["Mobil Ilova (Mobile API)"], summary="7.4. Farzand Tilini O'zgartirish (uzb, rus, eng)")
-@app.put("/mobile/child-profile/{child_id}/set-language/", response_model=dict, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/child-profile/{child_id}/set-language", response_model=dict, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.put("/mobile/child-profile/{child_id}/set-language", response_model=dict, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.put("/mobile/child-profile/{child_id}/set-language/", response_model=dict, include_in_schema=False)
+@app.post("/mobile/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
+@app.put("/mobile/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
+@app.post("/api/website/child-profile/{child_id}/set-language/", response_model=dict, include_in_schema=False)
+@app.put("/api/website/child-profile/{child_id}/set-language/", response_model=dict, include_in_schema=False)
+@app.post("/api/website/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
+@app.put("/api/website/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
 def set_child_language(child_id: int, req: SetLanguageRequest, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     conn = get_db_connection()
@@ -1106,11 +1132,13 @@ def set_child_language(child_id: int, req: SetLanguageRequest, current_user: dic
     }
 
 
-# 7.5 OTA-ONA PROFILI (/mobile/parent/profile/ va /mobile/profile/)
+# 7.5 OTA-ONA PROFILI (/mobile/parent/profile/ va /api/website/parent/profile/)
 @app.get("/mobile/parent/profile/", response_model=ParentProfileResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.5. Ota-ona Profili va Farzandlar Ro'yxati (Token orqali)")
 @app.get("/mobile/parent/profile", response_model=ParentProfileResponse, include_in_schema=False)
 @app.get("/mobile/profile/", response_model=ParentProfileResponse, include_in_schema=False)
 @app.get("/mobile/profile", response_model=ParentProfileResponse, include_in_schema=False)
+@app.get("/api/website/parent/profile/", response_model=ParentProfileResponse, tags=["Web Sayt (Website)"], summary="Web: Ota-ona Profili")
+@app.get("/api/website/parent/profile", response_model=ParentProfileResponse, include_in_schema=False)
 def get_parent_profile(request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     lang = get_accept_language(request)
@@ -1133,9 +1161,11 @@ def get_parent_profile(request: Request, current_user: dict = Depends(get_curren
 
 # 7.6 OTA-ONA PANELIDAN 4-XONALI PAROLNI O'ZGARTIRISH (/mobile/parent/change-passcode/)
 @app.post("/mobile/parent/change-passcode/", tags=["Mobil Ilova (Mobile API)"], summary="7.6. Ota-ona Panelidan 4-Xonali Parolni O'zgartirish (Token orqali)")
-@app.post("/mobile/parent/change-passcode", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/change-passcode/", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/change-passcode", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/parent/change-passcode", include_in_schema=False)
+@app.post("/mobile/change-passcode/", include_in_schema=False)
+@app.post("/mobile/change-passcode", include_in_schema=False)
+@app.post("/api/website/parent/change-passcode/", include_in_schema=False)
+@app.post("/api/website/parent/change-passcode", include_in_schema=False)
 def mobile_change_passcode(req: ChangePasscodeRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     stored_passcode = current_user.get("passcode") or TEMP_PASSCODE_CACHE.get(user_id)
@@ -1177,8 +1207,10 @@ def mobile_change_passcode(req: ChangePasscodeRequest, request: Request, current
 
 # 7.7 FARZAND PROFILINI O'CHIRISH (/mobile/child-profile/{child_id})
 @app.delete("/mobile/child-profile/{child_id}", tags=["Mobil Ilova (Mobile API)"], summary="7.7. Farzand Profilini O'chirish (Token orqali)")
-@app.delete("/mobile/child-profile/{child_id}/", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.delete("/mobile/child/{child_id}", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.delete("/mobile/child-profile/{child_id}/", include_in_schema=False)
+@app.delete("/mobile/child/{child_id}", include_in_schema=False)
+@app.delete("/api/website/child-profile/{child_id}", include_in_schema=False)
+@app.delete("/api/website/child-profile/{child_id}/", include_in_schema=False)
 def delete_child_profile(child_id: int, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     conn = get_db_connection()
@@ -1199,7 +1231,9 @@ def delete_child_profile(child_id: int, current_user: dict = Depends(get_current
 
 # 7.8 FARZANDNING AI DA O'TKAZGAN VAQTINI SAQLASH (/mobile/child/{child_id}/track-time/)
 @app.post("/mobile/child/{child_id}/track-time/", tags=["Mobil Ilova (Mobile API)"], summary="7.8. Farzandning AI da O'tkazgan Vaqtini Saqlash (Token orqali)")
-@app.post("/mobile/child/{child_id}/track-time", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/child/{child_id}/track-time", include_in_schema=False)
+@app.post("/api/website/child/{child_id}/track-time/", include_in_schema=False)
+@app.post("/api/website/child/{child_id}/track-time", include_in_schema=False)
 def track_child_time(child_id: int, req: TrackTimeRequest, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     conn = get_db_connection()
@@ -1470,6 +1504,8 @@ def calculate_child_activity_stats(child_id: int, user_id: int, request: Request
 @app.get("/mobile/child/{child_id}/activity-stats", response_model=ChildActivityStatsResponse, include_in_schema=False)
 @app.get("/mobile/child-activity/{child_id}", response_model=ChildActivityStatsResponse, include_in_schema=False)
 @app.get("/mobile/child/{child_id}/stats", response_model=ChildActivityStatsResponse, include_in_schema=False)
+@app.get("/api/website/child/{child_id}/activity-stats/", response_model=ChildActivityStatsResponse, tags=["Web Sayt (Website)"], summary="Web: Farzandning AI Faollik Statistikasi")
+@app.get("/api/website/child/{child_id}/activity-stats", response_model=ChildActivityStatsResponse, include_in_schema=False)
 def get_child_activity_stats_endpoint(child_id: int, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     return calculate_child_activity_stats(child_id, user_id, request)
@@ -1480,6 +1516,8 @@ def get_child_activity_stats_endpoint(child_id: int, request: Request, current_u
 @app.get("/mobile/child/{child_id}/ai-history", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
 @app.get("/mobile/ai/history/{child_id}", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
 @app.get("/mobile/ai/history/", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
+@app.get("/api/website/child/{child_id}/ai-history/", response_model=List[AiChatHistoryItemResponse], tags=["Web Sayt (Website)"], summary="Web: Farzand AI Suhbat Tarixi")
+@app.get("/api/website/child/{child_id}/ai-history", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
 def get_child_ai_history(child_id: Optional[int] = None, request: Request = None, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     conn = get_db_connection()
@@ -1511,7 +1549,9 @@ def get_child_ai_history(child_id: Optional[int] = None, request: Request = None
 
 
 @app.delete("/mobile/child/{child_id}/ai-history/", tags=["Mobil Ilova (Mobile API)"], summary="7.11. Farzandning AI Suhbat Tarixini Tozalash (Token orqali)")
-@app.delete("/mobile/child/{child_id}/ai-history", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.delete("/mobile/child/{child_id}/ai-history", include_in_schema=False)
+@app.delete("/api/website/child/{child_id}/ai-history/", tags=["Web Sayt (Website)"], summary="Web: Farzand AI Suhbat Tarixini Tozalash")
+@app.delete("/api/website/child/{child_id}/ai-history", include_in_schema=False)
 def delete_child_ai_history(child_id: int, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     conn = get_db_connection()
@@ -2131,8 +2171,11 @@ async def mobile_ai_stt(
 
 # 10.3 MUSTAQIL TEXT-TO-SPEECH (TTS) ENDPOINT
 @app.post("/api/website/ai/tts", tags=["Web Sayt (Website)"], summary="Matnni Microsoft Neural O'g'il Bola Audio (MP3)ga aylantirish")
+@app.post("/api/website/ai/tts/", tags=["Web Sayt (Website)"], include_in_schema=False)
 @app.post("/api/ai/tts", tags=["Web Sayt (Website)"], include_in_schema=False)
+@app.post("/api/ai/tts/", tags=["Web Sayt (Website)"], include_in_schema=False)
 @app.post("/mobile/ai/tts/", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/ai/tts", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
 async def ai_tts_endpoint(req: AiTtsRequest, request: Request):
     audio_url = await generate_edge_tts_audio(req.text, req.language or "uzb", request)
     if not audio_url:
@@ -2496,7 +2539,11 @@ def get_messages(
     return [dict(row) for row in rows]
 
 @app.post("/api/website/messages", status_code=status.HTTP_201_CREATED, tags=["Web Sayt (Website)"], summary="Yangi xabar yuborish (Mijoz nomidan)")
+@app.post("/api/website/messages/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/api/website/contact", status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/api/website/contact/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/api/messages", status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/api/messages/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_message(msg: MessageCreate):
     if not msg.name.strip() or not msg.phone.strip() or not msg.message.strip():
         raise HTTPException(status_code=400, detail="Barcha maydonlarni to'ldirish majburiy!")
@@ -2547,7 +2594,9 @@ def delete_message(message_id: int):
 
 # 5.5 FAQ (KO'P SO'RALADIGAN SAVOLLAR) CRUD ENDPOINTS
 @app.get("/api/website/faqs", response_model=List[FaqResponse], tags=["Web Sayt (Website)"], summary="Barcha faol FAQ savollar ro'yxati")
+@app.get("/api/website/faqs/", response_model=List[FaqResponse], include_in_schema=False)
 @app.get("/api/faqs", response_model=List[FaqResponse], tags=["Web Sayt (Website)"], include_in_schema=False)
+@app.get("/api/faqs/", response_model=List[FaqResponse], include_in_schema=False)
 def get_faqs(request: Request):
     lang = get_accept_language(request)
     conn = get_db_connection()
@@ -2640,7 +2689,9 @@ def delete_faq(faq_id: int):
 
 # 6. STATISTIKA (STATS) ENDPOINT
 @app.get("/api/website/stats", response_model=StatsResponse, tags=["Web Sayt (Website)"], summary="Statistikani olish")
+@app.get("/api/website/stats/", response_model=StatsResponse, include_in_schema=False)
 @app.get("/api/stats", response_model=StatsResponse, include_in_schema=False)
+@app.get("/api/stats/", response_model=StatsResponse, include_in_schema=False)
 def get_stats():
     conn = get_db_connection()
     cursor = conn.cursor()
