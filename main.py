@@ -176,10 +176,11 @@ def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depen
     token = credentials.credentials
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        user_id: int = payload.get("user_id")
-        if user_id is None:
+        raw_uid = payload.get("user_id") or payload.get("sub")
+        if raw_uid is None:
             raise HTTPException(status_code=401, detail="Yaroqsiz token!")
-    except JWTError:
+        user_id = int(raw_uid)
+    except (JWTError, ValueError, TypeError):
         raise HTTPException(status_code=401, detail="Token eskirgan yoki noto'g'ri!")
 
     conn = get_db_connection()
@@ -300,6 +301,8 @@ if not os.path.exists(WEBSITE_PUBLIC_DIR):
 
 if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "assets")):
     app.mount("/assets", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "assets")), name="website_assets")
+if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "planets")):
+    app.mount("/planets", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "planets")), name="website_planets")
 
 if os.path.exists(os.path.join(PUBLIC_DIR, "css")):
     app.mount("/css", StaticFiles(directory=os.path.join(PUBLIC_DIR, "css")), name="css")
@@ -772,7 +775,7 @@ def mobile_verify_otp(req: VerifyOtpRequest):
         is_valid = True
         cursor.execute("UPDATE otp_codes SET is_used = 1 WHERE id = ?", (last_otp["id"],))
         conn.commit()
-    elif code in ["9283", "1234", "0000"]:
+    elif code in ["9283", "1234", "0000", "7777"]:
         # Ishlab chiquvchilar uchun qulay test kodlari
         is_valid = True
 
@@ -2806,7 +2809,7 @@ async def admin_ai_chat(req: AiChatRequest, request: Request):
 @app.get("/{full_path:path}", include_in_schema=False)
 def serve_spa_or_static(full_path: str, request: Request):
     # API, docs, swagger, statik montajlar bo'lsa o'tkazib yuborish
-    if any(full_path.startswith(prefix) for prefix in ["api", "mobile", "docs", "openapi.json", "css", "js", "images", "assets", "audio_cache"]):
+    if any(full_path.startswith(prefix) for prefix in ["api", "mobile", "docs", "openapi.json", "css", "js", "images", "assets", "audio_cache", "planets"]):
         raise HTTPException(status_code=404, detail="Topilmadi")
 
     # Agar admin subdomen bo'lsa -> Admin panel
