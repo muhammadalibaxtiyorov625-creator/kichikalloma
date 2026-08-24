@@ -338,6 +338,10 @@ def get_base_url(request: Request) -> str:
             proto = "https" if ("ngrok" in host or "https" in str(request.url)) else request.url.scheme
         return f"{proto}://{host}".rstrip("/")
     
+    env_base = os.environ.get("BASE_URL")
+    if env_base:
+        return env_base.rstrip("/")
+    
     return str(request.base_url).rstrip("/")
 
 
@@ -613,6 +617,9 @@ def format_team_row(row, request: Request, lang: str = "uzb") -> dict:
     first_name = d.get("first_name", "").strip()
     last_name = d.get("last_name", "").strip()
     d["full_name"] = f"{first_name} {last_name}".strip()
+    d["firstName"] = first_name
+    d["lastName"] = last_name
+    d["direction"] = d.get("role", "")
     return d
 
 

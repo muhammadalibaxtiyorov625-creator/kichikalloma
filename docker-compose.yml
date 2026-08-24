@@ -11,7 +11,7 @@ services:
       - PORT=3000
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-educational-space-platform-super-secret-key-2026}
-      - BASE_URL=${BASE_URL:-http://localhost:3000}
+      - BASE_URL=${BASE_URL:-http://189.74.97.98}
     volumes:
       - app_data:/app/database.sqlite
       - app_uploads:/app/public/uploads

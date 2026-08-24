@@ -77,6 +77,9 @@ class TeamResponse(TeamBase):
     id: int
     full_name: str = Field(..., example="Aziz Rahimov", description="To'liq ismi va familiyasi")
     created_at: str
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    direction: Optional[str] = None
 
 # ==========================================
 # GALEREYA (GALLERY) SCHEMAS (FAQAT RASMLAR RO'YXATI)
