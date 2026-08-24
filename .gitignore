@@ -17,7 +17,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Build
-website/dist/
 website/node_modules/
 
 # Archives & Logs
