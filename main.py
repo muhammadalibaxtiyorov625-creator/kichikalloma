@@ -10,6 +10,19 @@ import asyncio
 import threading
 import requests as http_requests
 
+import mimetypes
+
+# Har qanday OT (Windows / Linux) da JS va CSS MIME turlarini to'g'ri ro'yxatdan o'tkazish
+mimetypes.init()
+mimetypes.add_type("application/javascript", ".js", True)
+mimetypes.add_type("application/javascript", ".mjs", True)
+mimetypes.add_type("text/javascript", ".js", True)
+mimetypes.add_type("text/javascript", ".mjs", True)
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("image/svg+xml", ".svg", True)
+mimetypes.add_type("application/json", ".json", True)
+mimetypes.add_type("application/wasm", ".wasm", True)
+
 # Windows konsolida emojilar print bo'lganda qulab tushmasligi uchun
 if hasattr(sys.stdout, 'reconfigure'):
     try:
@@ -228,12 +241,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Har doim eng so'nggi JS/CSS va HTML yuklanishi uchun no-cache middleware
+# Har doim to'g'ri Content-Type (JS, CSS, HTML) va no-cache sarlavhalarini ta'minlovchi middleware
 @app.middleware("http")
-async def add_no_cache_header(request: Request, call_next):
+async def enforce_mime_types_and_headers(request: Request, call_next):
     try:
         response = await call_next(request)
-        if request.url.path.startswith("/js") or request.url.path.startswith("/css") or request.url.path in ["/", "/admin"]:
+        path = request.url.path.lower()
+        
+        # Brauzerlarda "Strict MIME type checking" xatosi chiqmasligi uchun JS va CSS ga to'g'ri MIME type berish
+        if path.endswith(".js") or path.endswith(".mjs"):
+            response.headers["content-type"] = "application/javascript; charset=utf-8"
+        elif path.endswith(".css"):
+            response.headers["content-type"] = "text/css; charset=utf-8"
+        elif path.endswith(".wasm"):
+            response.headers["content-type"] = "application/wasm"
+        elif path.endswith(".svg"):
+            response.headers["content-type"] = "image/svg+xml"
+            
+        if path.startswith("/js") or path.startswith("/css") or path in ["/", "/admin"]:
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
@@ -2737,17 +2762,31 @@ def serve_spa_or_static(full_path: str, request: Request):
     if is_admin_subdomain(request):
         admin_index = os.path.join(PUBLIC_DIR, "index.html")
         if os.path.exists(admin_index):
-            return FileResponse(admin_index)
+            return FileResponse(admin_index, media_type="text/html; charset=utf-8")
 
-    # 1. website/dist/public dagi statik faylni qidirish (masalan: /logo.png, /favicon.png, /space-bg.jpg)
+    # 1. website/dist/public dagi statik faylni qidirish (masalan: /logo.png, /favicon.png, /space-bg.jpg, /assets/xxx.js)
     static_file = os.path.join(WEBSITE_PUBLIC_DIR, full_path)
     if os.path.isfile(static_file):
-        return FileResponse(static_file)
+        media_type = None
+        lower_path = static_file.lower()
+        if lower_path.endswith((".js", ".mjs")):
+            media_type = "application/javascript; charset=utf-8"
+        elif lower_path.endswith(".css"):
+            media_type = "text/css; charset=utf-8"
+        elif lower_path.endswith(".html"):
+            media_type = "text/html; charset=utf-8"
+        elif lower_path.endswith(".svg"):
+            media_type = "image/svg+xml"
+        elif lower_path.endswith(".wasm"):
+            media_type = "application/wasm"
+        else:
+            media_type, _ = mimetypes.guess_type(static_file)
+        return FileResponse(static_file, media_type=media_type)
 
     # 2. React Router SPA fallback (masalan: /planets, /about, /gallery)
     website_index = os.path.join(WEBSITE_PUBLIC_DIR, "index.html")
     if os.path.exists(website_index):
-        return FileResponse(website_index)
+        return FileResponse(website_index, media_type="text/html; charset=utf-8")
 
     raise HTTPException(status_code=404, detail="Sahifa topilmadi")
 
