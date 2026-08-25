@@ -38,14 +38,45 @@ sudo systemctl start kichik-alloma
 sleep 2
 
 echo "=========================================="
-echo "🔍 5. Tizim holati tekshirilmoqda..."
+echo "🌐 5. Nginx (Port 80) sozlanmoqda..."
+echo "=========================================="
+sudo apt install -y nginx
+if [ -f "/etc/nginx/sites-available/default" ]; then
+    sudo bash -c 'cat > /etc/nginx/sites-available/default << "EOF"
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    client_max_body_size 100M;
+    add_header Permissions-Policy "unload=*" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+}
+EOF'
+    sudo nginx -t && sudo systemctl restart nginx
+fi
+
+echo "=========================================="
+echo "🔍 6. Tizim holati tekshirilmoqda..."
 echo "=========================================="
 sudo systemctl status kichik-alloma --no-pager
 
 echo ""
 echo "=========================================="
 echo "✅ Barcha xizmatlar 100% muvaffaqiyatli ishga tushdi!"
-echo "Web sayt & API: http://189.74.97.98:3000/"
-echo "Admin Panel:    http://189.74.97.98:3000/admin"
-echo "API Docs:       http://189.74.97.98:3000/docs"
+echo "Asosiy Web Sayt (Port 80):  http://189.74.97.98/"
+echo "Admin Panel (Port 80):      http://189.74.97.98/admin"
+echo "API Hujjatlari (Port 80):   http://189.74.97.98/docs"
+echo "To'g'ridan-to'g'ri Port 3000: http://189.74.97.98:3000/"
 echo "=========================================="
