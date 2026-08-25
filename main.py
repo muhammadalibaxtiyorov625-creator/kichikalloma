@@ -233,22 +233,50 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware
+# CORS Middleware (Barcha IP, Domen va Portlar uchun 100% ruxsat)
 app.add_middleware(
     CORSMiddleware,
+    allow_origin_regex=".*",
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
-# Har doim to'g'ri Content-Type (JS, CSS, HTML) va no-cache sarlavhalarini ta'minlovchi middleware
+# Har doim to'g'ri CORS, Content-Type (JS, CSS, HTML) va no-cache sarlavhalarini ta'minlovchi middleware
 @app.middleware("http")
 async def enforce_mime_types_and_headers(request: Request, call_next):
+    # OPTIONS (Preflight) so'rovlarini zudlik bilan 200 OK bilan qondirish
+    if request.method == "OPTIONS":
+        origin = request.headers.get("origin") or "*"
+        return Response(
+            content="",
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+                "Access-Control-Allow-Headers": request.headers.get("access-control-request-headers") or "*",
+                "Access-Control-Max-Age": "86400",
+                "Permissions-Policy": "unload=*",
+            }
+        )
+
     try:
         response = await call_next(request)
         path = request.url.path.lower()
+        origin = request.headers.get("origin")
         
+        # Har qanday so'rovga CORS sarlavhasini kafolatlangan holda qo'shish
+        if origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+        else:
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            
         # Brauzerlarda "Strict MIME type checking" xatosi chiqmasligi uchun JS va CSS ga to'g'ri MIME type berish
         if path.endswith(".js") or path.endswith(".mjs"):
             response.headers["content-type"] = "application/javascript; charset=utf-8"
@@ -269,9 +297,16 @@ async def enforce_mime_types_and_headers(request: Request, call_next):
         return response
     except Exception as exc:
         print(f"[SERVER ERROR] {request.method} {request.url.path}: {exc}")
+        origin = request.headers.get("origin") or "*"
         return JSONResponse(
             status_code=500,
-            content={"detail": "Server ichki xatoligi bartaraf etildi", "error": str(exc), "success": False}
+            content={"detail": "Server ichki xatoligi bartaraf etildi", "error": str(exc), "success": False},
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+                "Access-Control-Allow-Headers": "*",
+            }
         )
 
 @app.exception_handler(HTTPException)
