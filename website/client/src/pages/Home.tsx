@@ -609,26 +609,6 @@ function PlanetModal({
           )}
         </div>
 
-        {/* Skills & Badges Grid */}
-        <div className="mt-5 space-y-2.5">
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
-            <span className="text-xs font-bold text-white/60">Tavsiya etilgan yosh:</span>
-            <span className="text-xs font-black text-[#f6c94f]">{planet.ageGroup}</span>
-          </div>
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
-            <span className="text-xs font-bold text-white/60">Dars modullari soni:</span>
-            <span className="text-xs font-black text-[#6c45dd]">{planet.modulesCount} ta interaktiv topshiriq</span>
-          </div>
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-2 justify-center">
-          {planet.skills.map((skill) => (
-            <span key={skill} className="rounded-xl border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white/90">
-              ✓ {skill}
-            </span>
-          ))}
-        </div>
-
         {/* Action Button */}
         <button
           type="button"
