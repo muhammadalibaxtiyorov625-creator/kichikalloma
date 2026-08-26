@@ -1537,52 +1537,58 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    planetService.getPlanets()
-      .then((data) => {
-        const arr = Array.isArray(data) ? data : (data as any).value || [];
-        const mapped: ApiPlanet[] = arr.map((p: any, i: number) => {
+    // Sayyoralar va Teams ni parallel ravishda bir vaqtda yuklaymiz
+    Promise.all([
+      planetService.getPlanets().catch(() => []),
+      teamService.getTeams().catch(() => []),
+      fetch(STATS_API).then(r => r.json()).catch(() => null),
+    ]).then(([planetsData, teamsData, statsData]) => {
+      // Planets
+      const planetArr = Array.isArray(planetsData) ? planetsData : (planetsData as any)?.value || [];
+      if (planetArr.length > 0) {
+        const mapped: ApiPlanet[] = planetArr.map((p: any, i: number) => {
           const rawId = (p.id as string | number | undefined)?.toString() || "";
           const planetTitle = (p.title as string) || (p.name as string) || "";
           const id = mapDbIdToPlanetId(planetTitle) || mapDbIdToPlanetId(rawId) || PLANET_ID_MAP[i] || `planet-${(p.id as number) ?? i}`;
+          // Rasm: uploads yo'lidan faqat nisbiy yo'l olamiz (server rasmlar uchun)
+          const rawImg = p.image as string | null;
+          const img = rawImg
+            ? rawImg.replace(/^https?:\/\/[^/]+/, "") // absolute URL dan relative qilish
+            : DEFAULT_PLANET_IMAGES[id] || `/planets/${id}.png`;
           return {
             id,
             name: planetTitle,
             skill: planetTitle,
             description: (p.description as string) || "",
             status: (p.status as "active" | "soon") || "soon",
-            image: fixImageUrl(p.image as string | null),
+            image: img,
           };
         });
         setApiPlanets(mapped);
-      })
-      .catch((err) => {
-        console.error("Planets fetch error:", err);
-      });
-  }, []);
+      }
 
-  useEffect(() => {
-    fetch(STATS_API)
-      .then((res) => res.json())
-      .then((data: ApiStats) => setApiStats(data))
-      .catch(() => {});
-  }, []);
+      // Teams
+      const teamArr = Array.isArray(teamsData) ? teamsData : (teamsData as any)?.value || [];
+      if (teamArr.length > 0) {
+        setApiTeams(teamArr.map((t: any, i: number) => {
+          const rawImg = t.image as string | null;
+          const img = rawImg
+            ? rawImg.replace(/^https?:\/\/[^/]+/, "") // absolute URL dan relative qilish
+            : `/images/team/member${(i % 4) + 1}.svg`;
+          return {
+            id: t.id as number,
+            firstName: (t.firstName as string) || (t.first_name as string) || "",
+            lastName: (t.lastName as string) || (t.last_name as string) || "",
+            direction: (t.direction as string) || (t.role as string) || "",
+            description: (t.description as string) || "",
+            image: img,
+          };
+        }));
+      }
 
-  useEffect(() => {
-    teamService.getTeams()
-      .then((data) => {
-        const arr = Array.isArray(data) ? data : (data as any).value || [];
-        setApiTeams(arr.map((t: any) => ({
-          id: t.id as number,
-          firstName: (t.firstName as string) || (t.first_name as string) || "",
-          lastName: (t.lastName as string) || (t.last_name as string) || "",
-          direction: (t.direction as string) || (t.role as string) || "",
-          description: (t.description as string) || "",
-          image: fixImageUrl(t.image as string | null),
-        })));
-      })
-      .catch((err) => {
-        console.error("Teams fetch error:", err);
-      });
+      // Stats
+      if (statsData) setApiStats(statsData);
+    });
   }, []);
 
   const handleTry = () => {
