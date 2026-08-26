@@ -1714,7 +1714,7 @@ export default function Home() {
     modulesCount: number;
     skills: string[];
   } | null>(null);
-  const [isRobotSpeaking, setIsRobotSpeaking] = useState(false);
+  const [isRobotSpeaking, setIsRobotSpeaking] = useState<boolean>(false);
   const [robotAudioProgress, setRobotAudioProgress] = useState(0);
   const [robotAudioCurrentTime, setRobotAudioCurrentTime] = useState(0);
   const [robotAudioDuration, setRobotAudioDuration] = useState(60);
