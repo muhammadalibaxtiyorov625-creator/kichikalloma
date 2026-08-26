@@ -19,6 +19,9 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  Pause,
+  Play,
+  Volume2,
 } from "lucide-react";
 import { motion, useInView, useMotionValue, useTransform, animate, useScroll, useSpring } from "framer-motion";
 import { toast } from "sonner";
@@ -1711,6 +1714,89 @@ export default function Home() {
     modulesCount: number;
     skills: string[];
   } | null>(null);
+  const [isRobotSpeaking, setIsRobotSpeaking] = useState(false);
+  const [robotAudioProgress, setRobotAudioProgress] = useState(0);
+  const [robotAudioCurrentTime, setRobotAudioCurrentTime] = useState(0);
+  const [robotAudioDuration, setRobotAudioDuration] = useState(60);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const formatAudioTime = (sec: number) => {
+    if (isNaN(sec) || sec < 0) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  const getOrInitAudio = () => {
+    if (!audioRef.current) {
+      const audio = new Audio("/intro_guide.mp3");
+      audio.onloadedmetadata = () => {
+        if (audio.duration) {
+          setRobotAudioDuration(audio.duration);
+        }
+      };
+      audio.onended = () => {
+        setIsRobotSpeaking(false);
+        setRobotAudioProgress(0);
+        setRobotAudioCurrentTime(0);
+      };
+      audio.ontimeupdate = () => {
+        if (audio.duration) {
+          setRobotAudioProgress((audio.currentTime / audio.duration) * 100);
+          setRobotAudioCurrentTime(audio.currentTime);
+          setRobotAudioDuration(audio.duration);
+        }
+      };
+      audioRef.current = audio;
+    }
+    return audioRef.current;
+  };
+
+  const toggleRobotSpeech = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
+
+    if (isRobotSpeaking) {
+      audio.pause();
+      setIsRobotSpeaking(false);
+    } else {
+      audio.play().then(() => {
+        setIsRobotSpeaking(true);
+      }).catch(() => {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance("Salom! Kichik Alloma koinotiga xush kelibsiz! Bu yerda bolajonlar 8 ta sayyora orqali ilm oladilar.");
+          utterance.lang = "uz-UZ";
+          window.speechSynthesis.speak(utterance);
+        }
+      });
+    }
+  };
+
+  const seekRobotAudio = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percentage = Math.max(0, Math.min(1, clickX / width));
+    const targetDuration = audio.duration || robotAudioDuration || 60;
+    const targetTime = percentage * targetDuration;
+    
+    audio.currentTime = targetTime;
+    setRobotAudioCurrentTime(targetTime);
+    setRobotAudioProgress(percentage * 100);
+  };
+
+  const skipRobotAudio = (seconds: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
+    const targetDuration = audio.duration || robotAudioDuration || 60;
+    const newTime = Math.max(0, Math.min(targetDuration, audio.currentTime + seconds));
+    audio.currentTime = newTime;
+    setRobotAudioCurrentTime(newTime);
+    setRobotAudioProgress((newTime / targetDuration) * 100);
+  };
+
   const [activeTeamMember, setActiveTeamMember] = useState<{
     id: number;
     firstName: string;
