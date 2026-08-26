@@ -260,10 +260,6 @@ textarea:not(:disabled) {
   will-change: transform;
 }
 
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
 @keyframes orbit-cw {
   0% {
     transform: rotate(0deg);

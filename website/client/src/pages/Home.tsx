@@ -2322,9 +2322,14 @@ export default function Home() {
                       
                       {/* Dynamic sliding role & contribution transition */}
                       <div className="relative mt-2 overflow-hidden h-[76px] w-full">
-                        {/* Role title (visible by default) */}
-                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-xs font-bold leading-normal text-[#d54381]/90 transition-all duration-300 transform group-hover:-translate-y-8 group-hover:opacity-0 px-1 text-center">
-                          {roleName}
+                        {/* Role title and API description (visible by default) */}
+                        <div className="absolute inset-x-0 top-0 bottom-0 flex flex-col items-center justify-center text-xs font-bold leading-tight text-[#d54381]/90 transition-all duration-300 transform group-hover:-translate-y-12 group-hover:opacity-0 px-1 text-center">
+                          <span className="font-extrabold">{roleName}</span>
+                          {member.description && (
+                            <span className="mt-1 text-[11px] font-semibold text-[#5d4c78] bg-[#6c45dd]/10 px-2 py-0.5 rounded-full inline-block">
+                              {member.description}
+                            </span>
+                          )}
                         </div>
                         
                         {/* Contribution details (appears on hover) */}
