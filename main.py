@@ -788,7 +788,8 @@ def serve_admin_panel():
 @app.get("/sitemap.xml", include_in_schema=False)
 def serve_sitemap(request: Request):
     """Google va Yandex uchun dinamik XML Sitemap"""
-    base = get_base_url(request)
+    # SITE_URL muhit o'zgaruvchisidan olish, yo'q bo'lsa kichikalloma.uz
+    base = os.environ.get("SITE_URL", "https://kichikalloma.uz").rstrip("/")
 
     # Barcha statik sahifalar
     static_pages = [
@@ -799,27 +800,11 @@ def serve_sitemap(request: Request):
         {"loc": f"{base}/#aloqa", "priority": "0.6", "changefreq": "monthly"},
     ]
 
-    # Sayyoralar bazadan
-    planet_rows = []
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT name_uz FROM planets WHERE is_active = 1 LIMIT 20")
-        rows = cursor.fetchall()
-        conn.close()
-        for row in rows:
-            slug = row["name_uz"].lower().replace(" ", "-").replace("'", "").replace("'", "") if row["name_uz"] else ""
-            if slug:
-                planet_rows.append({"loc": f"{base}/#sayyoralar", "priority": "0.7", "changefreq": "monthly"})
-    except Exception:
-        pass
-
     from datetime import datetime
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
     urls_xml = ""
-    all_pages = static_pages + planet_rows
-    for page in all_pages:
+    for page in static_pages:
         urls_xml += f"""
   <url>
     <loc>{page['loc']}</loc>
@@ -829,10 +814,7 @@ def serve_sitemap(request: Request):
   </url>"""
 
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">{urls_xml}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls_xml}
 </urlset>"""
 
     return Response(content=xml_content, media_type="application/xml; charset=utf-8")
@@ -841,7 +823,7 @@ def serve_sitemap(request: Request):
 @app.get("/robots.txt", include_in_schema=False)
 def serve_robots(request: Request):
     """SEO robots.txt — barcha qidiruvchilar uchun"""
-    base = get_base_url(request)
+    base = os.environ.get("SITE_URL", "https://kichikalloma.uz").rstrip("/")
     content = f"""User-agent: *
 Allow: /
 Disallow: /admin
