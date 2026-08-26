@@ -1732,8 +1732,8 @@ def get_neptune_emotion_options(request: Request):
 @app.post("/mobile/planets/neptune/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/mobile/planets/neptun/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/mobile/planets/neptun/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
-@app.post("/mobile/child/{child_id}/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
-@app.post("/mobile/child/{child_id}/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def record_child_emotion(
     req: RecordEmotionRequest,
     request: Request,
@@ -1802,14 +1802,27 @@ def record_child_emotion(
     }
 
 
+# Farzand ID si URL path orqali berilganda qo'llab-quvvatlash
+@app.post("/mobile/child/{child_id}/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="7.12.2.1. Farzand Emotsiyasini Belgilash (Path ID orqali)")
+@app.post("/mobile/child/{child_id}/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+def record_child_emotion_by_path(
+    child_id: int,
+    req: RecordEmotionRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    req.child_id = child_id
+    return record_child_emotion(req, request, current_user)
+
+
 # 7.12.3. BOLA UCHUN: OXIRGI 7 KUNLIK (1 HAFTALIK) EMOTSIYALAR
 # (7 kundan eski emotsiyalar bola panelida ko'rinmaydi — avtomatik o'chadi/filtrlanadi)
 @app.get("/mobile/planets/neptune/emotions/", response_model=WeeklyChildEmotionsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.12.3. Neptune / Bola Paneli — Oxirgi 7 Kunlik Emotsiyalar (Token orqali)")
 @app.get("/mobile/planets/neptune/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
 @app.get("/mobile/planets/neptun/emotions/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
 @app.get("/mobile/planets/neptun/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
-@app.get("/mobile/child/{child_id}/emotions/weekly/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
-@app.get("/mobile/child/{child_id}/emotions/weekly", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/emotions/weekly/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/emotions/weekly", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
 def get_child_weekly_emotions(
     child_id: Optional[int] = Query(None, description="Farzand ID raqami"),
     request: Request = None,
