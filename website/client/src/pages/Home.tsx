@@ -497,7 +497,12 @@ function PlanetModal({
   onTry,
   isRobotSpeaking,
   robotAudioProgress,
+  robotAudioCurrentTime,
+  robotAudioDuration,
   toggleRobotSpeech,
+  seekRobotAudio,
+  skipRobotAudio,
+  formatAudioTime,
 }: {
   planet: {
     id: string;
@@ -512,7 +517,12 @@ function PlanetModal({
   onTry: () => void;
   isRobotSpeaking: boolean;
   robotAudioProgress: number;
+  robotAudioCurrentTime: number;
+  robotAudioDuration: number;
   toggleRobotSpeech: (e: React.MouseEvent) => void;
+  seekRobotAudio: (e: React.MouseEvent<HTMLDivElement>) => void;
+  skipRobotAudio: (seconds: number, e: React.MouseEvent) => void;
+  formatAudioTime: (sec: number) => string;
 }) {
   if (!planet) return null;
   const isEarth = planet.id === "earth" || planet.name.toLowerCase().includes("yer") || planet.name.toLowerCase().includes("kognitiv");
@@ -550,10 +560,10 @@ function PlanetModal({
           <p className="mt-2 text-sm font-semibold leading-relaxed text-white/75 max-w-md mx-auto">{planet.desc}</p>
         </div>
 
-        {/* 🎙️ 1-Minute Voice Guide inside Modal */}
-        <div className="mt-5 rounded-2xl border border-[#f6c94f]/35 bg-gradient-to-r from-[#2c175b]/80 to-[#1b0e3b]/90 p-3.5 sm:p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)] backdrop-blur-md">
+        {/* 🎙️ 1-Minute Interactive Seekable Voice Guide */}
+        <div className="mt-5 rounded-2xl border border-[#f6c94f]/35 bg-gradient-to-r from-[#2c175b]/80 to-[#1b0e3b]/90 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)] backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-all duration-300 ${
                 isRobotSpeaking
                   ? "bg-gradient-to-tr from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-[#f6c94f] shadow-[0_0_15px_rgba(246,201,79,0.5)] animate-pulse"
@@ -561,52 +571,85 @@ function PlanetModal({
               }`}>
                 <Volume2 className="h-6 w-6" />
               </div>
-              <div>
-                <div className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 truncate">
                   Ovozli tanishtiruv
-                  <span className="rounded-md bg-[#f6c94f]/20 px-1.5 py-0.5 text-[9px] font-extrabold text-[#f6c94f]">1 daqiqa</span>
+                  <span className="rounded-md bg-[#f6c94f]/20 px-1.5 py-0.5 text-[9px] font-extrabold text-[#f6c94f] shrink-0">1 daqiqa</span>
                 </div>
-                <div className="text-[11px] font-semibold text-white/60">
+                <div className="text-[11px] font-semibold text-white/60 truncate">
                   {isRobotSpeaking ? "Platforma haqida hikoya qilinmoqda..." : "Sayt va ta'lim haqida eshitish"}
                 </div>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleRobotSpeech}
-              className={`flex items-center justify-center h-10 px-4 rounded-xl font-black text-xs transition-all duration-200 shadow-md ${
-                isRobotSpeaking
-                  ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
-                  : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
-              }`}
-            >
-              {isRobotSpeaking ? (
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
-                  <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
-                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
-                  <Pause className="h-3.5 w-3.5 ml-0.5" />
-                  <span>To'xtatish</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <Play className="h-3.5 w-3.5 fill-current" />
-                  <span>Tinglash</span>
-                </div>
-              )}
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Skip Back 10s */}
+              <button
+                type="button"
+                onClick={(e) => skipRobotAudio(-10, e)}
+                title="10 soniya orqaga"
+                className="h-9 w-9 grid place-items-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/15 hover:text-white transition text-[10px] font-extrabold"
+              >
+                -10s
+              </button>
+
+              {/* Play / Pause Toggle */}
+              <button
+                type="button"
+                onClick={toggleRobotSpeech}
+                className={`flex items-center justify-center h-9 px-3.5 sm:px-4 rounded-xl font-black text-xs transition-all duration-200 shadow-md ${
+                  isRobotSpeaking
+                    ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
+                    : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
+                }`}
+              >
+                {isRobotSpeaking ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                    <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                    <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                    <Pause className="h-3.5 w-3.5 ml-0.5" />
+                    <span>To'xtatish</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Play className="h-3.5 w-3.5 fill-current" />
+                    <span>{robotAudioCurrentTime > 0 ? "Davom ettirish" : "Tinglash"}</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Skip Forward 10s */}
+              <button
+                type="button"
+                onClick={(e) => skipRobotAudio(10, e)}
+                title="10 soniya oldinga"
+                className="h-9 w-9 grid place-items-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/15 hover:text-white transition text-[10px] font-extrabold"
+              >
+                +10s
+              </button>
+            </div>
           </div>
 
-          {/* Audio progress bar */}
-          {isRobotSpeaking && (
-            <div className="mt-3 h-1 w-full bg-white/15 rounded-full overflow-hidden">
+          {/* Interactive Seek Bar / Timeline */}
+          <div className="mt-3.5 space-y-1.5">
+            <div
+              onClick={seekRobotAudio}
+              className="group/seek relative h-2.5 w-full bg-white/15 hover:bg-white/25 rounded-full cursor-pointer overflow-hidden transition-all flex items-center"
+            >
               <div
-                className="h-full bg-gradient-to-r from-[#6c45dd] via-[#d54381] to-[#f6c94f] transition-all duration-200"
+                className="h-full bg-gradient-to-r from-[#6c45dd] via-[#d54381] to-[#f6c94f] transition-all duration-100 rounded-full"
                 style={{ width: `${robotAudioProgress}%` }}
               />
             </div>
-          )}
+
+            {/* Time Indicators */}
+            <div className="flex items-center justify-between text-[10px] font-bold text-white/50 px-0.5">
+              <span>{formatAudioTime(robotAudioCurrentTime)}</span>
+              <span className="text-[9px] text-[#f6c94f]/80 font-medium">Bosing yoki suring</span>
+              <span>{formatAudioTime(robotAudioDuration)}</span>
+            </div>
+          </div>
         </div>
 
         {/* Action Button */}
@@ -1539,30 +1582,52 @@ export default function Home() {
   } | null>(null);
   const [isRobotSpeaking, setIsRobotSpeaking] = useState(false);
   const [robotAudioProgress, setRobotAudioProgress] = useState(0);
+  const [robotAudioCurrentTime, setRobotAudioCurrentTime] = useState(0);
+  const [robotAudioDuration, setRobotAudioDuration] = useState(60);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const toggleRobotSpeech = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const formatAudioTime = (sec: number) => {
+    if (isNaN(sec) || sec < 0) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  const getOrInitAudio = () => {
     if (!audioRef.current) {
       const audio = new Audio("/intro_guide.mp3");
+      audio.onloadedmetadata = () => {
+        if (audio.duration) {
+          setRobotAudioDuration(audio.duration);
+        }
+      };
       audio.onended = () => {
         setIsRobotSpeaking(false);
         setRobotAudioProgress(0);
+        setRobotAudioCurrentTime(0);
       };
       audio.ontimeupdate = () => {
         if (audio.duration) {
           setRobotAudioProgress((audio.currentTime / audio.duration) * 100);
+          setRobotAudioCurrentTime(audio.currentTime);
+          setRobotAudioDuration(audio.duration);
         }
       };
       audioRef.current = audio;
     }
+    return audioRef.current;
+  };
+
+  const toggleRobotSpeech = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
 
     if (isRobotSpeaking) {
-      audioRef.current.pause();
+      audio.pause();
       setIsRobotSpeaking(false);
     } else {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().then(() => {
+      // Resume from wherever it was paused!
+      audio.play().then(() => {
         setIsRobotSpeaking(true);
       }).catch(() => {
         // Fallback Web Speech API
@@ -1573,6 +1638,31 @@ export default function Home() {
         }
       });
     }
+  };
+
+  const seekRobotAudio = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percentage = Math.max(0, Math.min(1, clickX / width));
+    const targetDuration = audio.duration || robotAudioDuration || 60;
+    const targetTime = percentage * targetDuration;
+    
+    audio.currentTime = targetTime;
+    setRobotAudioCurrentTime(targetTime);
+    setRobotAudioProgress(percentage * 100);
+  };
+
+  const skipRobotAudio = (seconds: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = getOrInitAudio();
+    const targetDuration = audio.duration || robotAudioDuration || 60;
+    const newTime = Math.max(0, Math.min(targetDuration, audio.currentTime + seconds));
+    audio.currentTime = newTime;
+    setRobotAudioCurrentTime(newTime);
+    setRobotAudioProgress((newTime / targetDuration) * 100);
   };
 
   const t = content[language];
@@ -2674,7 +2764,12 @@ export default function Home() {
         onTry={handleTry}
         isRobotSpeaking={isRobotSpeaking}
         robotAudioProgress={robotAudioProgress}
+        robotAudioCurrentTime={robotAudioCurrentTime}
+        robotAudioDuration={robotAudioDuration}
         toggleRobotSpeech={toggleRobotSpeech}
+        seekRobotAudio={seekRobotAudio}
+        skipRobotAudio={skipRobotAudio}
+        formatAudioTime={formatAudioTime}
       />
     </div>
   );
