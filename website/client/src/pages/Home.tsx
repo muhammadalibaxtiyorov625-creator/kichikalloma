@@ -155,41 +155,27 @@ function BlurText({
   delay?: number;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once: true, margin: "-40px" });
 
   const words = text.split(" ");
 
   return (
     <motion.span ref={ref} className={`inline-block ${className}`}>
-      {words.map((word, wIndex) => {
-        const charOffset = words.slice(0, wIndex).join("").length;
-        return (
-          <span key={wIndex} className="inline-block whitespace-nowrap mr-[0.25em]">
-            {Array.from(word).map((letter, lIndex) => {
-              const charIndex = charOffset + lIndex;
-              return (
-                <motion.span
-                  key={lIndex}
-                  initial={{ opacity: 0, filter: "blur(12px)", y: 12, scale: 0.88 }}
-                  animate={
-                    inView
-                      ? { opacity: 1, filter: "blur(0px)", y: 0, scale: 1 }
-                      : { opacity: 0, filter: "blur(12px)", y: 12, scale: 0.88 }
-                  }
-                  transition={{
-                    duration: 0.65,
-                    delay: delay + charIndex * 0.022,
-                    ease: PRO_EASE,
-                  }}
-                  className="inline-block"
-                >
-                  {letter}
-                </motion.span>
-              );
-            })}
-          </span>
-        );
-      })}
+      {words.map((word, wIndex) => (
+        <motion.span
+          key={wIndex}
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{
+            duration: 0.5,
+            delay: delay + wIndex * 0.035,
+            ease: PRO_EASE,
+          }}
+          className="inline-block mr-[0.28em] whitespace-nowrap will-change-transform"
+        >
+          {word}
+        </motion.span>
+      ))}
     </motion.span>
   );
 }
@@ -481,27 +467,19 @@ function SectionDepthWrapper({
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["end end", "end start"],
+    offset: ["start end", "end start"],
   });
 
-  // Stay 100% crisp and full size while reading inside section (0 -> 0.70).
-  // ONLY as section exits off the top screen edge (0.70 -> 1.0), it smoothly recedes into 3D carousel depth, blurs, and fades out cleanly!
-  const opacity = useTransform(scrollYProgress, [0, 0.70, 1], [1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.70, 1], [1, 1, 0.94]);
-  const blurValue = useTransform(scrollYProgress, [0, 0.70, 1], [0, 0, 12]);
-  const filter = useTransform(blurValue, (v) => `blur(${v}px)`);
-  const y = useTransform(scrollYProgress, [0, 0.70, 1], [0, 0, -35]);
+  // Butter-smooth subtle entry and exit opacity/y translation
+  const opacity = useTransform(scrollYProgress, [0, 0.12, 0.88, 1], [0.92, 1, 1, 0.94]);
+  const y = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [20, 0, 0, -15]);
 
   return (
-    <div ref={containerRef} className="carousel-page-snap relative z-10 w-full [perspective:1400px]">
+    <div ref={containerRef} id={id} className="relative z-10 w-full">
       <motion.div
-        id={id}
         style={{
           opacity,
-          scale,
-          filter,
           y,
-          transformStyle: "preserve-3d",
         }}
         className={`will-change-transform gpu-accelerated ${className}`}
       >
@@ -515,6 +493,14 @@ function PlanetModal({
   planet,
   onClose,
   onTry,
+  isRobotSpeaking,
+  robotAudioProgress,
+  robotAudioCurrentTime,
+  robotAudioDuration,
+  toggleRobotSpeech,
+  seekRobotAudio,
+  skipRobotAudio,
+  formatAudioTime,
 }: {
   planet: {
     id: string;
@@ -527,8 +513,18 @@ function PlanetModal({
   } | null;
   onClose: () => void;
   onTry: () => void;
+  isRobotSpeaking: boolean;
+  robotAudioProgress: number;
+  robotAudioCurrentTime: number;
+  robotAudioDuration: number;
+  toggleRobotSpeech: (e: React.MouseEvent) => void;
+  seekRobotAudio: (e: React.MouseEvent<HTMLDivElement>) => void;
+  skipRobotAudio: (seconds: number, e: React.MouseEvent) => void;
+  formatAudioTime: (sec: number) => string;
 }) {
   if (!planet) return null;
+  const isEarth = planet.id === "earth" || planet.name.toLowerCase().includes("yer") || planet.name.toLowerCase().includes("kognitiv");
+  if (!isEarth) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-fadeIn">
@@ -562,24 +558,73 @@ function PlanetModal({
           <p className="mt-2 text-sm font-semibold leading-relaxed text-white/75 max-w-md mx-auto">{planet.desc}</p>
         </div>
 
-        {/* Skills & Badges Grid */}
-        <div className="mt-6 space-y-2.5">
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
-            <span className="text-xs font-bold text-white/60">Tavsiya etilgan yosh:</span>
-            <span className="text-xs font-black text-[#f6c94f]">{planet.ageGroup}</span>
-          </div>
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
-            <span className="text-xs font-bold text-white/60">Dars modullari soni:</span>
-            <span className="text-xs font-black text-[#6c45dd]">{planet.modulesCount} ta interaktiv topshiriq</span>
-          </div>
-        </div>
+        {/* 🎙️ 1-Minute Interactive Seekable Voice Guide */}
+        <div className="mt-5 rounded-2xl border border-[#f6c94f]/35 bg-gradient-to-r from-[#2c175b]/80 to-[#1b0e3b]/90 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)] backdrop-blur-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-all duration-300 ${
+                isRobotSpeaking
+                  ? "bg-gradient-to-tr from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-[#f6c94f] shadow-[0_0_15px_rgba(246,201,79,0.5)] animate-pulse"
+                  : "bg-white/10 border-white/15 text-[#f6c94f]"
+              }`}>
+                <Volume2 className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 truncate">
+                  Ovozli tanishtiruv
+                  <span className="rounded-md bg-[#f6c94f]/20 px-1.5 py-0.5 text-[9px] font-extrabold text-[#f6c94f] shrink-0">1 daqiqa</span>
+                </div>
+                <div className="text-[11px] font-semibold text-white/60 truncate">
+                  {isRobotSpeaking ? "Platforma haqida hikoya qilinmoqda..." : "Sayt va ta'lim haqida eshitish"}
+                </div>
+              </div>
+            </div>
 
-        <div className="mt-5 flex flex-wrap gap-2 justify-center">
-          {planet.skills.map((skill) => (
-            <span key={skill} className="rounded-xl border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white/90">
-              ✓ {skill}
-            </span>
-          ))}
+            <button
+              type="button"
+              onClick={toggleRobotSpeech}
+              className={`flex items-center justify-center h-10 px-4 sm:px-5 rounded-xl font-black text-xs transition-all duration-200 shadow-md shrink-0 ${
+                isRobotSpeaking
+                  ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
+                  : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
+              }`}
+            >
+              {isRobotSpeaking ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                  <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                  <Pause className="h-3.5 w-3.5 ml-0.5" />
+                  <span>To'xtatish</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  <span>{robotAudioCurrentTime > 0 ? "Davom ettirish" : "Tinglash"}</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Interactive Seek Bar / Timeline */}
+          <div className="mt-3.5 space-y-1.5">
+            <div
+              onClick={seekRobotAudio}
+              className="group/seek relative h-2.5 w-full bg-white/15 hover:bg-white/25 rounded-full cursor-pointer overflow-hidden transition-all flex items-center"
+            >
+              <div
+                className="h-full bg-gradient-to-r from-[#6c45dd] via-[#d54381] to-[#f6c94f] transition-all duration-100 rounded-full"
+                style={{ width: `${robotAudioProgress}%` }}
+              />
+            </div>
+
+            {/* Time Indicators */}
+            <div className="flex items-center justify-between text-[10px] font-bold text-white/50 px-0.5">
+              <span>{formatAudioTime(robotAudioCurrentTime)}</span>
+              <span className="text-[9px] text-[#f6c94f]/80 font-medium">Bosing yoki suring</span>
+              <span>{formatAudioTime(robotAudioDuration)}</span>
+            </div>
+          </div>
         </div>
 
         {/* Action Button */}
@@ -1580,15 +1625,15 @@ const TEAMS_API = "/api/website/teams";
 const PLANET_ID_MAP = ["earth", "mars", "uran", "neptune", "venus", "saturn", "jupiter", "mercury", "sun"];
 
 const DEFAULT_PLANET_IMAGES: Record<string, string> = {
-  neptune: "/planets/neptune.png",
-  mercury: "/planets/mercury.png",
-  venus: "/planets/venus.png",
-  earth: "/planets/earth.png",
-  mars: "/planets/mars.png",
-  jupiter: "/planets/jupiter.png",
-  saturn: "/planets/saturn.png",
-  uran: "/planets/uran.png",
-  sun: "/planets/sun.png",
+  earth: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png",
+  mars: "/images/uploads/626835a96045495da55fc03c79067817.png",
+  uran: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png",
+  venus: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png",
+  neptune: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png",
+  saturn: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png",
+  mercury: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png",
+  jupiter: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png",
+  sun: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png",
 };
 
 function fixImageUrl(url: string | null): string {
@@ -1600,29 +1645,41 @@ function fixImageUrl(url: string | null): string {
 function mapDbIdToPlanetId(dbValue: string): string {
   const v = dbValue.toLowerCase();
   
-  if (v.includes("kognitiv") || v === "earth") return "earth";
-  if (v.includes("jismoniy") || v === "mars" || v.includes("tanqidiy")) return "mars";
-  if (v.includes("ijodkorlik") || v === "jupiter" || v.includes("kreativ")) return "jupiter";
-  if (v.includes("axloqiy") || v === "saturn" || v.includes("muloqot")) return "saturn";
-  if (v.includes("nutq") || v === "uran" || v.includes("moslashuv")) return "uran";
-  if (v.includes("ijtimoiy") || v === "neptune" || v.includes("hamkorlik")) return "neptune";
-  if (v.includes("emotsional") || v === "venus") return "venus";
-  if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v === "mercury" || v.includes("diqqat")) return "mercury";
+  if (v.includes("kognitiv") || v.includes("yer") || v === "earth" || v.includes("tutor")) return "earth";
+  if (v.includes("jismoniy") || v.includes("mars") || v.includes("harakat") || v.includes("faollik")) return "mars";
+  if (v.includes("ijodkorlik") || v.includes("merkuriy") || v.includes("mercury") || v.includes("kasb")) return "mercury";
+  if (v.includes("matematika") || v.includes("saturn") || v.includes("mantiq") || v.includes("axloqiy")) return "saturn";
+  if (v.includes("english") || v.includes("vocabulary") || v.includes("uran") || v.includes("nutq") || v.includes("lug'at") || v.includes("lugat") || v.includes("ingliz")) return "uran";
+  if (v.includes("emotsional") || v.includes("neptun") || v.includes("neptune") || v.includes("hissiyot")) return "neptune";
+  if (v.includes("virtual") || v.includes("do'kon") || v.includes("dokon") || v.includes("store") || v.includes("venera") || v.includes("venus") || v.includes("gold coin") || v.includes("tanga")) return "venus";
+  if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v.includes("yupiter") || v.includes("jupiter") || v.includes("intizom")) return "jupiter";
   if (v.includes("quyosh") || v === "sun") return "sun";
   
   return "";
 }
 
+const PLANET_ASTRONOMICAL_NAMES: Record<string, string> = {
+  earth: "Yer",
+  jupiter: "Yupiter",
+  venus: "Venera",
+  saturn: "Saturn",
+  mercury: "Merkuriy",
+  uran: "Uran",
+  mars: "Mars",
+  neptune: "Neptun",
+  sun: "Quyosh",
+};
+
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
-  { id: "earth", name: "Kognitiv", skill: "Kognitiv", description: "Fikrlash, o'rganish va muammo yechish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
-  { id: "mars", name: "Jismoniy va motorika", skill: "Jismoniy va motorika", description: "Harakat va sog'lom tanaffus", status: "active", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
-  { id: "uran", name: "Nutq va til", skill: "Nutq va til", description: "Muloqot, lug'at va talaffuz", status: "active", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
-  { id: "neptune", name: "Ijtimoiy", skill: "Ijtimoiy", description: "Hamkorlik va ijtimoiy ko'nikmalar", status: "active", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
-  { id: "venus", name: "Emotsional", skill: "Emotsional", description: "Hissiyotlarni anglash va boshqarish", status: "active", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
-  { id: "saturn", name: "Axloqiy", skill: "Axloqiy", description: "Qadriyat, mas'uliyat va tanlov", status: "active", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
-  { id: "jupiter", name: "Ijodkorlik", skill: "Ijodkorlik", description: "Tasavvur va divergent fikrlash", status: "active", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
-  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "O'z-o'zini boshqarish", description: "Rejalashtirish, diqqat va intizom", status: "active", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
-  { id: "sun", name: "Quyosh", skill: "Quyosh", description: "Ai chat", status: "active", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
+  { id: "earth", name: "YER", skill: "Kognitiv ta’lim + AI Tutor", description: "AI bilan cheklangan, maqsadli o‘qish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
+  { id: "jupiter", name: "YUPITER", skill: "O‘z-o‘zini boshqarish", description: "Reja, bajarilish, intizom", status: "soon", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
+  { id: "venus", name: "VENERA", skill: "Virtual do'kon", description: "Oltin tangalar orqali buyumlar", status: "soon", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
+  { id: "saturn", name: "SATURN", skill: "Matematika + mantiq", description: "Masala, test, yechim va mukofot", status: "soon", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
+  { id: "mercury", name: "MERKURIY", skill: "Ijodkorlik + kasblar", description: "Kasblarni kashf etish va qiziqish", status: "soon", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
+  { id: "uran", name: "URAN", skill: "Ingliz tili lug'atlari", description: "So‘z, talaffuz, test va mustahkamlash", status: "soon", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
+  { id: "mars", name: "MARS", skill: "Jismoniy faollik", description: "Video asosida harakat va mashqlar", status: "soon", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
+  { id: "neptune", name: "NEPTUN", skill: "Emotsional savodxonlik", description: "Hissiyotlarni qayd etish va Parent Panel", status: "soon", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
+  { id: "sun", name: "QUYOSH", skill: "Quyosh (AI Chat)", description: "AI Suhbatdosh", status: "soon", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
 ];
 
 const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
@@ -2034,20 +2091,20 @@ export default function Home() {
           <div className="container relative z-10">
             <div className="max-w-3xl pt-6">
               <h1 className="max-w-[820px] text-[clamp(3.1rem,7vw,5.4rem)] font-black leading-[0.96] tracking-[-0.065em] text-white">
-                <BlurText text={t.hero.title} delay={0.25} />
+                <BlurText text={t.hero.title} delay={0.02} />
               </h1>
               <motion.p
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.5, delay: 0.12, ease: PRO_EASE }}
                 className="mt-7 max-w-2xl text-base font-semibold leading-8 text-white/74 sm:text-lg"
               >
                 {t.hero.copy}
               </motion.p>
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.5, delay: 0.22, ease: PRO_EASE }}
                 className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
               >
                 <button
@@ -2070,7 +2127,7 @@ export default function Home() {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, delay: 1, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.6, delay: 0.32, ease: PRO_EASE }}
                 className="mt-8 max-w-xl border-l-2 border-[#f6c94f] pl-4 text-sm font-bold leading-6 text-white/60"
               >
                 {t.hero.note}
@@ -2159,18 +2216,7 @@ export default function Home() {
 
                 {/* Sun center (Prominent, clean, larger than all orbiting planets without harsh border lines) */}
                 <div
-                  onClick={() => {
-                    setActiveModalPlanet({
-                      id: "sun",
-                      name: "Quyosh — Kichik Alloma Markazi",
-                      desc: "Barcha 8 ta intellektual va fazoviy ko'nikma modullarini birlashtiruvchi asosiy koinot markazi.",
-                      image: apiPlanets.find((p) => p.id === "sun")?.image || DEFAULT_PLANET_IMAGES.sun,
-                      ageGroup: "5 - 12 yosh",
-                      modulesCount: 24,
-                      skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Kompakt o'yinlar"],
-                    });
-                  }}
-                  className="group pointer-events-auto cursor-pointer absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
+                  className="group pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
                 >
                   <div className="relative grid place-items-center h-[88px] w-[88px] min-[400px]:h-[100px] min-[400px]:w-[100px] min-[500px]:h-[120px] min-[500px]:w-[120px] sm:h-[150px] sm:w-[150px] lg:h-[165px] lg:w-[165px]">
                     {/* Solar Corona & Soft Radiant Energy Glow (No harsh border line) */}
@@ -2181,7 +2227,7 @@ export default function Home() {
                     <img
                       src={apiPlanets.find((p) => p.id === "sun")?.image || DEFAULT_PLANET_IMAGES.sun}
                       alt="Quyosh"
-                      className="relative z-10 h-full w-full rounded-full object-contain drop-shadow-[0_0_35px_rgba(255,160,0,0.9)] transition-transform duration-500 group-hover:scale-110"
+                      className="relative z-10 h-full w-full rounded-full object-contain drop-shadow-[0_0_35px_rgba(255,160,0,0.9)]"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = DEFAULT_PLANET_IMAGES.sun;
                       }}
@@ -2194,6 +2240,7 @@ export default function Home() {
                   {(() => {
                     const planetSkillsDetails: Record<string, { age: string; modules: number; skills: string[] }> = {
                       sun: { age: "5 - 12 yosh", modules: 24, skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Diqqat o'yinlari"] },
+                      earth: { age: "6 - 12 yosh", modules: 18, skills: ["Kognitiv ta'lim", "Maqsadli o'qish"] },
                       math: { age: "6 - 12 yosh", modules: 16, skills: ["Mantiqiy masalalar", "Matematik hisob", "Tahliliy fikrlash"] },
                       memory: { age: "5 - 11 yosh", modules: 14, skills: ["Vizual xotira", "Assotsiativ eslab qolish", "Diqqat jamlash"] },
                       space: { age: "6 - 12 yosh", modules: 18, skills: ["Fazoviy tasavvur", "3D geometriya", "Vizual konstruksiya"] },
@@ -2214,11 +2261,12 @@ export default function Home() {
                       const sin = Math.sin(angleRad);
                       const planetImage = apiPlanet?.image || DEFAULT_PLANET_IMAGES[planet.id];
                       const planetDetails = planetSkillsDetails[planet.id] || { age: "6 - 12 yosh", modules: 15, skills: ["Intellektual rivojlanish", "Mantiq"] };
+                      const isEarth = planet.id === "earth";
 
                       return (
                         <div
                           key={planet.id}
-                          className="absolute text-center z-10"
+                          className="absolute text-center z-10 select-none"
                           style={{
                             left: `calc(50% + var(--orbit-radius) * ${cos.toFixed(4)})`,
                             top: `calc(50% + var(--orbit-radius) * ${sin.toFixed(4)})`,
@@ -2227,36 +2275,47 @@ export default function Home() {
                         >
                           <div className="animate-orbit-ccw-slow">
                             <div
-                              onClick={() => {
+                              onClick={isEarth ? () => {
                                 setActiveModalPlanet({
                                   id: planet.id,
-                                  name,
+                                  name: "YER — " + name,
                                   desc,
                                   image: planetImage,
                                   ageGroup: planetDetails.age,
                                   modulesCount: planetDetails.modules,
                                   skills: planetDetails.skills,
                                 });
-                              }}
-                              className="group transition-transform duration-300 hover:scale-115 cursor-pointer"
+                              } : undefined}
+                              className={`group relative transition-all duration-300 ${
+                                isEarth
+                                  ? "hover:scale-115 cursor-pointer"
+                                  : "hover:scale-110 cursor-default"
+                              }`}
                             >
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
-                                <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-30 blur-lg" />
+                                <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg transition-all duration-300 group-hover:opacity-60 group-hover:blur-xl" />
                                 
                                 {/* Decoupled hover translate container */}
                                 <div className="relative z-10 transition-transform duration-200 group-hover:-translate-y-1.5 w-full h-full flex items-center justify-center">
                                   <img
                                     src={planetImage}
                                     alt={name}
-                                    className="h-full w-full rounded-full object-contain drop-shadow-[0_6px_20px_rgba(0,0,0,0.3)]"
+                                    className="h-full w-full rounded-full object-contain drop-shadow-[0_6px_20px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-105"
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).src = DEFAULT_PLANET_IMAGES[planet.id];
                                     }}
                                   />
                                 </div>
                               </div>
-                              <p className="mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight text-white sm:text-xs">{name}</p>
-                              <p className="mx-auto mt-0.5 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[7.5px] min-[400px]:text-[8px] font-bold leading-3 text-white/65 sm:text-[9px]">{desc}</p>
+                              <p className="mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight sm:text-xs text-white transition-colors duration-200 group-hover:text-[#f6c94f]">
+                                {name}
+                                <span className="block text-[7.5px] min-[400px]:text-[8px] sm:text-[8.5px] font-bold text-[#f6c94f]/85 mt-0.5">
+                                  ({PLANET_ASTRONOMICAL_NAMES[planet.id] || planet.id})
+                                </span>
+                              </p>
+                              <p className="mx-auto mt-0.5 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[7.5px] min-[400px]:text-[8px] font-bold leading-3 text-white/65 sm:text-[9px]">
+                                {desc}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -2506,8 +2565,6 @@ export default function Home() {
             <div className="marquee-track gap-6">
               {(() => {
                 const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
-
-                // Quadruple the sequence if list is short to ensure edge-to-edge full screen coverage without any blank gaps
                 const repeatCount = baseList.length < 6 ? 4 : 2;
                 const displayList = Array.from({ length: repeatCount }, (_, rIndex) =>
                   baseList.map((member, index) => ({ ...member, id: member.id + rIndex * 100 + index }))
@@ -2579,7 +2636,7 @@ export default function Home() {
                             </span>
                           )}
                           <span className="line-clamp-2 text-[11px] leading-snug text-[#5d4c78]">
-                            {contribution}
+                            {teamContributions[language][`${member.firstName} ${member.lastName}` as keyof typeof teamContributions['uz']] || teamContributions[language].default}
                           </span>
                         </div>
                       </div>
@@ -2939,11 +2996,25 @@ export default function Home() {
       </footer>
       </SectionDepthWrapper>
 
-      {/* Planet Skill Profile Modal */}
+      {/* Planet Skill Profile Modal (Only for Earth) */}
       <PlanetModal
         planet={activeModalPlanet}
-        onClose={() => setActiveModalPlanet(null)}
+        onClose={() => {
+          if (audioRef.current && isRobotSpeaking) {
+            audioRef.current.pause();
+            setIsRobotSpeaking(false);
+          }
+          setActiveModalPlanet(null);
+        }}
         onTry={handleTry}
+        isRobotSpeaking={isRobotSpeaking}
+        robotAudioProgress={robotAudioProgress}
+        robotAudioCurrentTime={robotAudioCurrentTime}
+        robotAudioDuration={robotAudioDuration}
+        toggleRobotSpeech={toggleRobotSpeech}
+        seekRobotAudio={seekRobotAudio}
+        skipRobotAudio={skipRobotAudio}
+        formatAudioTime={formatAudioTime}
       />
 
       {/* Team Member Profile Modal */}
