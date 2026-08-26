@@ -582,53 +582,30 @@ function PlanetModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Skip Back 10s */}
-              <button
-                type="button"
-                onClick={(e) => skipRobotAudio(-10, e)}
-                title="10 soniya orqaga"
-                className="h-9 w-9 grid place-items-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/15 hover:text-white transition text-[10px] font-extrabold"
-              >
-                -10s
-              </button>
-
-              {/* Play / Pause Toggle */}
-              <button
-                type="button"
-                onClick={toggleRobotSpeech}
-                className={`flex items-center justify-center h-9 px-3.5 sm:px-4 rounded-xl font-black text-xs transition-all duration-200 shadow-md ${
-                  isRobotSpeaking
-                    ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
-                    : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
-                }`}
-              >
-                {isRobotSpeaking ? (
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
-                    <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
-                    <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
-                    <Pause className="h-3.5 w-3.5 ml-0.5" />
-                    <span>To'xtatish</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <Play className="h-3.5 w-3.5 fill-current" />
-                    <span>{robotAudioCurrentTime > 0 ? "Davom ettirish" : "Tinglash"}</span>
-                  </div>
-                )}
-              </button>
-
-              {/* Skip Forward 10s */}
-              <button
-                type="button"
-                onClick={(e) => skipRobotAudio(10, e)}
-                title="10 soniya oldinga"
-                className="h-9 w-9 grid place-items-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/15 hover:text-white transition text-[10px] font-extrabold"
-              >
-                +10s
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={toggleRobotSpeech}
+              className={`flex items-center justify-center h-10 px-4 sm:px-5 rounded-xl font-black text-xs transition-all duration-200 shadow-md shrink-0 ${
+                isRobotSpeaking
+                  ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
+                  : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
+              }`}
+            >
+              {isRobotSpeaking ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                  <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                  <Pause className="h-3.5 w-3.5 ml-0.5" />
+                  <span>To'xtatish</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  <span>{robotAudioCurrentTime > 0 ? "Davom ettirish" : "Tinglash"}</span>
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Interactive Seek Bar / Timeline */}
