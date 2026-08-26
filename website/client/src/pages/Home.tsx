@@ -1987,16 +1987,10 @@ export default function Home() {
                               }`}
                             >
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
-                                <div className={`absolute inset-1 rounded-full transition-all duration-300 ${
-                                  isEarth
-                                    ? "bg-[#f6c94f] opacity-50 blur-lg animate-pulse group-hover:opacity-80"
-                                    : "bg-[#a78cff] opacity-25 blur-lg group-hover:opacity-60 group-hover:blur-xl"
-                                }`} />
+                                <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg transition-all duration-300 group-hover:opacity-60 group-hover:blur-xl" />
                                 
                                 {/* Decoupled hover translate container */}
-                                <div className={`relative z-10 transition-transform duration-200 group-hover:-translate-y-1.5 ${
-                                  isEarth ? "ring-2 ring-[#f6c94f]/70 rounded-full shadow-[0_0_18px_rgba(246,201,79,0.6)]" : ""
-                                } w-full h-full flex items-center justify-center`}>
+                                <div className="relative z-10 transition-transform duration-200 group-hover:-translate-y-1.5 w-full h-full flex items-center justify-center">
                                   <img
                                     src={planetImage}
                                     alt={name}
@@ -2007,11 +2001,7 @@ export default function Home() {
                                   />
                                 </div>
                               </div>
-                              <p className={`mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight sm:text-xs transition-colors duration-200 ${
-                                isEarth
-                                  ? "text-[#f6c94f] group-hover:text-[#ffe082]"
-                                  : "text-white group-hover:text-[#c4b5fd]"
-                              }`}>
+                              <p className="mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight sm:text-xs text-white transition-colors duration-200 group-hover:text-[#f6c94f]">
                                 {name}
                               </p>
                               <p className="mx-auto mt-0.5 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[7.5px] min-[400px]:text-[8px] font-bold leading-3 text-white/65 sm:text-[9px]">
