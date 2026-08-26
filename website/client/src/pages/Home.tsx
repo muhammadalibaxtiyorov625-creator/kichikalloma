@@ -17,6 +17,11 @@ import {
   Award,
   MessageSquare,
   Clock,
+  Bot,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
 } from "lucide-react";
 import { motion, useInView, useMotionValue, useTransform, animate, useScroll, useSpring } from "framer-motion";
 import { toast } from "sonner";
@@ -1488,6 +1493,44 @@ export default function Home() {
     modulesCount: number;
     skills: string[];
   } | null>(null);
+  const [isRobotSpeaking, setIsRobotSpeaking] = useState(false);
+  const [robotAudioProgress, setRobotAudioProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleRobotSpeech = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!audioRef.current) {
+      const audio = new Audio("/intro_guide.mp3");
+      audio.onended = () => {
+        setIsRobotSpeaking(false);
+        setRobotAudioProgress(0);
+      };
+      audio.ontimeupdate = () => {
+        if (audio.duration) {
+          setRobotAudioProgress((audio.currentTime / audio.duration) * 100);
+        }
+      };
+      audioRef.current = audio;
+    }
+
+    if (isRobotSpeaking) {
+      audioRef.current.pause();
+      setIsRobotSpeaking(false);
+    } else {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().then(() => {
+        setIsRobotSpeaking(true);
+      }).catch(() => {
+        // Fallback Web Speech API
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance("Salom! Kichik Alloma koinotiga xush kelibsiz! Bu yerda bolajonlar 8 ta sayyora orqali ilm oladilar.");
+          utterance.lang = "uz-UZ";
+          window.speechSynthesis.speak(utterance);
+        }
+      });
+    }
+  };
+
   const t = content[language];
 
   useEffect(() => {
@@ -1980,12 +2023,66 @@ export default function Home() {
                                   skills: planetDetails.skills,
                                 });
                               } : undefined}
-                              className={`group transition-all duration-300 ${
+                              className={`group relative transition-all duration-300 ${
                                 isEarth
                                   ? "hover:scale-115 cursor-pointer"
                                   : "hover:scale-110 cursor-default"
                               }`}
                             >
+                              {/* 🤖 Interactive AI Robot Guide above Earth */}
+                              {isEarth && (
+                                <div className="absolute -top-11 sm:-top-14 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-auto">
+                                  {/* Speech Bubble / Play Button */}
+                                  <button
+                                    type="button"
+                                    onClick={toggleRobotSpeech}
+                                    className={`group/robot relative flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] border transition-all duration-300 ${
+                                      isRobotSpeaking
+                                        ? "bg-gradient-to-r from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-white scale-105 shadow-[0_0_20px_rgba(246,201,79,0.5)]"
+                                        : "bg-[#1a0e36]/95 hover:bg-[#281552] border-[#f6c94f]/50 text-[#f6c94f] hover:scale-105"
+                                    }`}
+                                  >
+                                    {/* Robot Icon with animated halo */}
+                                    <div className="relative">
+                                      <Bot className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRobotSpeaking ? "text-[#f6c94f] animate-bounce" : "text-[#f6c94f]"}`} />
+                                      {isRobotSpeaking && (
+                                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00ff88] animate-ping" />
+                                      )}
+                                    </div>
+
+                                    {/* Text & Status */}
+                                    <span className="text-[8.5px] sm:text-[10.5px] font-black tracking-wide whitespace-nowrap">
+                                      {isRobotSpeaking ? "Robot gapirmoqda..." : "🤖 Sayt haqida (1 daqiqa)"}
+                                    </span>
+
+                                    {/* Play / Pause Icon & Equalizer Bars */}
+                                    {isRobotSpeaking ? (
+                                      <div className="flex items-center gap-0.5 ml-0.5">
+                                        <span className="h-2 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                                        <span className="h-3.5 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                                        <span className="h-2 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                                        <Pause className="h-2.5 w-2.5 ml-1 text-white" />
+                                      </div>
+                                    ) : (
+                                      <Play className="h-2.5 w-2.5 fill-current text-[#f6c94f]" />
+                                    )}
+
+                                    {/* Audio Progress Bar at bottom of bubble */}
+                                    {isRobotSpeaking && (
+                                      <div className="absolute -bottom-1 left-2 right-2 h-0.5 bg-white/20 rounded-full overflow-hidden">
+                                        <div
+                                          className="h-full bg-[#f6c94f] transition-all duration-200"
+                                          style={{ width: `${robotAudioProgress}%` }}
+                                        />
+                                      </div>
+                                    )}
+                                  </button>
+
+                                  {/* Speech Bubble Arrow pointing to Earth */}
+                                  <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-[#1a0e36]/95 -mt-0.5" />
+                                </div>
+                              )}
+
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
                                 <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg transition-all duration-300 group-hover:opacity-60 group-hover:blur-xl" />
                                 
