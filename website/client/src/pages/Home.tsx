@@ -1509,7 +1509,7 @@ function mapDbIdToPlanetId(dbValue: string): string {
   if (v.includes("matematika") || v.includes("saturn") || v.includes("mantiq") || v.includes("axloqiy")) return "saturn";
   if (v.includes("english") || v.includes("vocabulary") || v.includes("uran") || v.includes("nutq")) return "uran";
   if (v.includes("emotsional") || v.includes("neptun") || v.includes("neptune") || v.includes("hissiyot")) return "neptune";
-  if (v.includes("virtual store") || v.includes("store") || v.includes("venera") || v.includes("venus") || v.includes("gold coin")) return "venus";
+  if (v.includes("virtual") || v.includes("do'kon") || v.includes("dokon") || v.includes("store") || v.includes("venera") || v.includes("venus") || v.includes("gold coin") || v.includes("tanga")) return "venus";
   if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v.includes("yupiter") || v.includes("jupiter") || v.includes("intizom")) return "jupiter";
   if (v.includes("quyosh") || v === "sun") return "sun";
   
@@ -1519,7 +1519,7 @@ function mapDbIdToPlanetId(dbValue: string): string {
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
   { id: "earth", name: "YER", skill: "Kognitiv ta’lim + AI Tutor", description: "AI bilan cheklangan, maqsadli o‘qish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
   { id: "jupiter", name: "YUPITER", skill: "O‘z-o‘zini boshqarish", description: "Reja, bajarilish, intizom", status: "soon", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
-  { id: "venus", name: "VENERA", skill: "Virtual Store", description: "Gold Coin orqali kosmetik buyumlar", status: "soon", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
+  { id: "venus", name: "VENERA", skill: "Virtual do'kon", description: "Oltin tangalar orqali buyumlar", status: "soon", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
   { id: "saturn", name: "SATURN", skill: "Matematika + mantiq", description: "Masala, test, yechim va mukofot", status: "soon", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
   { id: "mercury", name: "MERKURIY", skill: "Ijodkorlik + kasblar", description: "Kasblarni kashf etish va qiziqish", status: "soon", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
   { id: "uran", name: "URAN", skill: "English Vocabulary", description: "So‘z, talaffuz, test va mustahkamlash", status: "soon", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
