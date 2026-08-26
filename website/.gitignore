@@ -3,7 +3,7 @@
 .pnpm-store/
 
 # Build outputs
-dist/
+# dist/ -- server deploy uchun git da saqlanadi
 build/
 *.dist
 
