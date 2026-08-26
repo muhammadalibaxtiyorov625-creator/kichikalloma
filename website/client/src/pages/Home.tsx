@@ -1784,18 +1784,13 @@ export default function Home() {
 
       <main>
         <SectionDepthWrapper id="bosh">
-          <section className="relative isolate flex min-h-[780px] items-end overflow-hidden bg-[#0b0e27] pb-20 pt-36 sm:min-h-[820px] sm:pb-24 lg:items-center lg:pb-0">
-          <video
-            className="absolute inset-0 -z-20 h-full w-full object-cover opacity-75"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster={assets.constellationImage}
-          >
-            <source src={assets.heroVideo} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_75%_18%,rgba(124,88,247,0.42),transparent_27%),linear-gradient(90deg,rgba(10,7,36,0.96)_4%,rgba(10,7,36,0.78)_44%,rgba(10,7,36,0.28)_100%)]" />
+          <section className="relative isolate flex min-h-[780px] items-end overflow-hidden bg-[#07091e] pb-20 pt-36 sm:min-h-[820px] sm:pb-24 lg:items-center lg:pb-0">
+          <div
+            className="absolute inset-0 -z-20 h-full w-full bg-cover bg-center bg-no-repeat opacity-85"
+            style={{ backgroundImage: "url('/space-bg.jpg')" }}
+          />
+          <CosmicBackgroundAnimation variant="dark" />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_75%_18%,rgba(124,88,247,0.42),transparent_35%),linear-gradient(90deg,rgba(7,9,30,0.96)_4%,rgba(7,9,30,0.78)_44%,rgba(7,9,30,0.35)_100%)]" />
           <div className="absolute -bottom-28 left-[45%] -z-10 h-80 w-80 rounded-full bg-[#6c45dd]/25 blur-[90px]" />
           <div className="absolute right-[14%] top-[32%] hidden h-2 w-2 rounded-full bg-[#f6c94f] shadow-[0_0_24px_10px_rgba(246,201,79,0.3)] lg:block" />
 
