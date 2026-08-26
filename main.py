@@ -787,34 +787,18 @@ def serve_admin_panel():
 
 @app.get("/sitemap.xml", include_in_schema=False)
 def serve_sitemap(request: Request):
-    """Google va Yandex uchun dinamik XML Sitemap"""
-    # SITE_URL muhit o'zgaruvchisidan olish, yo'q bo'lsa kichikalloma.uz
-    base = os.environ.get("SITE_URL", "https://kichikalloma.uz").rstrip("/")
-
-    # Barcha statik sahifalar
-    static_pages = [
-        {"loc": f"{base}/", "priority": "1.0", "changefreq": "weekly"},
-        {"loc": f"{base}/#sayyoralar", "priority": "0.9", "changefreq": "weekly"},
-        {"loc": f"{base}/#jamoa", "priority": "0.8", "changefreq": "monthly"},
-        {"loc": f"{base}/#kurslar", "priority": "0.8", "changefreq": "weekly"},
-        {"loc": f"{base}/#aloqa", "priority": "0.6", "changefreq": "monthly"},
-    ]
-
+    """Google va Yandex uchun XML Sitemap"""
     from datetime import datetime
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
-    urls_xml = ""
-    for page in static_pages:
-        urls_xml += f"""
-  <url>
-    <loc>{page['loc']}</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>{page['changefreq']}</changefreq>
-    <priority>{page['priority']}</priority>
-  </url>"""
-
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls_xml}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <url>
+      <loc>https://kichikalloma.uz/</loc>
+      <lastmod>{today}</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>1.0</priority>
+   </url>
 </urlset>"""
 
     return Response(content=xml_content, media_type="application/xml; charset=utf-8")
@@ -823,8 +807,7 @@ def serve_sitemap(request: Request):
 @app.get("/robots.txt", include_in_schema=False)
 def serve_robots(request: Request):
     """SEO robots.txt — barcha qidiruvchilar uchun"""
-    base = os.environ.get("SITE_URL", "https://kichikalloma.uz").rstrip("/")
-    content = f"""User-agent: *
+    content = """User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
@@ -832,7 +815,7 @@ Disallow: /docs
 Disallow: /redoc
 Disallow: /api/
 
-Sitemap: {base}/sitemap.xml
+Sitemap: https://kichikalloma.uz/sitemap.xml
 """
     return Response(content=content, media_type="text/plain; charset=utf-8")
 
