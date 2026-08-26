@@ -17,7 +17,6 @@ import {
   Award,
   MessageSquare,
   Clock,
-  Bot,
   Volume2,
   VolumeX,
   Play,
@@ -549,6 +548,65 @@ function PlanetModal({
           </div>
           <h3 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white">{planet.name}</h3>
           <p className="mt-2 text-sm font-semibold leading-relaxed text-white/75 max-w-md mx-auto">{planet.desc}</p>
+        </div>
+
+        {/* 🎙️ 1-Minute Voice Guide inside Modal */}
+        <div className="mt-5 rounded-2xl border border-[#f6c94f]/35 bg-gradient-to-r from-[#2c175b]/80 to-[#1b0e3b]/90 p-3.5 sm:p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)] backdrop-blur-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-all duration-300 ${
+                isRobotSpeaking
+                  ? "bg-gradient-to-tr from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-[#f6c94f] shadow-[0_0_15px_rgba(246,201,79,0.5)] animate-pulse"
+                  : "bg-white/10 border-white/15 text-[#f6c94f]"
+              }`}>
+                <Volume2 className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                  Ovozli tanishtiruv
+                  <span className="rounded-md bg-[#f6c94f]/20 px-1.5 py-0.5 text-[9px] font-extrabold text-[#f6c94f]">1 daqiqa</span>
+                </div>
+                <div className="text-[11px] font-semibold text-white/60">
+                  {isRobotSpeaking ? "Platforma haqida hikoya qilinmoqda..." : "Sayt va ta'lim haqida eshitish"}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleRobotSpeech}
+              className={`flex items-center justify-center h-10 px-4 rounded-xl font-black text-xs transition-all duration-200 shadow-md ${
+                isRobotSpeaking
+                  ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
+                  : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
+              }`}
+            >
+              {isRobotSpeaking ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                  <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                  <Pause className="h-3.5 w-3.5 ml-0.5" />
+                  <span>To'xtatish</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  <span>Tinglash</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Audio progress bar */}
+          {isRobotSpeaking && (
+            <div className="mt-3 h-1 w-full bg-white/15 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#6c45dd] via-[#d54381] to-[#f6c94f] transition-all duration-200"
+                style={{ width: `${robotAudioProgress}%` }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Skills & Badges Grid */}
