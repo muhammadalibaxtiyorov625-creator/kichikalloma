@@ -1908,18 +1908,7 @@ export default function Home() {
 
                 {/* Sun center (Prominent, clean, larger than all orbiting planets without harsh border lines) */}
                 <div
-                  onClick={() => {
-                    setActiveModalPlanet({
-                      id: "sun",
-                      name: "Quyosh — Kichik Alloma Markazi",
-                      desc: "Barcha 8 ta intellektual va fazoviy ko'nikma modullarini birlashtiruvchi asosiy koinot markazi.",
-                      image: apiPlanets.find((p) => p.id === "sun")?.image || DEFAULT_PLANET_IMAGES.sun,
-                      ageGroup: "5 - 12 yosh",
-                      modulesCount: 24,
-                      skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Kompakt o'yinlar"],
-                    });
-                  }}
-                  className="group pointer-events-auto cursor-pointer absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
+                  className="group pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
                 >
                   <div className="relative grid place-items-center h-[88px] w-[88px] min-[400px]:h-[100px] min-[400px]:w-[100px] min-[500px]:h-[120px] min-[500px]:w-[120px] sm:h-[150px] sm:w-[150px] lg:h-[165px] lg:w-[165px]">
                     {/* Solar Corona & Soft Radiant Energy Glow (No harsh border line) */}
@@ -1930,7 +1919,7 @@ export default function Home() {
                     <img
                       src={apiPlanets.find((p) => p.id === "sun")?.image || DEFAULT_PLANET_IMAGES.sun}
                       alt="Quyosh"
-                      className="relative z-10 h-full w-full rounded-full object-contain drop-shadow-[0_0_35px_rgba(255,160,0,0.9)] transition-transform duration-500 group-hover:scale-110"
+                      className="relative z-10 h-full w-full rounded-full object-contain drop-shadow-[0_0_35px_rgba(255,160,0,0.9)]"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = DEFAULT_PLANET_IMAGES.sun;
                       }}
@@ -1943,6 +1932,7 @@ export default function Home() {
                   {(() => {
                     const planetSkillsDetails: Record<string, { age: string; modules: number; skills: string[] }> = {
                       sun: { age: "5 - 12 yosh", modules: 24, skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Diqqat o'yinlari"] },
+                      earth: { age: "6 - 12 yosh", modules: 18, skills: ["Kognitiv ta’lim", "AI Tutor", "Maqsadli o‘qish"] },
                       math: { age: "6 - 12 yosh", modules: 16, skills: ["Mantiqiy masalalar", "Matematik hisob", "Tahliliy fikrlash"] },
                       memory: { age: "5 - 11 yosh", modules: 14, skills: ["Vizual xotira", "Assotsiativ eslab qolish", "Diqqat jamlash"] },
                       space: { age: "6 - 12 yosh", modules: 18, skills: ["Fazoviy tasavvur", "3D geometriya", "Vizual konstruksiya"] },
@@ -1963,6 +1953,7 @@ export default function Home() {
                       const sin = Math.sin(angleRad);
                       const planetImage = apiPlanet?.image || DEFAULT_PLANET_IMAGES[planet.id];
                       const planetDetails = planetSkillsDetails[planet.id] || { age: "6 - 12 yosh", modules: 15, skills: ["Intellektual rivojlanish", "Mantiq"] };
+                      const isEarth = planet.id === "earth";
 
                       return (
                         <div
@@ -1976,24 +1967,24 @@ export default function Home() {
                         >
                           <div className="animate-orbit-ccw-slow">
                             <div
-                              onClick={() => {
+                              onClick={isEarth ? () => {
                                 setActiveModalPlanet({
                                   id: planet.id,
-                                  name,
+                                  name: "YER — " + name,
                                   desc,
                                   image: planetImage,
                                   ageGroup: planetDetails.age,
                                   modulesCount: planetDetails.modules,
                                   skills: planetDetails.skills,
                                 });
-                              }}
-                              className="group transition-transform duration-300 hover:scale-115 cursor-pointer"
+                              } : undefined}
+                              className={`group transition-transform duration-300 ${isEarth ? "hover:scale-115 cursor-pointer" : "cursor-default"}`}
                             >
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
                                 <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-30 blur-lg" />
                                 
                                 {/* Decoupled hover translate container */}
-                                <div className="relative z-10 transition-transform duration-200 group-hover:-translate-y-1.5 w-full h-full flex items-center justify-center">
+                                <div className={`relative z-10 transition-transform duration-200 ${isEarth ? "group-hover:-translate-y-1.5" : ""} w-full h-full flex items-center justify-center`}>
                                   <img
                                     src={planetImage}
                                     alt={name}
