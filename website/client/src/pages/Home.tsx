@@ -496,6 +496,9 @@ function PlanetModal({
   planet,
   onClose,
   onTry,
+  isRobotSpeaking,
+  robotAudioProgress,
+  toggleRobotSpeech,
 }: {
   planet: {
     id: string;
@@ -508,6 +511,9 @@ function PlanetModal({
   } | null;
   onClose: () => void;
   onTry: () => void;
+  isRobotSpeaking: boolean;
+  robotAudioProgress: number;
+  toggleRobotSpeech: (e: React.MouseEvent) => void;
 }) {
   if (!planet) return null;
   const isEarth = planet.id === "earth" || planet.name.toLowerCase().includes("yer") || planet.name.toLowerCase().includes("kognitiv");
@@ -545,8 +551,67 @@ function PlanetModal({
           <p className="mt-2 text-sm font-semibold leading-relaxed text-white/75 max-w-md mx-auto">{planet.desc}</p>
         </div>
 
+        {/* 🤖 1-Minute AI Voice Robot Guide inside Modal */}
+        <div className="mt-6 rounded-2xl border border-[#f6c94f]/35 bg-gradient-to-r from-[#2c175b]/80 to-[#1b0e3b]/90 p-3.5 sm:p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)] backdrop-blur-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border transition-all duration-300 ${
+                isRobotSpeaking
+                  ? "bg-gradient-to-tr from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-[#f6c94f] shadow-[0_0_15px_rgba(246,201,79,0.5)] animate-pulse"
+                  : "bg-white/10 border-white/15 text-[#f6c94f]"
+              }`}>
+                <Bot className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                  AI Ovozli Gid
+                  <span className="rounded-md bg-[#f6c94f]/20 px-1.5 py-0.5 text-[9px] font-extrabold text-[#f6c94f]">1 daqiqa</span>
+                </div>
+                <div className="text-[11px] font-semibold text-white/60">
+                  {isRobotSpeaking ? "Platforma haqida hikoya qilinmoqda..." : "Sayt va ta'lim haqida eshitish"}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleRobotSpeech}
+              className={`flex items-center justify-center h-10 px-4 rounded-xl font-black text-xs transition-all duration-200 shadow-md ${
+                isRobotSpeaking
+                  ? "bg-[#d54381] text-white hover:bg-[#b8326a]"
+                  : "bg-[#f6c94f] text-[#1c1038] hover:bg-[#ffdc77] hover:scale-105"
+              }`}
+            >
+              {isRobotSpeaking ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_100ms]" />
+                  <span className="h-3.5 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_200ms]" />
+                  <span className="h-2 w-0.5 bg-white rounded-full animate-[bounce_0.6s_infinite_300ms]" />
+                  <Pause className="h-3.5 w-3.5 ml-0.5" />
+                  <span>To'xtatish</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  <span>Tinglash</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Audio progress bar */}
+          {isRobotSpeaking && (
+            <div className="mt-3 h-1 w-full bg-white/15 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#6c45dd] via-[#d54381] to-[#f6c94f] transition-all duration-200"
+                style={{ width: `${robotAudioProgress}%` }}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Skills & Badges Grid */}
-        <div className="mt-6 space-y-2.5">
+        <div className="mt-5 space-y-2.5">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
             <span className="text-xs font-bold text-white/60">Tavsiya etilgan yosh:</span>
             <span className="text-xs font-black text-[#f6c94f]">{planet.ageGroup}</span>
@@ -2029,60 +2094,6 @@ export default function Home() {
                                   : "hover:scale-110 cursor-default"
                               }`}
                             >
-                              {/* 🤖 Interactive AI Robot Guide above Earth */}
-                              {isEarth && (
-                                <div className="absolute -top-11 sm:-top-14 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-auto">
-                                  {/* Speech Bubble / Play Button */}
-                                  <button
-                                    type="button"
-                                    onClick={toggleRobotSpeech}
-                                    className={`group/robot relative flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.6)] border transition-all duration-300 ${
-                                      isRobotSpeaking
-                                        ? "bg-gradient-to-r from-[#6c45dd] to-[#d54381] border-[#f6c94f] text-white scale-105 shadow-[0_0_20px_rgba(246,201,79,0.5)]"
-                                        : "bg-[#1a0e36]/95 hover:bg-[#281552] border-[#f6c94f]/50 text-[#f6c94f] hover:scale-105"
-                                    }`}
-                                  >
-                                    {/* Robot Icon with animated halo */}
-                                    <div className="relative">
-                                      <Bot className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRobotSpeaking ? "text-[#f6c94f] animate-bounce" : "text-[#f6c94f]"}`} />
-                                      {isRobotSpeaking && (
-                                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00ff88] animate-ping" />
-                                      )}
-                                    </div>
-
-                                    {/* Text & Status */}
-                                    <span className="text-[8.5px] sm:text-[10.5px] font-black tracking-wide whitespace-nowrap">
-                                      {isRobotSpeaking ? "Robot gapirmoqda..." : "🤖 Sayt haqida (1 daqiqa)"}
-                                    </span>
-
-                                    {/* Play / Pause Icon & Equalizer Bars */}
-                                    {isRobotSpeaking ? (
-                                      <div className="flex items-center gap-0.5 ml-0.5">
-                                        <span className="h-2 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_100ms]" />
-                                        <span className="h-3.5 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_200ms]" />
-                                        <span className="h-2 w-0.5 bg-[#f6c94f] rounded-full animate-[bounce_0.6s_infinite_300ms]" />
-                                        <Pause className="h-2.5 w-2.5 ml-1 text-white" />
-                                      </div>
-                                    ) : (
-                                      <Play className="h-2.5 w-2.5 fill-current text-[#f6c94f]" />
-                                    )}
-
-                                    {/* Audio Progress Bar at bottom of bubble */}
-                                    {isRobotSpeaking && (
-                                      <div className="absolute -bottom-1 left-2 right-2 h-0.5 bg-white/20 rounded-full overflow-hidden">
-                                        <div
-                                          className="h-full bg-[#f6c94f] transition-all duration-200"
-                                          style={{ width: `${robotAudioProgress}%` }}
-                                        />
-                                      </div>
-                                    )}
-                                  </button>
-
-                                  {/* Speech Bubble Arrow pointing to Earth */}
-                                  <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-[#1a0e36]/95 -mt-0.5" />
-                                </div>
-                              )}
-
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
                                 <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg transition-all duration-300 group-hover:opacity-60 group-hover:blur-xl" />
                                 
@@ -2674,8 +2685,17 @@ export default function Home() {
       {/* Planet Skill Profile Modal (Only for Earth) */}
       <PlanetModal
         planet={activeModalPlanet}
-        onClose={() => setActiveModalPlanet(null)}
+        onClose={() => {
+          if (audioRef.current && isRobotSpeaking) {
+            audioRef.current.pause();
+            setIsRobotSpeaking(false);
+          }
+          setActiveModalPlanet(null);
+        }}
         onTry={handleTry}
+        isRobotSpeaking={isRobotSpeaking}
+        robotAudioProgress={robotAudioProgress}
+        toggleRobotSpeech={toggleRobotSpeech}
       />
     </div>
   );
