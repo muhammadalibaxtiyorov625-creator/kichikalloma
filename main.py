@@ -613,7 +613,15 @@ def get_planet_audio_hash(planet_id: int, intro_text: str) -> str:
 def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
     d = dict(row)
     pid = d.get("id")
-    d["image"] = to_full_image_url(d.get("image"), request)
+    raw_img = d.get("image") or ""
+    
+    # Agar rasm uploads papkasida bo'lsa va diskda topilmasa, mavjud sayyora SVG siga fallback
+    if raw_img and raw_img.startswith("/images/uploads/"):
+        disk_path = os.path.join(PUBLIC_DIR, raw_img.lstrip("/").replace("images/", ""))
+        if not os.path.exists(disk_path):
+            raw_img = "/images/planets/earth.svg"
+
+    d["image"] = to_full_image_url(raw_img or "/images/planets/earth.svg", request)
     
     # is_blocked va is_block
     is_inactive = d.get("status", "active") != "active"
@@ -651,7 +659,19 @@ def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
 
 def format_team_row(row, request: Request, lang: str = "uzb") -> dict:
     d = dict(row)
-    d["image"] = to_full_image_url(d.get("image") or "/images/team/member1.svg", request)
+    raw_img = d.get("image") or ""
+    tid = d.get("id") or 1
+    fallback_img = f"/images/team/member{((tid - 1) % 4) + 1}.svg"
+
+    # Agar rasm bo'lmasa yoki diskda topilmasa, mavjud jamoa a'zosi rasmiga fallback qilish
+    if not raw_img:
+        raw_img = fallback_img
+    elif raw_img.startswith("/images/uploads/"):
+        disk_path = os.path.join(PUBLIC_DIR, raw_img.lstrip("/").replace("images/", ""))
+        if not os.path.exists(disk_path):
+            raw_img = fallback_img
+
+    d["image"] = to_full_image_url(raw_img, request)
     desc = d.get("description") or ""
     d["description"] = translate_text_sync(desc, lang) if lang != "uzb" else desc
     first_name = d.get("first_name", "").strip()

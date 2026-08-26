@@ -1485,6 +1485,27 @@ function mapDbIdToPlanetId(dbValue: string): string {
   return "";
 }
 
+const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
+  { id: "earth", name: "Kognitiv", skill: "Fikrlash va bilim", description: "Masalani tushunish, mantiqiy yechim topish.", status: "active", image: "/planets/earth.png" },
+  { id: "mars", name: "Jismoniy", skill: "Nutq va til", description: "Fikrni aniq ifodalashni o'rganish.", status: "active", image: "/planets/mars.png" },
+  { id: "uran", name: "Nutq va til", skill: "O'zini boshqarish", description: "Kichik odatlar katta natijalarga olib boradi.", status: "active", image: "/planets/uran.png" },
+  { id: "neptune", name: "Ijtimoiy", skill: "Hissiyotlarni anglash", description: "O'zini his qilishni tushunish, anglash.", status: "active", image: "/planets/neptune.png" },
+  { id: "venus", name: "Emotsional", skill: "Ijodkorlik va tasavvur", description: "Yangi g'oyalar yaratish uchun makon.", status: "active", image: "/planets/venus.png" },
+  { id: "saturn", name: "Axloqiy", skill: "Ijtimoiy ko'nikmalar", description: "Birgalikda o'rganish va muloqot qilish.", status: "active", image: "/planets/saturn.png" },
+  { id: "jupiter", name: "Ijodkorlik", skill: "Harakat va sog'lik", description: "O'rganish orasida harakat ham kerak.", status: "active", image: "/planets/jupiter.png" },
+  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "Qadriyat va mas'uliyat", description: "Har bir tanlovning oqibati bor.", status: "active", image: "/planets/mercury.png" },
+  { id: "sun", name: "Quyosh", skill: "Alloma AI Suhbat", description: "AI bilan erkin muloqot va savol-javoblar.", status: "active", image: "/planets/sun.png" },
+];
+
+const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
+  { id: 1, firstName: "Muhammadali", lastName: "Baxtiyorov", direction: "Bosh Ta'lim Metodisti", description: "", image: "/images/team/member1.svg" },
+  { id: 2, firstName: "Oyatillo", lastName: "Mahmudjonov", direction: "Bolalar Psixologi", description: "", image: "/images/team/member3.svg" },
+  { id: 3, firstName: "Muhammadsodiq", lastName: "Kozimov", direction: "Mantiq va Dasturlash Murabbiyi", description: "", image: "/images/team/member2.svg" },
+  { id: 4, firstName: "Sergey", lastName: "Solovyov", direction: "Nutq va Til Rivojlantirish Mutaxassisi", description: "", image: "/images/team/member4.svg" },
+  { id: 5, firstName: "Shoxrux", lastName: "Komiljonov", direction: "Loyiha Rahbari & Metodist", description: "", image: "/images/team/member1.svg" },
+  { id: 6, firstName: "Jasurbek", lastName: "Egamberdiyev", direction: "Filologiya Fanlari Doktori, Professor", description: "", image: "/images/team/member2.svg" },
+];
+
 export default function Home() {
   const [language, setLanguage] = useState<Locale>("uz");
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -1493,9 +1514,9 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const langBtnRef = useRef<HTMLButtonElement>(null);
   const [langPos, setLangPos] = useState({ top: 60, right: 100 });
-  const [apiPlanets, setApiPlanets] = useState<ApiPlanet[]>([]);
+  const [apiPlanets, setApiPlanets] = useState<ApiPlanet[]>(DEFAULT_PLANETS_INITIAL);
   const [apiStats, setApiStats] = useState<ApiStats | null>(null);
-  const [apiTeams, setApiTeams] = useState<ApiTeam[]>([]);
+  const [apiTeams, setApiTeams] = useState<ApiTeam[]>(DEFAULT_TEAMS_INITIAL);
   const [activeModalPlanet, setActiveModalPlanet] = useState<{
     id: string;
     name: string;
@@ -2294,9 +2315,17 @@ export default function Home() {
                           <img
                             src={member.image}
                             alt={`${member.firstName} ${member.lastName}`}
+                            loading="lazy"
+                            decoding="async"
                             className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 transition-transform duration-500 group-hover:scale-105"
                             onLoad={(e) => {
-                              (e.target as HTMLImageElement).classList.remove("opacity-0");
+                              (e.currentTarget as HTMLImageElement).classList.remove("opacity-0");
+                            }}
+                            onError={(e) => {
+                              const img = e.currentTarget as HTMLImageElement;
+                              img.onerror = null;
+                              img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
+                              img.classList.remove("opacity-0");
                             }}
                           />
                         )}
@@ -2638,12 +2667,22 @@ function PlanetMini({
             <img
               src={apiPlanet!.image}
               alt={planetName}
+              loading="lazy"
+              decoding="async"
               className="relative z-10 h-[74px] w-[74px] rounded-full object-cover transition duration-200 group-hover:-translate-y-1 group-hover:scale-105 sm:hidden"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = `/planets/${planet.id}.png`;
+              }}
             />
             <img
               src={apiPlanet!.image}
               alt={planetName}
+              loading="lazy"
+              decoding="async"
               className="relative z-10 hidden h-[104px] w-[104px] rounded-full object-cover transition duration-200 group-hover:-translate-y-1 group-hover:scale-105 sm:inline-block"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = `/planets/${planet.id}.png`;
+              }}
             />
           </>
         ) : (
