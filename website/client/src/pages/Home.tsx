@@ -2322,19 +2322,21 @@ export default function Home() {
                       
                       {/* Dynamic sliding role & contribution transition */}
                       <div className="relative mt-2 overflow-hidden h-[76px] w-full">
-                        {/* Role title and API description (visible by default) */}
-                        <div className="absolute inset-x-0 top-0 bottom-0 flex flex-col items-center justify-center text-xs font-bold leading-tight text-[#d54381]/90 transition-all duration-300 transform group-hover:-translate-y-12 group-hover:opacity-0 px-1 text-center">
-                          <span className="font-extrabold">{roleName}</span>
+                        {/* Role title (visible by default) */}
+                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-xs font-extrabold leading-normal text-[#d54381]/90 transition-all duration-300 transform group-hover:-translate-y-12 group-hover:opacity-0 px-1 text-center">
+                          {roleName}
+                        </div>
+                        
+                        {/* Experience / Description & contribution details (appears on hover) */}
+                        <div className="absolute inset-x-0 top-0 bottom-0 flex flex-col items-center justify-center text-[11px] font-semibold leading-tight text-[#5d4c78] opacity-0 transition-all duration-300 transform translate-y-8 group-hover:translate-y-0 group-hover:opacity-100 px-1 text-center">
                           {member.description && (
-                            <span className="mt-1 text-[11px] font-semibold text-[#5d4c78] bg-[#6c45dd]/10 px-2 py-0.5 rounded-full inline-block">
+                            <span className="mb-1 text-[11px] font-bold text-[#6c45dd] bg-[#6c45dd]/12 px-2.5 py-0.5 rounded-full inline-block">
                               {member.description}
                             </span>
                           )}
-                        </div>
-                        
-                        {/* Contribution details (appears on hover) */}
-                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-[11px] font-semibold leading-normal text-[#5d4c78] opacity-0 transition-all duration-300 transform translate-y-8 group-hover:translate-y-0 group-hover:opacity-100 px-1 text-center">
-                          {contribution}
+                          <span className="line-clamp-2 text-[11px] leading-snug text-[#5d4c78]">
+                            {contribution}
+                          </span>
                         </div>
                       </div>
                     </article>
