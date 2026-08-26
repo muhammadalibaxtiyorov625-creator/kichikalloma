@@ -2150,7 +2150,10 @@ def mobile_get_planet_detail(planet_id: int, request: Request, current_user: dic
     conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="Sayyora topilmadi!")
-    return format_planet_row(row, request, lang=lang)
+    formatted = format_planet_row(row, request, lang=lang)
+    if formatted.get("is_blocked"):
+        raise HTTPException(status_code=403, detail="Ushbu sayyora hozirda qulflangan!")
+    return formatted
 
 
 # 9.1 MOBIL FAQ SAVOLLAR RO'YXATI (/mobile/faqs/ va /mobile/faqs)
