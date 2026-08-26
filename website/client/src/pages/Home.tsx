@@ -1414,15 +1414,15 @@ const TEAMS_API = "/api/website/teams";
 const PLANET_ID_MAP = ["earth", "mars", "uran", "neptune", "venus", "saturn", "jupiter", "mercury", "sun"];
 
 const DEFAULT_PLANET_IMAGES: Record<string, string> = {
-  neptune: "/planets/neptune.png",
-  mercury: "/planets/mercury.png",
-  venus: "/planets/venus.png",
-  earth: "/planets/earth.png",
-  mars: "/planets/mars.png",
-  jupiter: "/planets/jupiter.png",
-  saturn: "/planets/saturn.png",
-  uran: "/planets/uran.png",
-  sun: "/planets/sun.png",
+  earth: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png",
+  mars: "/images/uploads/626835a96045495da55fc03c79067817.png",
+  uran: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png",
+  venus: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png",
+  neptune: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png",
+  saturn: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png",
+  mercury: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png",
+  jupiter: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png",
+  sun: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png",
 };
 
 function fixImageUrl(url: string | null): string {
