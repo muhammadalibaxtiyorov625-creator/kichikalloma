@@ -1344,69 +1344,57 @@ const planets = [
 
 const teamRoles = {
   uz: {
-    "Madina Rahimova": "Bosh ta'lim metodisti & Bolalar psixologi",
-    "Bobur Ismoilov": "Lead AI & Backend muhandisi",
-    "Nigora Alimova": "UX/UI va Gamifikatsiya dizayneri",
-    "Mehruza Solijonova": "O'quvchilar dasturlari va loyihalarini boshqarish bo'yicha mas'ul kotibi",
-    "Nursultan Suleymanov": "UX/UI mobil ilova dizayneri",
-    "Yulduz Ergasheva": "Bitiruvchilar bilan ishlash menejeri",
-    "Abubakr Ro'ziboyev": "Flutter Developer mutaxassisi",
-    "Gulgina Raxmatullayeva": "Videodarsliklar bo'yicha loyiha menejeri",
+    "Muhammadali Baxtiyorov": "Dasturchi",
+    "Oyatillo Mahmudjonov": "Grafik dizayner",
+    "Muhammadsodiq Kozimov": "Mobil dasturchi",
+    "Sergey Solovyov": "Dasturchi",
+    "Shoxrux Komiljonov": "Founder, project manager",
+    "Jasurbek Egamberdiyev": "Filologiya fanlari doktori DSc, Professor",
   },
   ru: {
-    "Madina Rahimova": "Главный методист по образованию и детский психолог",
-    "Bobur Ismoilov": "Lead AI & Backend-инженер",
-    "Nigora Alimova": "UX/UI и дизайнер геймификации",
-    "Mehruza Solijonova": "Ответственный секретарь по управлению программами и проектами",
-    "Nursultan Suleymanov": "UX/UI дизайнер мобильных приложений",
-    "Yulduz Ergasheva": "Менеджер по работе с выпускниками",
-    "Abubakr Ro'ziboyev": "Специалист Flutter Developer",
-    "Gulgina Raxmatullayeva": "Руководитель проектов по видеоурокам",
+    "Muhammadali Baxtiyorov": "Full-Stack разработчик",
+    "Oyatillo Mahmudjonov": "Графический дизайнер",
+    "Muhammadsodiq Kozimov": "Мобильный разработчик",
+    "Sergey Solovyov": "Инженер-программист",
+    "Shoxrux Komiljonov": "Основатель, руководитель проекта",
+    "Jasurbek Egamberdiyev": "Доктор филологических наук DSc, профессор",
   },
   en: {
-    "Madina Rahimova": "Chief Education Methodist & Child Psychologist",
-    "Bobur Ismoilov": "Lead AI & Backend Engineer",
-    "Nigora Alimova": "UX/UI & Gamification Designer",
-    "Mehruza Solijonova": "Executive Secretary for Student Programs & Project Management",
-    "Nursultan Suleymanov": "UX/UI Mobile App Designer",
-    "Yulduz Ergasheva": "Alumni Relations Manager",
-    "Abubakr Ro'ziboyev": "Flutter Developer Specialist",
-    "Gulgina Raxmatullayeva": "Video Lessons Project Manager",
+    "Muhammadali Baxtiyorov": "Full-Stack Software Engineer",
+    "Oyatillo Mahmudjonov": "Lead Graphic Designer",
+    "Muhammadsodiq Kozimov": "Mobile App Developer",
+    "Sergey Solovyov": "Senior Software Engineer",
+    "Shoxrux Komiljonov": "Founder, Project Manager",
+    "Jasurbek Egamberdiyev": "Doctor of Philological Sciences DSc, Professor",
   }
 } as const;
 
 const teamContributions = {
   uz: {
-    "Madina Rahimova": "Ta'lim metodologiyasini ishlab chiqqan va bolalar psixologiyasi bo'yicha ilmiy yondashuvlarni integratsiya qilgan.",
-    "Bobur Ismoilov": "AI algoritmlarini, sun'iy intellekt hamrohini va backend xizmatlarini ishlab chiqqan hamda optimallashtirgan.",
-    "Nigora Alimova": "Foydalanuvchi interfeysi (UX/UI) dizaynini va platformadagi gamifikatsiya tizimini loyihalashtirgan.",
-    "Mehruza Solijonova": "O'quvchilar dasturlarini muvofiqlashtirgan va loyiha menejmentini olib borgan.",
-    "Nursultan Suleymanov": "Mobil ilovaning interfeys dizaynini va interaktiv elementlarini yaratgan.",
-    "Yulduz Ergasheva": "Bitiruvchilar hamjamiyatini rivojlantirish va qo'llab-quvvatlash tizimini boshqargan.",
-    "Abubakr Ro'ziboyev": "Flutter mobil ilovasining frontend qismini va silliq animatsiyalarini ishlab chiqqan.",
-    "Gulgina Raxmatullayeva": "Videodarsliklarni ishlab chiqarish, ssenariy yozish va media kontentini tayyorlashga mas'ul bo'lgan.",
+    "Muhammadali Baxtiyorov": "Veb platforma, backend API va ma'lumotlar bazasi arxitekturasini ishlab chiqqan.",
+    "Oyatillo Mahmudjonov": "Loyiha brendingi, grafik dizayn va vizual identifikatsiyasini yaratgan.",
+    "Muhammadsodiq Kozimov": "Kichik Alloma mobil ilovasi va foydalanuvchi interfeysini ishlab chiqqan.",
+    "Sergey Solovyov": "Dasturiy ta'minot, tizim xavfsizligi va integratsiyalarni amalga oshirgan.",
+    "Shoxrux Komiljonov": "Loyiha konsepsiyasi, boshqaruvi va strategik rivojlanishini yo'lga qo'ygan.",
+    "Jasurbek Egamberdiyev": "Bolalar tili va nutqini rivojlantirish bo'yicha ilmiy-metodik asoslarni yaratgan.",
     default: "Loyiha rivojlanishiga va Kichik Alloma koinotini yaratishga o'z hissasini qo'shgan mutaxassis."
   },
   ru: {
-    "Madina Rahimova": "Разработала методику обучения и интегрировала научные подходы детской психологии.",
-    "Bobur Ismoilov": "Разработал и оптимизировал алгоритмы искусственного интеллекта (ИИ), ИИ-ассистента и бэкенд-сервисы.",
-    "Nigora Alimova": "Спроектировала дизайн пользовательского интерфейса (UX/UI) и систему геймификации.",
-    "Mehruza Solijonova": "Координировала программы обучения студентов и управляла ключевыми этапами проекта.",
-    "Nursultan Suleymanov": "Создала дизайн мобильного приложения и его интерактивные элементы интерфейса.",
-    "Yulduz Ergasheva": "Руководила развитием сообщества выпускников и системой их поддержки.",
-    "Abubakr Ro'ziboyev": "Разработал фронтенд-часть мобильного приложения Flutter и плавные анимации.",
-    "Gulgina Raxmatullayeva": "Отвечала за производство видеоуроков, написание сценариев и подготовку медиаконтента.",
+    "Muhammadali Baxtiyorov": "Разработал веб-платформу, бэкенд API и архитектуру базы данных.",
+    "Oyatillo Mahmudjonov": "Создал брендинг проекта, графический дизайн и визуальную айдентику.",
+    "Muhammadsodiq Kozimov": "Разработал мобильное приложение Kichik Alloma и интерфейс пользователя.",
+    "Sergey Solovyov": "Реализовал программное обеспечение, безопасность системы и интеграции.",
+    "Shoxrux Komiljonov": "Определил концепцию, управление и стратегическое развитие проекта.",
+    "Jasurbek Egamberdiyev": "Создал научно-методические основы развития детской речи и языка.",
     default: "Специалист, внесший вклад в развитие проекта и создание вселенной Kichik Alloma."
   },
   en: {
-    "Madina Rahimova": "Developed the educational methodology and integrated child psychology scientific frameworks.",
-    "Bobur Ismoilov": "Developed and optimized AI algorithms, the AI companion chatbot, and core backend services.",
-    "Nigora Alimova": "Designed the user experience/interface (UX/UI) and built the platform's gamification system.",
-    "Mehruza Solijonova": "Coordinated student programs and managed key project operations.",
-    "Nursultan Suleymanov": "Designed the mobile application interface and interactive screen experiences.",
-    "Yulduz Ergasheva": "Managed the alumni community relations and student support initiatives.",
-    "Abubakr Ro'ziboyev": "Developed the Flutter mobile app frontend and built smooth user interface animations.",
-    "Gulgina Raxmatullayeva": "Responsible for video lesson production, scriptwriting, and educational media content.",
+    "Muhammadali Baxtiyorov": "Developed web platform, backend API and database architecture.",
+    "Oyatillo Mahmudjonov": "Created project branding, graphic design and visual identity.",
+    "Muhammadsodiq Kozimov": "Developed the Kichik Alloma mobile app and user interface.",
+    "Sergey Solovyov": "Implemented software architecture, system security and high-speed integrations.",
+    "Shoxrux Komiljonov": "Led project concept, management and strategic development.",
+    "Jasurbek Egamberdiyev": "Created scientific-methodological foundations for child speech and language development.",
     default: "Specialist who contributed to the development and success of the Kichik Alloma universe."
   }
 } as const;
@@ -1425,13 +1413,9 @@ type ApiPlanet = {
 };
 
 type ApiStats = {
-  totalPlanets: number;
-  activePlanets: number;
-  totalAmenities: number;
-  activeAmenities: number;
-  totalTeams: number;
-  totalGallery: number;
-  totalMessages: number;
+  planetsCount: number;
+  activeChildren: number;
+  totalModules: number;
   unreadMessages: number;
 };
 
@@ -1463,8 +1447,6 @@ const DEFAULT_PLANET_IMAGES: Record<string, string> = {
 
 function fixImageUrl(url: string | null): string {
   if (!url) return "";
-  // Har qanday absolute URL dan faqat nisbiy yo'lni ajratib olish
-  // (localhost:3000, localhost:3009, ngrok, cloudflare tunnellar uchun)
   return url.replace(/^https?:\/\/[^/]+(?=\/images\/|\/audio_cache\/|\/assets\/)/, "");
 }
 
@@ -1486,15 +1468,15 @@ function mapDbIdToPlanetId(dbValue: string): string {
 }
 
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
-  { id: "earth", name: "Kognitiv", skill: "Fikrlash va bilim", description: "Masalani tushunish, mantiqiy yechim topish.", status: "active", image: "/planets/earth.png" },
-  { id: "mars", name: "Jismoniy", skill: "Nutq va til", description: "Fikrni aniq ifodalashni o'rganish.", status: "active", image: "/planets/mars.png" },
-  { id: "uran", name: "Nutq va til", skill: "O'zini boshqarish", description: "Kichik odatlar katta natijalarga olib boradi.", status: "active", image: "/planets/uran.png" },
-  { id: "neptune", name: "Ijtimoiy", skill: "Hissiyotlarni anglash", description: "O'zini his qilishni tushunish, anglash.", status: "active", image: "/planets/neptune.png" },
-  { id: "venus", name: "Emotsional", skill: "Ijodkorlik va tasavvur", description: "Yangi g'oyalar yaratish uchun makon.", status: "active", image: "/planets/venus.png" },
-  { id: "saturn", name: "Axloqiy", skill: "Ijtimoiy ko'nikmalar", description: "Birgalikda o'rganish va muloqot qilish.", status: "active", image: "/planets/saturn.png" },
-  { id: "jupiter", name: "Ijodkorlik", skill: "Harakat va sog'lik", description: "O'rganish orasida harakat ham kerak.", status: "active", image: "/planets/jupiter.png" },
-  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "Qadriyat va mas'uliyat", description: "Har bir tanlovning oqibati bor.", status: "active", image: "/planets/mercury.png" },
-  { id: "sun", name: "Quyosh", skill: "Alloma AI Suhbat", description: "AI bilan erkin muloqot va savol-javoblar.", status: "active", image: "/planets/sun.png" },
+  { id: "earth", name: "Kognitiv", skill: "Kognitiv", description: "Fikrlash, o'rganish va muammo yechish", status: "active", image: "/planets/earth.png" },
+  { id: "mars", name: "Jismoniy va motorika", skill: "Jismoniy va motorika", description: "Harakat va sog'lom tanaffus", status: "active", image: "/planets/mars.png" },
+  { id: "uran", name: "Nutq va til", skill: "Nutq va til", description: "Muloqot, lug'at va talaffuz", status: "active", image: "/planets/uran.png" },
+  { id: "neptune", name: "Ijtimoiy", skill: "Ijtimoiy", description: "Hamkorlik va ijtimoiy ko'nikmalar", status: "active", image: "/planets/neptune.png" },
+  { id: "venus", name: "Emotsional", skill: "Emotsional", description: "Hissiyotlarni anglash va boshqarish", status: "active", image: "/planets/venus.png" },
+  { id: "saturn", name: "Axloqiy", skill: "Axloqiy", description: "Qadriyat, mas'uliyat va tanlov", status: "active", image: "/planets/saturn.png" },
+  { id: "jupiter", name: "Ijodkorlik", skill: "Ijodkorlik", description: "Tasavvur va divergent fikrlash", status: "active", image: "/planets/jupiter.png" },
+  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "O'z-o'zini boshqarish", description: "Rejalashtirish, diqqat va intizom", status: "active", image: "/planets/mercury.png" },
+  { id: "sun", name: "Quyosh", skill: "Quyosh", description: "Alloma AI Suhbat", status: "active", image: "/planets/sun.png" },
 ];
 
 const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
@@ -2285,13 +2267,7 @@ export default function Home() {
           <div className="mt-16 w-full overflow-hidden pb-8 relative z-10">
             <div className="marquee-track gap-6">
               {(() => {
-                const baseList = apiTeams.length > 0 ? apiTeams : [
-                  { id: 1, firstName: "Mehruza", lastName: "Solijonova", direction: "O'quvchilar dasturlari va loyihalarini boshqarish bo'yicha mas'ul kotibi", image: "/team/mehruza.png", description: "" },
-                  { id: 2, firstName: "Nursultan", lastName: "Suleymanov", direction: "UX/UI mobil ilova dizayneri", image: "/team/nursultan.png", description: "" },
-                  { id: 3, firstName: "Yulduz", lastName: "Ergasheva", direction: "Bitiruvchilar bilan ishlash menejeri", image: "/team/yulduz.png", description: "" },
-                  { id: 4, firstName: "Abubakr", lastName: "Ro'ziboyev", direction: "Flutter Developer mutaxassisi", image: "/team/abubakr.png", description: "" },
-                  { id: 5, firstName: "Gulgina", lastName: "Raxmatullayeva", direction: "Videodarsliklar bo'yicha loyiha menejeri", image: "/team/gulgina.png", description: "" },
-                ];
+                const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
 
                 // Quadruple the sequence if list is short to ensure edge-to-edge full screen coverage without any blank gaps
                 const repeatCount = baseList.length < 6 ? 4 : 2;
