@@ -172,6 +172,27 @@ def init_db():
         )
     """)
 
+    # 11. Farzand Emotsiyalari va Kayfiyat Kundaligi (Neptune / Emotsiyalar Sayyorasi)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_emotions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            emotion_key TEXT NOT NULL,
+            emotion_name TEXT NOT NULL,
+            emoji TEXT NOT NULL DEFAULT '😊',
+            color TEXT DEFAULT '#4FACFE',
+            intensity INTEGER DEFAULT 3,
+            note TEXT DEFAULT '',
+            planet_id INTEGER DEFAULT 46,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
     # Tekshirish: Baza birinchi marta yaratildimi?
     cursor.execute("SELECT value FROM system_meta WHERE key = 'seeded'")
     seeded_row = cursor.fetchone()

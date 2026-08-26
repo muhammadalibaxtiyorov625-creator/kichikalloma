@@ -335,3 +335,61 @@ class AiSttResponse(BaseModel):
     success: bool = True
     text: str = Field(..., description="Ovozdan ajratib olingan aniq matn")
     language: Optional[str] = "uzb"
+
+# ==========================================
+# NEPTUNE / EMOTIONS SCHEMAS (EMOTSIYALAR VA KAYFIYAT)
+# ==========================================
+class EmotionOption(BaseModel):
+    key: str = Field(..., example="happy", description="Emotsiya kaliti (masalan: happy, calm, excited, tired, sad, angry, scared, surprised, proud)")
+    name: str = Field(..., example="Xursand", description="Emotsiya nomi")
+    emoji: str = Field(..., example="😊", description="Emotsiya emojisi")
+    color: str = Field(..., example="#FFD166", description="Emotsiya foni/rangi HEX")
+    description: str = Field(..., example="Quvnoq va xushchaqchaq kayfiyat", description="Emotsiya tavsifi")
+
+class RecordEmotionRequest(BaseModel):
+    child_id: int = Field(..., example=1, description="Farzand ID raqami")
+    emotion_key: str = Field(..., example="happy", description="Tanlangan emotsiya kaliti (happy, calm, excited, tired, sad, angry, scared, surprised, proud)")
+    emoji: Optional[str] = Field(None, example="😊", description="Emoji (agar berilmasa, kalitdan olinadi)")
+    intensity: Optional[int] = Field(3, ge=1, le=5, example=3, description="His qilish darajasi (1 dan 5 gacha)")
+    note: Optional[str] = Field("", example="Bugun maktabda '5' baho oldim!", description="Bola yozgan sabab yoki izoh")
+    date: Optional[str] = Field(None, example="2026-08-26", description="Sana (YYYY-MM-DD), berilmasa bugungi sana")
+    time: Optional[str] = Field(None, example="14:30:00", description="Vaqt (HH:MM:SS), berilmasa hozirgi vaqt")
+
+class EmotionItemResponse(BaseModel):
+    id: int
+    child_id: int
+    child_name: Optional[str] = None
+    emotion_key: str
+    emotion_name: str
+    emoji: str
+    color: str = "#4FACFE"
+    intensity: int = 3
+    note: str = ""
+    date: str
+    time: str
+    day_name: Optional[str] = None
+    created_at: str
+
+class WeeklyChildEmotionsResponse(BaseModel):
+    success: bool = True
+    child_id: int
+    child_name: str
+    period: str = "last_7_days"
+    total_records: int
+    dominant_emotion: Optional[str] = None
+    dominant_emoji: Optional[str] = None
+    emotions: List[EmotionItemResponse]
+    daily_summary: List[dict]
+
+class ParentChildEmotionsAnalyticsResponse(BaseModel):
+    success: bool = True
+    child_id: int
+    child_name: str
+    total_history_count: int
+    last_7_days_count: int
+    dominant_emotion: Optional[str] = None
+    dominant_emoji: Optional[str] = None
+    emotion_distribution: List[dict]
+    weekly_emotions: List[EmotionItemResponse]
+    all_history: List[EmotionItemResponse]
+    ai_recommendation: Optional[str] = None

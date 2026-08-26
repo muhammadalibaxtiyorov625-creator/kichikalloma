@@ -58,7 +58,9 @@ from schemas import (
     ParentProfileResponse, TrackTimeRequest, ChildActivityStatsResponse,
     AiChatHistoryItemResponse,
     AiChatRequest, AiChatResponse, AiTtsRequest,
-    AiVoiceChatResponse, AiSttResponse
+    AiVoiceChatResponse, AiSttResponse,
+    EmotionOption, RecordEmotionRequest, EmotionItemResponse,
+    WeeklyChildEmotionsResponse, ParentChildEmotionsAnalyticsResponse
 )
 
 # Gemini AI Konfiguratsiyasi
@@ -1608,6 +1610,438 @@ def delete_child_ai_history(child_id: int, current_user: dict = Depends(get_curr
     conn.commit()
     conn.close()
     return {"success": True, "message": "AI suhbat tarixi muvaffaqiyatli tozalandi", "child_id": child_id}
+
+
+# ==============================================================================
+# 7.12. NEPTUNE / EMOTSIYALAR VA KAYFIYAT KUNDALIGI (EMOTIONAL PLANET)
+# ==============================================================================
+
+EMOTIONS_CONFIG = {
+    "happy": {
+        "uzb": {"name": "Xursand", "description": "Quvnoq, xushchaqchaq va yaxshi kayfiyatda"},
+        "rus": {"name": "Счастливый", "description": "Радостное и хорошее настроение"},
+        "eng": {"name": "Happy", "description": "Joyful and in a good mood"},
+        "emoji": "😊",
+        "color": "#FFD166",
+        "planet_id": 46
+    },
+    "calm": {
+        "uzb": {"name": "Xotirjam", "description": "Tinch, osoyishta va xotirjam holat"},
+        "rus": {"name": "Спокойный", "description": "Тихое и умиротворенное состояние"},
+        "eng": {"name": "Calm", "description": "Peaceful and relaxed"},
+        "emoji": "😌",
+        "color": "#06D6A0",
+        "planet_id": 46
+    },
+    "excited": {
+        "uzb": {"name": "G'ayratli", "description": "Ilhomlangan, yangiliklarga tayyor va quvnoq"},
+        "rus": {"name": "Воодушевленный", "description": "Полный энергии и вдохновения"},
+        "eng": {"name": "Excited", "description": "Full of energy and enthusiasm"},
+        "emoji": "🤩",
+        "color": "#118AB2",
+        "planet_id": 46
+    },
+    "proud": {
+        "uzb": {"name": "Faxrlangan", "description": "O'z yutug'idan mamnun va minnatdor"},
+        "rus": {"name": "Гордый", "description": "Доволен своими успехами"},
+        "eng": {"name": "Proud", "description": "Satisfied with personal achievement"},
+        "emoji": "🥰",
+        "color": "#EF476F",
+        "planet_id": 46
+    },
+    "tired": {
+        "uzb": {"name": "Charchagan", "description": "Kuchsizlangan, dam olish va uxlash kerak"},
+        "rus": {"name": "Уставший", "description": "Нужен отдых и сон"},
+        "eng": {"name": "Tired", "description": "Needs rest and sleep"},
+        "emoji": "😴",
+        "color": "#8338EC",
+        "planet_id": 46
+    },
+    "sad": {
+        "uzb": {"name": "G'amgin / Xafa", "description": "Ko'ngli to'lmagan yoki xafa bo'lgan holat"},
+        "rus": {"name": "Грустный", "description": "Опечален или расстроен"},
+        "eng": {"name": "Sad", "description": "Feeling down or disappointed"},
+        "emoji": "😢",
+        "color": "#4A90E2",
+        "planet_id": 46
+    },
+    "angry": {
+        "uzb": {"name": "Jahldor", "description": "Asabiylashgan yoki g'azablangan holat"},
+        "rus": {"name": "Сердитый", "description": "Раздражен или злится"},
+        "eng": {"name": "Angry", "description": "Frustrated or irritated"},
+        "emoji": "😠",
+        "color": "#E63946",
+        "planet_id": 46
+    },
+    "scared": {
+        "uzb": {"name": "Qo'rqqan", "description": "Cho'chigan yoki xavotirlangan holat"},
+        "rus": {"name": "Испуганный", "description": "Боится или тревожится"},
+        "eng": {"name": "Scared", "description": "Afraid or anxious"},
+        "emoji": "😨",
+        "color": "#FB8500",
+        "planet_id": 46
+    },
+    "surprised": {
+        "uzb": {"name": "Hayron", "description": "Kutilmagan yangilikdan hayratda"},
+        "rus": {"name": "Удивленный", "description": "Удивлен неожиданностью"},
+        "eng": {"name": "Surprised", "description": "Amazed by something unexpected"},
+        "emoji": "😲",
+        "color": "#02C39A",
+        "planet_id": 46
+    }
+}
+
+def _get_day_name(date_str: str, lang: str = "uzb") -> str:
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        weekday = dt.weekday()
+        day_names = {
+            "uzb": ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"],
+            "rus": ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"],
+            "eng": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        }
+        return day_names.get(lang, day_names["uzb"])[weekday]
+    except Exception:
+        return ""
+
+
+# 7.12.1. MAVJUD EMOTSIYALAR RO'YXATI
+@app.get("/mobile/planets/neptune/options/", response_model=List[EmotionOption], tags=["Mobil Ilova (Mobile API)"], summary="7.12.1. Neptune / Emotsiyalar Sayyorasi — Mavjud Emotsiyalar Ro'yxati")
+@app.get("/mobile/planets/neptune/options", response_model=List[EmotionOption], include_in_schema=False)
+@app.get("/mobile/planets/neptun/options/", response_model=List[EmotionOption], include_in_schema=False)
+@app.get("/mobile/planets/neptun/options", response_model=List[EmotionOption], include_in_schema=False)
+@app.get("/mobile/emotions/options/", response_model=List[EmotionOption], include_in_schema=False)
+@app.get("/mobile/emotions/options", response_model=List[EmotionOption], include_in_schema=False)
+def get_neptune_emotion_options(request: Request):
+    lang = get_accept_language(request)
+    options = []
+    for key, val in EMOTIONS_CONFIG.items():
+        lang_data = val.get(lang, val["uzb"])
+        options.append({
+            "key": key,
+            "name": lang_data["name"],
+            "emoji": val["emoji"],
+            "color": val["color"],
+            "description": lang_data["description"]
+        })
+    return options
+
+
+# 7.12.2. BOLANING YANGI EMOTSIYASINI SAQLASH (BOLA & NEPTUNE UCHUN)
+@app.post("/mobile/planets/neptune/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="7.12.2. Farzand Emotsiyasini Belgilash / Saqlash (Token orqali)")
+@app.post("/mobile/planets/neptune/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/planets/neptun/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/planets/neptun/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+def record_child_emotion(
+    req: RecordEmotionRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    lang = get_accept_language(request)
+    now = datetime.now()
+    date_str = req.date or now.strftime("%Y-%m-%d")
+    time_str = req.time or now.strftime("%H:%M:%S")
+
+    emotion_cfg = EMOTIONS_CONFIG.get(req.emotion_key.lower().strip(), EMOTIONS_CONFIG["happy"])
+    lang_data = emotion_cfg.get(lang, emotion_cfg["uzb"])
+    emotion_name = lang_data["name"]
+    emoji = req.emoji or emotion_cfg["emoji"]
+    color = emotion_cfg["color"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Farzand tegishliligini tekshirish
+    cursor.execute("SELECT id, name, surname FROM children WHERE id = ? AND user_id = ?", (req.child_id, user_id))
+    child_row = cursor.fetchone()
+    if not child_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Farzand topilmadi yoki sizga tegishli emas!")
+
+    child_full_name = f"{child_row['name']} {child_row['surname']}".strip()
+
+    cursor.execute("""
+        INSERT INTO child_emotions (user_id, child_id, emotion_key, emotion_name, emoji, color, intensity, note, planet_id, date, time)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user_id,
+        req.child_id,
+        req.emotion_key.lower().strip(),
+        emotion_name,
+        emoji,
+        color,
+        req.intensity or 3,
+        (req.note or "").strip(),
+        46, # Neptune / Emotional planet
+        date_str,
+        time_str
+    ))
+    emotion_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    day_name = _get_day_name(date_str, lang)
+
+    return {
+        "id": emotion_id,
+        "child_id": req.child_id,
+        "child_name": child_full_name,
+        "emotion_key": req.emotion_key.lower().strip(),
+        "emotion_name": emotion_name,
+        "emoji": emoji,
+        "color": color,
+        "intensity": req.intensity or 3,
+        "note": (req.note or "").strip(),
+        "date": date_str,
+        "time": time_str,
+        "day_name": day_name,
+        "created_at": now.strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+
+# 7.12.3. BOLA UCHUN: OXIRGI 7 KUNLIK (1 HAFTALIK) EMOTSIYALAR
+# (7 kundan eski emotsiyalar bola panelida ko'rinmaydi — avtomatik o'chadi/filtrlanadi)
+@app.get("/mobile/planets/neptune/emotions/", response_model=WeeklyChildEmotionsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.12.3. Neptune / Bola Paneli — Oxirgi 7 Kunlik Emotsiyalar (Token orqali)")
+@app.get("/mobile/planets/neptune/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/planets/neptun/emotions/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/planets/neptun/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/child/{child_id}/emotions/weekly/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+@app.get("/mobile/child/{child_id}/emotions/weekly", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
+def get_child_weekly_emotions(
+    child_id: Optional[int] = Query(None, description="Farzand ID raqami"),
+    request: Request = None,
+    current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    lang = get_accept_language(request)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Farzandni aniqlash
+    if child_id:
+        cursor.execute("SELECT id, name, surname FROM children WHERE id = ? AND user_id = ?", (child_id, user_id))
+    else:
+        cursor.execute("SELECT id, name, surname FROM children WHERE user_id = ? ORDER BY id ASC LIMIT 1", (user_id,))
+    
+    child_row = cursor.fetchone()
+    if not child_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Farzand topilmadi!")
+
+    target_child_id = child_row["id"]
+    child_full_name = f"{child_row['name']} {child_row['surname']}".strip()
+
+    # Oxirgi 7 kunlik sanalarni hisoblash
+    seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+
+    cursor.execute("""
+        SELECT * FROM child_emotions 
+        WHERE user_id = ? AND child_id = ? AND date >= ?
+        ORDER BY date DESC, time DESC
+    """, (user_id, target_child_id, seven_days_ago))
+    rows = cursor.fetchall()
+    conn.close()
+
+    emotions_list = []
+    emotion_counter = {}
+    daily_map = {}
+
+    for r in rows:
+        d = dict(r)
+        d_date = d["date"]
+        d_day = _get_day_name(d_date, lang)
+        key = d.get("emotion_key", "happy")
+        cfg = EMOTIONS_CONFIG.get(key, EMOTIONS_CONFIG["happy"])
+        lang_data = cfg.get(lang, cfg["uzb"])
+
+        item = {
+            "id": d["id"],
+            "child_id": d["child_id"],
+            "child_name": child_full_name,
+            "emotion_key": key,
+            "emotion_name": lang_data["name"],
+            "emoji": d.get("emoji") or cfg["emoji"],
+            "color": d.get("color") or cfg["color"],
+            "intensity": d.get("intensity") or 3,
+            "note": d.get("note") or "",
+            "date": d_date,
+            "time": d.get("time") or "",
+            "day_name": d_day,
+            "created_at": str(d.get("created_at") or "")
+        }
+        emotions_list.append(item)
+
+        # Statistika
+        emotion_counter[key] = emotion_counter.get(key, 0) + 1
+
+        if d_date not in daily_map:
+            daily_map[d_date] = {
+                "date": d_date,
+                "day_name": d_day,
+                "emotions": []
+            }
+        daily_map[d_date]["emotions"].append(item)
+
+    dominant_key = max(emotion_counter, key=emotion_counter.get) if emotion_counter else None
+    dominant_name = EMOTIONS_CONFIG.get(dominant_key, {}).get(lang, {}).get("name") if dominant_key else None
+    dominant_emoji = EMOTIONS_CONFIG.get(dominant_key, {}).get("emoji") if dominant_key else None
+
+    # Kunlar bo'yicha saralash
+    daily_summary = list(daily_map.values())
+
+    return {
+        "success": True,
+        "child_id": target_child_id,
+        "child_name": child_full_name,
+        "period": "last_7_days",
+        "total_records": len(emotions_list),
+        "dominant_emotion": dominant_name,
+        "dominant_emoji": dominant_emoji,
+        "emotions": emotions_list,
+        "daily_summary": daily_summary
+    }
+
+
+# 7.12.4. OTA-ONA UCHUN: FARZANDNING TO'LIQ EMOTSIYALAR TARIXI VA ANALITIKASI
+# (Ota-ona uchun barcha tarixlar, shu jumladan 7 kundan oldingilar ham o'chmasdan turadi!)
+@app.get("/mobile/parent/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.12.4. Ota-ona Paneli — Farzandning To'liq Emotsiyalar Tarixi & Tahlili (Token orqali)")
+@app.get("/mobile/parent/child/{child_id}/emotions", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
+@app.get("/mobile/parents/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
+@app.get("/mobile/parents/child/{child_id}/emotions", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
+@app.get("/api/website/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, tags=["Web Sayt (Website)"], summary="Web: Farzand Emotsiyalar Tarixi & Tahlili")
+@app.get("/api/website/child/{child_id}/emotions", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
+def get_parent_child_emotions_analytics(
+    child_id: int,
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    lang = get_accept_language(request)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, name, surname FROM children WHERE id = ? AND user_id = ?", (child_id, user_id))
+    child_row = cursor.fetchone()
+    if not child_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Farzand topilmadi yoki sizga tegishli emas!")
+
+    child_full_name = f"{child_row['name']} {child_row['surname']}".strip()
+
+    # Barcha tarixni olish (hech qanday kun cheklovisiz)
+    cursor.execute("""
+        SELECT * FROM child_emotions 
+        WHERE user_id = ? AND child_id = ?
+        ORDER BY date DESC, time DESC
+    """, (user_id, child_id))
+    all_rows = cursor.fetchall()
+    conn.close()
+
+    seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+
+    all_history = []
+    weekly_emotions = []
+    emotion_counts = {}
+
+    for r in all_rows:
+        d = dict(r)
+        d_date = d["date"]
+        d_day = _get_day_name(d_date, lang)
+        key = d.get("emotion_key", "happy")
+        cfg = EMOTIONS_CONFIG.get(key, EMOTIONS_CONFIG["happy"])
+        lang_data = cfg.get(lang, cfg["uzb"])
+
+        item = {
+            "id": d["id"],
+            "child_id": d["child_id"],
+            "child_name": child_full_name,
+            "emotion_key": key,
+            "emotion_name": lang_data["name"],
+            "emoji": d.get("emoji") or cfg["emoji"],
+            "color": d.get("color") or cfg["color"],
+            "intensity": d.get("intensity") or 3,
+            "note": d.get("note") or "",
+            "date": d_date,
+            "time": d.get("time") or "",
+            "day_name": d_day,
+            "created_at": str(d.get("created_at") or "")
+        }
+        all_history.append(item)
+
+        # 7 kunlik saralash
+        if d_date >= seven_days_ago:
+            weekly_emotions.append(item)
+
+        # Taqsimot hisoblash
+        if key not in emotion_counts:
+            emotion_counts[key] = {
+                "key": key,
+                "name": lang_data["name"],
+                "emoji": cfg["emoji"],
+                "color": cfg["color"],
+                "count": 0
+            }
+        emotion_counts[key]["count"] += 1
+
+    total_records = len(all_history)
+    distribution = []
+    for k, v in emotion_counts.items():
+        pct = round((v["count"] / total_records) * 100, 1) if total_records > 0 else 0
+        distribution.append({
+            "emotion_key": v["key"],
+            "emotion_name": v["name"],
+            "emoji": v["emoji"],
+            "color": v["color"],
+            "count": v["count"],
+            "percentage": pct
+        })
+    distribution.sort(key=lambda x: x["count"], reverse=True)
+
+    dominant_key = distribution[0]["emotion_key"] if distribution else None
+    dominant_name = distribution[0]["emotion_name"] if distribution else None
+    dominant_emoji = distribution[0]["emoji"] if distribution else None
+
+    # AI tavsiyasi
+    ai_recommendation = None
+    if dominant_key in ["happy", "excited", "proud"]:
+        ai_recommendation = f"{child_row['name']} so'nggi vaqtlarda asosan ijobiy va quvnoq kayfiyatda! Bu uning darslarni o'zlashtirishi va ijodiy fikrlashiga ajoyib turtki beradi."
+    elif dominant_key in ["sad", "tired", "angry", "scared"]:
+        ai_recommendation = f"{child_row['name']} biroz charchagan yoki xavotirli holatda. Unga ko'proq tabiat qo'ynida dam berish, birgalikda sayr qilish va samimiy suhbatlashish tavsiya etiladi."
+    else:
+        ai_recommendation = f"{child_row['name']} barqaror va xotirjam holatda o'rganmoqda. Ushbu sokin muhit uning diqqatini jamlashiga yordam beradi."
+
+    return {
+        "success": True,
+        "child_id": child_id,
+        "child_name": child_full_name,
+        "total_history_count": total_records,
+        "last_7_days_count": len(weekly_emotions),
+        "dominant_emotion": dominant_name,
+        "dominant_emoji": dominant_emoji,
+        "emotion_distribution": distribution,
+        "weekly_emotions": weekly_emotions,
+        "all_history": all_history,
+        "ai_recommendation": ai_recommendation
+    }
+
+
+# 7.12.5. EMOTSIYANI O'CHIRISH
+@app.delete("/mobile/planets/neptune/emotions/{emotion_id}", tags=["Mobil Ilova (Mobile API)"], summary="7.12.5. Emotsiya Yozuvini O'chirish (Token orqali)")
+@app.delete("/mobile/planets/neptun/emotions/{emotion_id}", include_in_schema=False)
+@app.delete("/mobile/child/emotions/{emotion_id}", include_in_schema=False)
+def delete_child_emotion(emotion_id: int, current_user: dict = Depends(get_current_user)):
+    user_id = current_user["id"]
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM child_emotions WHERE id = ? AND user_id = ?", (emotion_id, user_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Emotsiya yozuvi muvaffaqiyatli o'chirildi", "id": emotion_id}
 
 
 # 8. MOBIL SAYYORALAR RO'YXATI (/mobile/planets/ va /mobile/planets)
