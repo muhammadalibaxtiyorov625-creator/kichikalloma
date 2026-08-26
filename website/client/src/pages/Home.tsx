@@ -1983,7 +1983,7 @@ export default function Home() {
                   {(() => {
                     const planetSkillsDetails: Record<string, { age: string; modules: number; skills: string[] }> = {
                       sun: { age: "5 - 12 yosh", modules: 24, skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Diqqat o'yinlari"] },
-                      earth: { age: "6 - 12 yosh", modules: 18, skills: ["Kognitiv ta’lim", "AI Tutor", "Maqsadli o‘qish"] },
+                      earth: { age: "6 - 12 yosh", modules: 18, skills: ["Kognitiv ta'lim", "Maqsadli o'qish"] },
                       math: { age: "6 - 12 yosh", modules: 16, skills: ["Mantiqiy masalalar", "Matematik hisob", "Tahliliy fikrlash"] },
                       memory: { age: "5 - 11 yosh", modules: 14, skills: ["Vizual xotira", "Assotsiativ eslab qolish", "Diqqat jamlash"] },
                       space: { age: "6 - 12 yosh", modules: 18, skills: ["Fazoviy tasavvur", "3D geometriya", "Vizual konstruksiya"] },
