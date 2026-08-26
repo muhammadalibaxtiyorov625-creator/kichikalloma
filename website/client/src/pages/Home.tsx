@@ -2420,13 +2420,11 @@ export default function Home() {
             <SectionHeader align="center" eyebrow={t.team.eyebrow} title={t.team.title} copy={t.team.copy} />
           </div>
 
-          {/* Auto-scrolling marquee row of team cards - Full width across screen */}
-          <div className="mt-16 w-full overflow-hidden pb-8 relative z-10">
+          {/* ─── DESKTOP: Auto-scrolling marquee ─── */}
+          <div className="mt-16 w-full overflow-hidden pb-8 relative z-10 hidden md:block">
             <div className="marquee-track gap-6">
               {(() => {
                 const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
-
-                // Quadruple the sequence if list is short to ensure edge-to-edge full screen coverage without any blank gaps
                 const repeatCount = baseList.length < 6 ? 4 : 2;
                 const displayList = Array.from({ length: repeatCount }, (_, rIndex) =>
                   baseList.map((member, index) => ({ ...member, id: member.id + rIndex * 100 + index }))
@@ -2483,7 +2481,7 @@ export default function Home() {
                             </span>
                           )}
                           <span className="line-clamp-2 text-[11px] leading-snug text-[#5d4c78]">
-                            {contribution}
+                            {teamContributions[language][`${member.firstName} ${member.lastName}` as keyof typeof teamContributions['uz']] || teamContributions[language].default}
                           </span>
                         </div>
                       </div>
@@ -2493,6 +2491,146 @@ export default function Home() {
               })()}
             </div>
           </div>
+
+          {/* ─── MOBILE: Manual swipe carousel with tap-to-info ─── */}
+          {(() => {
+            const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
+            return (
+              <div className="mt-12 md:hidden relative z-10 px-4">
+                <div
+                  className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-hide"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                  {baseList.map((member) => {
+                    const bg = member.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
+                    const memberKey = `${member.firstName} ${member.lastName}`;
+                    const roleName = teamRoles[language][memberKey as keyof typeof teamRoles['uz']] || member.direction;
+                    const contribution = teamContributions[language][memberKey as keyof typeof teamContributions['uz']] || teamContributions[language].default;
+
+                    return (
+                      <article
+                        key={member.id}
+                        onClick={() => setActiveMobileMember(member)}
+                        className="snap-center shrink-0 w-[240px] bg-white/90 border border-white/60 rounded-[28px] p-4 text-center shadow-[0_12px_40px_rgba(108,69,221,0.06)] backdrop-blur-md active:scale-95 transition-transform cursor-pointer"
+                      >
+                        <div className="relative h-[250px] w-full overflow-hidden rounded-[20px] bg-secondary/10">
+                          <div className={`h-full w-full flex items-center justify-center ${bg} text-[#2d174e]/60 font-black text-5xl select-none`}>
+                            {member.firstName[0]}{member.lastName[0]}
+                          </div>
+                          {member.image && (
+                            <img
+                              src={member.image}
+                              alt={`${member.firstName} ${member.lastName}`}
+                              loading="lazy"
+                              decoding="async"
+                              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300"
+                              onLoad={(e) => {
+                                (e.currentTarget as HTMLImageElement).classList.remove("opacity-0");
+                              }}
+                              onError={(e) => {
+                                const img = e.currentTarget as HTMLImageElement;
+                                img.onerror = null;
+                                img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
+                                img.classList.remove("opacity-0");
+                              }}
+                            />
+                          )}
+                        </div>
+                        
+                        <h3 className="mt-3 text-base font-black tracking-tight text-[#2d174e]">
+                          {member.firstName} {member.lastName}
+                        </h3>
+                        <p className="mt-1 text-xs font-extrabold text-[#d54381]/90">{roleName}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-[#6c45dd] bg-[#6c45dd]/10 px-2 py-0.5 rounded-full inline-block">
+                          Bosing →
+                        </p>
+                      </article>
+                    );
+                  })}
+                </div>
+                {/* Scroll hint dots */}
+                <div className="flex justify-center gap-1.5 mt-3">
+                  {baseList.map((m) => (
+                    <span key={m.id} className="h-1.5 w-1.5 rounded-full bg-[#6c45dd]/30 inline-block" />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ─── MOBILE: Team member info modal ─── */}
+          {activeMobileMember && (
+            <div
+              className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm md:hidden"
+              onClick={() => setActiveMobileMember(null)}
+            >
+              <div
+                className="relative w-full max-w-sm rounded-t-[36px] bg-gradient-to-b from-white to-[#f4efff] p-6 text-center shadow-2xl animate-fadeIn"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close button */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMobileMember(null)}
+                  className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/10 text-[#2d174e] hover:bg-black/20 transition"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
+                {/* Photo */}
+                <div className="mx-auto h-28 w-28 rounded-3xl overflow-hidden border-4 border-[#6c45dd]/20 shadow-lg">
+                  {(() => {
+                    const bg = activeMobileMember.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
+                    return (
+                      <div className={`relative h-full w-full ${bg} flex items-center justify-center text-[#2d174e]/60 font-black text-4xl`}>
+                        {activeMobileMember.firstName[0]}{activeMobileMember.lastName[0]}
+                        {activeMobileMember.image && (
+                          <img
+                            src={activeMobileMember.image}
+                            alt={`${activeMobileMember.firstName} ${activeMobileMember.lastName}`}
+                            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300"
+                            onLoad={(e) => (e.currentTarget as HTMLImageElement).classList.remove("opacity-0")}
+                            onError={(e) => {
+                              const img = e.currentTarget as HTMLImageElement;
+                              img.onerror = null;
+                              img.src = `/images/team/member${(Math.abs(activeMobileMember.id) % 4) + 1}.svg`;
+                              img.classList.remove("opacity-0");
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Name */}
+                <h3 className="mt-4 text-xl font-black text-[#2d174e]">
+                  {activeMobileMember.firstName} {activeMobileMember.lastName}
+                </h3>
+
+                {/* Role */}
+                <p className="mt-1 text-sm font-extrabold text-[#d54381]">
+                  {teamRoles[language][`${activeMobileMember.firstName} ${activeMobileMember.lastName}` as keyof typeof teamRoles['uz']] || activeMobileMember.direction}
+                </p>
+
+                {/* Experience badge */}
+                {activeMobileMember.description && (
+                  <span className="mt-2 inline-block text-xs font-bold text-[#6c45dd] bg-[#6c45dd]/12 px-3 py-1 rounded-full">
+                    {activeMobileMember.description}
+                  </span>
+                )}
+
+                {/* Contribution */}
+                <p className="mt-3 text-sm font-semibold leading-relaxed text-[#5d4c78]">
+                  {teamContributions[language][`${activeMobileMember.firstName} ${activeMobileMember.lastName}` as keyof typeof teamContributions['uz']] || teamContributions[language].default}
+                </p>
+
+                {/* Close bar */}
+                <div className="mt-5 h-1 w-12 rounded-full bg-[#6c45dd]/25 mx-auto" />
+              </div>
+            </div>
+          )}
+
         </section>
       </SectionDepthWrapper>
 
