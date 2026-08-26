@@ -1791,7 +1791,10 @@ export default function Home() {
             muted
             loop
             playsInline
-            poster={assets.constellationImage}
+            preload="auto"
+            onLoadedData={(e) => {
+              e.currentTarget.play().catch(() => {});
+            }}
           >
             <source src={assets.heroVideo} type="video/mp4" />
           </video>
