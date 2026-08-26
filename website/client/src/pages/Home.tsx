@@ -1480,12 +1480,12 @@ const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
 ];
 
 const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
-  { id: 1, firstName: "Muhammadali", lastName: "Baxtiyorov", direction: "Bosh Ta'lim Metodisti", description: "", image: "/images/team/member1.svg" },
-  { id: 2, firstName: "Oyatillo", lastName: "Mahmudjonov", direction: "Bolalar Psixologi", description: "", image: "/images/team/member3.svg" },
-  { id: 3, firstName: "Muhammadsodiq", lastName: "Kozimov", direction: "Mantiq va Dasturlash Murabbiyi", description: "", image: "/images/team/member2.svg" },
-  { id: 4, firstName: "Sergey", lastName: "Solovyov", direction: "Nutq va Til Rivojlantirish Mutaxassisi", description: "", image: "/images/team/member4.svg" },
-  { id: 5, firstName: "Shoxrux", lastName: "Komiljonov", direction: "Loyiha Rahbari & Metodist", description: "", image: "/images/team/member1.svg" },
-  { id: 6, firstName: "Jasurbek", lastName: "Egamberdiyev", direction: "Filologiya Fanlari Doktori, Professor", description: "", image: "/images/team/member2.svg" },
+  { id: 1, firstName: "Muhammadali", lastName: "Baxtiyorov", direction: "Dasturchi", description: "Tajriba 2 yil", image: "/images/team/member1.svg" },
+  { id: 2, firstName: "Oyatillo", lastName: "Mahmudjonov", direction: "Grafik dizayner", description: "Tajriba 2 yil", image: "/images/team/member2.svg" },
+  { id: 3, firstName: "Muhammadsodiq", lastName: "Kozimov", direction: "Mobil dasturchi", description: "Tajriba 3 yil", image: "/images/team/member3.svg" },
+  { id: 4, firstName: "Sergey", lastName: "Solovyov", direction: "Dasturchi", description: "Tajriba 5 yil", image: "/images/team/member4.svg" },
+  { id: 5, firstName: "Shoxrux", lastName: "Komiljonov", direction: "Founder, project manager", description: "Tajriba 5 yil", image: "/images/team/member1.svg" },
+  { id: 6, firstName: "Jasurbek", lastName: "Egamberdiyev", direction: "Filologiya fanlari doktori DSc, Professor", description: "Professor", image: "/images/team/member2.svg" },
 ];
 
 export default function Home() {

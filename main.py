@@ -614,14 +614,34 @@ def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
     d = dict(row)
     pid = d.get("id")
     raw_img = d.get("image") or ""
-    
-    # Agar rasm uploads papkasida bo'lsa va diskda topilmasa, mavjud sayyora SVG siga fallback
+
+    # Sayyora nomiga qarab to'g'ri fallback rasm
+    PLANET_TITLE_TO_IMG = {
+        "kognitiv": "/planets/earth.png",
+        "jismoniy": "/planets/mars.png",
+        "nutq": "/planets/uran.png",
+        "ijtimoiy": "/planets/neptune.png",
+        "emotsional": "/planets/venus.png",
+        "axloqiy": "/planets/saturn.png",
+        "ijodkorlik": "/planets/jupiter.png",
+        "boshqarish": "/planets/mercury.png",
+        "quyosh": "/planets/sun.png",
+        "ai chat": "/planets/sun.png",
+    }
+    title_lower = (d.get("title") or "").lower()
+    fallback_img = "/planets/earth.png"
+    for keyword, img_path in PLANET_TITLE_TO_IMG.items():
+        if keyword in title_lower:
+            fallback_img = img_path
+            break
+
+    # Agar rasm uploads papkasida bo'lsa va diskda topilmasa, sayyoraga mos rasmga fallback
     if raw_img and raw_img.startswith("/images/uploads/"):
         disk_path = os.path.join(PUBLIC_DIR, raw_img.lstrip("/").replace("images/", ""))
         if not os.path.exists(disk_path):
-            raw_img = "/images/planets/earth.svg"
+            raw_img = fallback_img
 
-    d["image"] = to_full_image_url(raw_img or "/images/planets/earth.svg", request)
+    d["image"] = to_full_image_url(raw_img or fallback_img, request)
     
     # is_blocked va is_block
     is_inactive = d.get("status", "active") != "active"
