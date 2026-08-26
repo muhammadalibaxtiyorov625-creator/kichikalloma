@@ -1468,24 +1468,24 @@ function mapDbIdToPlanetId(dbValue: string): string {
 }
 
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
-  { id: "earth", name: "Kognitiv", skill: "Kognitiv", description: "Fikrlash, o'rganish va muammo yechish", status: "active", image: "/planets/earth.png" },
-  { id: "mars", name: "Jismoniy va motorika", skill: "Jismoniy va motorika", description: "Harakat va sog'lom tanaffus", status: "active", image: "/planets/mars.png" },
-  { id: "uran", name: "Nutq va til", skill: "Nutq va til", description: "Muloqot, lug'at va talaffuz", status: "active", image: "/planets/uran.png" },
-  { id: "neptune", name: "Ijtimoiy", skill: "Ijtimoiy", description: "Hamkorlik va ijtimoiy ko'nikmalar", status: "active", image: "/planets/neptune.png" },
-  { id: "venus", name: "Emotsional", skill: "Emotsional", description: "Hissiyotlarni anglash va boshqarish", status: "active", image: "/planets/venus.png" },
-  { id: "saturn", name: "Axloqiy", skill: "Axloqiy", description: "Qadriyat, mas'uliyat va tanlov", status: "active", image: "/planets/saturn.png" },
-  { id: "jupiter", name: "Ijodkorlik", skill: "Ijodkorlik", description: "Tasavvur va divergent fikrlash", status: "active", image: "/planets/jupiter.png" },
-  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "O'z-o'zini boshqarish", description: "Rejalashtirish, diqqat va intizom", status: "active", image: "/planets/mercury.png" },
-  { id: "sun", name: "Quyosh", skill: "Quyosh", description: "Alloma AI Suhbat", status: "active", image: "/planets/sun.png" },
+  { id: "earth", name: "Kognitiv", skill: "Kognitiv", description: "Fikrlash, o'rganish va muammo yechish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
+  { id: "mars", name: "Jismoniy va motorika", skill: "Jismoniy va motorika", description: "Harakat va sog'lom tanaffus", status: "active", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
+  { id: "uran", name: "Nutq va til", skill: "Nutq va til", description: "Muloqot, lug'at va talaffuz", status: "active", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
+  { id: "neptune", name: "Ijtimoiy", skill: "Ijtimoiy", description: "Hamkorlik va ijtimoiy ko'nikmalar", status: "active", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
+  { id: "venus", name: "Emotsional", skill: "Emotsional", description: "Hissiyotlarni anglash va boshqarish", status: "active", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
+  { id: "saturn", name: "Axloqiy", skill: "Axloqiy", description: "Qadriyat, mas'uliyat va tanlov", status: "active", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
+  { id: "jupiter", name: "Ijodkorlik", skill: "Ijodkorlik", description: "Tasavvur va divergent fikrlash", status: "active", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
+  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "O'z-o'zini boshqarish", description: "Rejalashtirish, diqqat va intizom", status: "active", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
+  { id: "sun", name: "Quyosh", skill: "Quyosh", description: "Ai chat", status: "active", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
 ];
 
 const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
-  { id: 1, firstName: "Muhammadali", lastName: "Baxtiyorov", direction: "Dasturchi", description: "Tajriba 2 yil", image: "/images/team/member1.svg" },
-  { id: 2, firstName: "Oyatillo", lastName: "Mahmudjonov", direction: "Grafik dizayner", description: "Tajriba 2 yil", image: "/images/team/member2.svg" },
-  { id: 3, firstName: "Muhammadsodiq", lastName: "Kozimov", direction: "Mobil dasturchi", description: "Tajriba 3 yil", image: "/images/team/member3.svg" },
-  { id: 4, firstName: "Sergey", lastName: "Solovyov", direction: "Dasturchi", description: "Tajriba 5 yil", image: "/images/team/member4.svg" },
-  { id: 5, firstName: "Shoxrux", lastName: "Komiljonov", direction: "Founder, project manager", description: "Tajriba 5 yil", image: "/images/team/member1.svg" },
-  { id: 6, firstName: "Jasurbek", lastName: "Egamberdiyev", direction: "Filologiya fanlari doktori DSc, Professor", description: "Professor", image: "/images/team/member2.svg" },
+  { id: 1, firstName: "Muhammadali", lastName: "Baxtiyorov", direction: "Dasturchi", description: "Tajriba 2 yil", image: "/images/uploads/94e8bf566898412d924eb64bcf61c8cb.jpg" },
+  { id: 2, firstName: "Oyatillo", lastName: "Mahmudjonov", direction: "Grafik dizayner", description: "Tajriba 2 yil", image: "/images/uploads/d16126f8d4f449cf92b3159b96c0e0b1.jpg" },
+  { id: 3, firstName: "Muhammadsodiq", lastName: "Kozimov", direction: "Mobil dasturchi", description: "Tajriba 3 yil", image: "/images/uploads/a818643794c745179d8275529f3ebb13.jpg" },
+  { id: 4, firstName: "Sergey", lastName: "Solovyov", direction: "Dasturchi", description: "Tajriba 5 yil", image: "/images/uploads/5b02312f5858498db761950b7c171164.jpg" },
+  { id: 5, firstName: "Shoxrux", lastName: "Komiljonov", direction: "Founder, project manager", description: "Tajriba 5 yil", image: "/images/uploads/c653d29d5f4a40b99e77cd7be9dd72dd.png" },
+  { id: 6, firstName: "Jasurbek", lastName: "Egamberdiyev", direction: "Filologiya fanlari doktori DSc, Professor", description: "Professor", image: "/images/uploads/95eddf28273c4cffaf18399927a30b66.jpg" },
 ];
 
 export default function Home() {

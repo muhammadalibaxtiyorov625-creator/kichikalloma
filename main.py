@@ -613,9 +613,9 @@ def get_planet_audio_hash(planet_id: int, intro_text: str) -> str:
 def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
     d = dict(row)
     pid = d.get("id")
-    raw_img = d.get("image") or ""
+    raw_img = (d.get("image") or "").strip()
 
-    # Sayyora nomiga qarab to'g'ri fallback rasm
+    # Sayyora nomiga qarab standart fallback rasm
     PLANET_TITLE_TO_IMG = {
         "kognitiv": "/planets/earth.png",
         "jismoniy": "/planets/mars.png",
@@ -635,13 +635,9 @@ def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
             fallback_img = img_path
             break
 
-    # Agar rasm uploads papkasida bo'lsa va diskda topilmasa, sayyoraga mos rasmga fallback
-    if raw_img and raw_img.startswith("/images/uploads/"):
-        disk_path = os.path.join(PUBLIC_DIR, raw_img.lstrip("/").replace("images/", ""))
-        if not os.path.exists(disk_path):
-            raw_img = fallback_img
-
-    d["image"] = to_full_image_url(raw_img or fallback_img, request)
+    # DB dagi rasm bo'lsa o'sha ishlatiladi, bo'lmasa fallback
+    final_img = raw_img if raw_img else fallback_img
+    d["image"] = to_full_image_url(final_img, request)
     
     # is_blocked va is_block
     is_inactive = d.get("status", "active") != "active"
@@ -679,19 +675,12 @@ def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
 
 def format_team_row(row, request: Request, lang: str = "uzb") -> dict:
     d = dict(row)
-    raw_img = d.get("image") or ""
+    raw_img = (d.get("image") or "").strip()
     tid = d.get("id") or 1
     fallback_img = f"/images/team/member{((tid - 1) % 4) + 1}.svg"
 
-    # Agar rasm bo'lmasa yoki diskda topilmasa, mavjud jamoa a'zosi rasmiga fallback qilish
-    if not raw_img:
-        raw_img = fallback_img
-    elif raw_img.startswith("/images/uploads/"):
-        disk_path = os.path.join(PUBLIC_DIR, raw_img.lstrip("/").replace("images/", ""))
-        if not os.path.exists(disk_path):
-            raw_img = fallback_img
-
-    d["image"] = to_full_image_url(raw_img, request)
+    final_img = raw_img if raw_img else fallback_img
+    d["image"] = to_full_image_url(final_img, request)
     desc = d.get("description") or ""
     d["description"] = translate_text_sync(desc, lang) if lang != "uzb" else desc
     first_name = d.get("first_name", "").strip()
