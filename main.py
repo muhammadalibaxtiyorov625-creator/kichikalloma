@@ -36,7 +36,7 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from contextlib import asynccontextmanager
@@ -779,6 +779,80 @@ def serve_admin_panel():
     if os.path.exists(admin_index):
         return FileResponse(admin_index)
     return RedirectResponse(url="/docs")
+
+
+# ==============================================================================
+# SEO: SITEMAP.XML VA ROBOTS.TXT
+# ==============================================================================
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def serve_sitemap(request: Request):
+    """Google va Yandex uchun dinamik XML Sitemap"""
+    base = get_base_url(request)
+
+    # Barcha statik sahifalar
+    static_pages = [
+        {"loc": f"{base}/", "priority": "1.0", "changefreq": "weekly"},
+        {"loc": f"{base}/#sayyoralar", "priority": "0.9", "changefreq": "weekly"},
+        {"loc": f"{base}/#jamoa", "priority": "0.8", "changefreq": "monthly"},
+        {"loc": f"{base}/#kurslar", "priority": "0.8", "changefreq": "weekly"},
+        {"loc": f"{base}/#aloqa", "priority": "0.6", "changefreq": "monthly"},
+    ]
+
+    # Sayyoralar bazadan
+    planet_rows = []
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT name_uz FROM planets WHERE is_active = 1 LIMIT 20")
+        rows = cursor.fetchall()
+        conn.close()
+        for row in rows:
+            slug = row["name_uz"].lower().replace(" ", "-").replace("'", "").replace("'", "") if row["name_uz"] else ""
+            if slug:
+                planet_rows.append({"loc": f"{base}/#sayyoralar", "priority": "0.7", "changefreq": "monthly"})
+    except Exception:
+        pass
+
+    from datetime import datetime
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    urls_xml = ""
+    all_pages = static_pages + planet_rows
+    for page in all_pages:
+        urls_xml += f"""
+  <url>
+    <loc>{page['loc']}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>{page['changefreq']}</changefreq>
+    <priority>{page['priority']}</priority>
+  </url>"""
+
+    xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">{urls_xml}
+</urlset>"""
+
+    return Response(content=xml_content, media_type="application/xml; charset=utf-8")
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def serve_robots(request: Request):
+    """SEO robots.txt — barcha qidiruvchilar uchun"""
+    base = get_base_url(request)
+    content = f"""User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /docs
+Disallow: /redoc
+Disallow: /api/
+
+Sitemap: {base}/sitemap.xml
+"""
+    return Response(content=content, media_type="text/plain; charset=utf-8")
 
 
 # ==============================================================================
