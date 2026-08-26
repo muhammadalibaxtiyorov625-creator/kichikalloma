@@ -17,10 +17,8 @@ import {
   Award,
   MessageSquare,
   Clock,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion, useInView, useMotionValue, useTransform, animate, useScroll, useSpring } from "framer-motion";
 import { toast } from "sonner";
@@ -640,6 +638,150 @@ function PlanetModal({
         >
           Boshlash <ArrowRight className="h-4 w-4" />
         </button>
+      </div>
+    </div>
+  );
+}
+
+function TeamMemberModal({
+  member,
+  onClose,
+  onPrev,
+  onNext,
+  currentIndex,
+  totalCount,
+  language,
+}: {
+  member: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    direction: string;
+    description: string;
+    image?: string;
+    roleName: string;
+    contribution: string;
+  } | null;
+  onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  currentIndex?: number;
+  totalCount?: number;
+  language: Locale;
+}) {
+  if (!member) return null;
+
+  const bg = member.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn select-none">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[36px] border border-white/20 bg-gradient-to-b from-[#1e133d] via-[#160d30] to-[#0c061e] p-6 sm:p-8 text-white shadow-[0_30px_90px_rgba(108,69,221,0.45)]">
+        {/* Top bar: Counter & Close button */}
+        <div className="flex items-center justify-between mb-2">
+          {totalCount && typeof currentIndex === "number" ? (
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black tracking-wider text-[#f6c94f]">
+              {currentIndex + 1} / {totalCount}
+            </span>
+          ) : <div />}
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Member Photo with Side Floating Navigation Arrows */}
+        <div className="relative mx-auto my-3 flex items-center justify-center">
+          {onPrev && (
+            <button
+              type="button"
+              onClick={onPrev}
+              className="absolute left-0 z-20 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-[#6c45dd] hover:scale-110 active:scale-95 shadow-lg border border-white/20"
+              title="Oldingi a'zo"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          )}
+
+          <div className="relative h-36 w-36 sm:h-44 sm:w-44 overflow-hidden rounded-[28px] border-2 border-white/20 shadow-[0_15px_35px_rgba(0,0,0,0.4)] bg-secondary/20">
+            <div className={`h-full w-full flex items-center justify-center ${bg} text-[#2d174e]/60 font-black text-5xl select-none`}>
+              {member.firstName[0]}{member.lastName[0]}
+            </div>
+            {member.image && (
+              <img
+                src={member.image}
+                alt={`${member.firstName} ${member.lastName}`}
+                className="absolute inset-0 h-full w-full object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.onerror = null;
+                  img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
+                }}
+              />
+            )}
+          </div>
+
+          {onNext && (
+            <button
+              type="button"
+              onClick={onNext}
+              className="absolute right-0 z-20 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-[#6c45dd] hover:scale-110 active:scale-95 shadow-lg border border-white/20"
+              title="Keyingi a'zo"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          )}
+        </div>
+
+        {/* Name & Role */}
+        <div className="text-center mt-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#6c45dd]/25 px-3.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-[#dcd1ff] border border-[#6c45dd]/40">
+            <Sparkles className="h-3.5 w-3.5 text-[#f6c94f]" />
+            {member.roleName}
+          </div>
+          <h3 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white">
+            {member.firstName} {member.lastName}
+          </h3>
+          {member.description && (
+            <p className="mt-1.5 text-xs font-bold text-[#f6c94f] inline-block bg-[#f6c94f]/10 px-3 py-0.5 rounded-full border border-[#f6c94f]/20">
+              {member.description}
+            </p>
+          )}
+        </div>
+
+        {/* Contribution Details */}
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+          <div className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-1.5">
+            {language === "ru" ? "Вклад в проект и специализация:" : language === "en" ? "Project Role & Contribution:" : "Loyiha hissasi va mutaxassisligi:"}
+          </div>
+          <p className="text-sm font-semibold leading-relaxed text-white/90">
+            {member.contribution}
+          </p>
+        </div>
+
+        {/* Navigation Action Buttons in Modal Footer */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {onPrev && (
+            <button
+              type="button"
+              onClick={onPrev}
+              className="flex h-12 items-center justify-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 text-xs sm:text-sm font-black text-white transition hover:bg-white/20 active:scale-95"
+            >
+              <ChevronLeft className="h-4 w-4" /> {language === "ru" ? "Назад" : language === "en" ? "Previous" : "Oldingi"}
+            </button>
+          )}
+          {onNext && (
+            <button
+              type="button"
+              onClick={onNext}
+              className="flex h-12 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#6c45dd] to-[#d54381] text-xs sm:text-sm font-black text-white shadow-[0_10px_25px_rgba(108,69,221,0.35)] transition hover:scale-[1.02] active:scale-95"
+            >
+              {language === "ru" ? "Далее" : language === "en" ? "Next" : "Keyingi"} <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1569,89 +1711,87 @@ export default function Home() {
     modulesCount: number;
     skills: string[];
   } | null>(null);
-  const [isRobotSpeaking, setIsRobotSpeaking] = useState(false);
-  const [robotAudioProgress, setRobotAudioProgress] = useState(0);
-  const [robotAudioCurrentTime, setRobotAudioCurrentTime] = useState(0);
-  const [robotAudioDuration, setRobotAudioDuration] = useState(60);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [activeTeamMember, setActiveTeamMember] = useState<{
+    id: number;
+    firstName: string;
+    lastName: string;
+    direction: string;
+    description: string;
+    image?: string;
+    roleName: string;
+    contribution: string;
+  } | null>(null);
 
-  const formatAudioTime = (sec: number) => {
-    if (isNaN(sec) || sec < 0) return "0:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  const teamScrollRef = useRef<HTMLDivElement>(null);
+  const currentTeamList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
+  const currentTeamIndex = activeTeamMember
+    ? currentTeamList.findIndex(
+        (m) =>
+          m.id === activeTeamMember.id ||
+          `${m.firstName} ${m.lastName}` === `${activeTeamMember.firstName} ${activeTeamMember.lastName}`
+      )
+    : -1;
+
+  const handlePrevTeamMember = () => {
+    if (currentTeamList.length === 0) return;
+    const prevIdx =
+      currentTeamIndex <= 0 ? currentTeamList.length - 1 : currentTeamIndex - 1;
+    const member = currentTeamList[prevIdx];
+    const memberKey = `${member.firstName} ${member.lastName}`;
+    const roleName =
+      teamRoles[language][memberKey as keyof (typeof teamRoles)["uz"]] ||
+      member.direction;
+    const contribution =
+      teamContributions[language][
+        memberKey as keyof (typeof teamContributions)["uz"]
+      ] || teamContributions[language].default;
+
+    setActiveTeamMember({
+      id: member.id,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      direction: member.direction,
+      description: member.description,
+      image: member.image,
+      roleName,
+      contribution,
+    });
   };
 
-  const getOrInitAudio = () => {
-    if (!audioRef.current) {
-      const audio = new Audio("/intro_guide.mp3");
-      audio.onloadedmetadata = () => {
-        if (audio.duration) {
-          setRobotAudioDuration(audio.duration);
-        }
-      };
-      audio.onended = () => {
-        setIsRobotSpeaking(false);
-        setRobotAudioProgress(0);
-        setRobotAudioCurrentTime(0);
-      };
-      audio.ontimeupdate = () => {
-        if (audio.duration) {
-          setRobotAudioProgress((audio.currentTime / audio.duration) * 100);
-          setRobotAudioCurrentTime(audio.currentTime);
-          setRobotAudioDuration(audio.duration);
-        }
-      };
-      audioRef.current = audio;
-    }
-    return audioRef.current;
+  const handleNextTeamMember = () => {
+    if (currentTeamList.length === 0) return;
+    const nextIdx =
+      currentTeamIndex === -1 || currentTeamIndex >= currentTeamList.length - 1
+        ? 0
+        : currentTeamIndex + 1;
+    const member = currentTeamList[nextIdx];
+    const memberKey = `${member.firstName} ${member.lastName}`;
+    const roleName =
+      teamRoles[language][memberKey as keyof (typeof teamRoles)["uz"]] ||
+      member.direction;
+    const contribution =
+      teamContributions[language][
+        memberKey as keyof (typeof teamContributions)["uz"]
+      ] || teamContributions[language].default;
+
+    setActiveTeamMember({
+      id: member.id,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      direction: member.direction,
+      description: member.description,
+      image: member.image,
+      roleName,
+      contribution,
+    });
   };
 
-  const toggleRobotSpeech = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const audio = getOrInitAudio();
-
-    if (isRobotSpeaking) {
-      audio.pause();
-      setIsRobotSpeaking(false);
-    } else {
-      // Resume from wherever it was paused!
-      audio.play().then(() => {
-        setIsRobotSpeaking(true);
-      }).catch(() => {
-        // Fallback Web Speech API
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance("Salom! Kichik Alloma koinotiga xush kelibsiz! Bu yerda bolajonlar 8 ta sayyora orqali ilm oladilar.");
-          utterance.lang = "uz-UZ";
-          window.speechSynthesis.speak(utterance);
-        }
-      });
-    }
+  const scrollTeamLeft = () => {
+    teamScrollRef.current?.scrollBy({ left: -260, behavior: "smooth" });
   };
 
-  const seekRobotAudio = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    const audio = getOrInitAudio();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = Math.max(0, Math.min(1, clickX / width));
-    const targetDuration = audio.duration || robotAudioDuration || 60;
-    const targetTime = percentage * targetDuration;
-    
-    audio.currentTime = targetTime;
-    setRobotAudioCurrentTime(targetTime);
-    setRobotAudioProgress(percentage * 100);
-  };
-
-  const skipRobotAudio = (seconds: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const audio = getOrInitAudio();
-    const targetDuration = audio.duration || robotAudioDuration || 60;
-    const newTime = Math.max(0, Math.min(targetDuration, audio.currentTime + seconds));
-    audio.currentTime = newTime;
-    setRobotAudioCurrentTime(newTime);
-    setRobotAudioProgress((newTime / targetDuration) * 100);
+  const scrollTeamRight = () => {
+    teamScrollRef.current?.scrollBy({ left: 260, behavior: "smooth" });
   };
 
   const t = content[language];
@@ -2420,7 +2560,7 @@ export default function Home() {
             <SectionHeader align="center" eyebrow={t.team.eyebrow} title={t.team.title} copy={t.team.copy} />
           </div>
 
-          {/* ─── DESKTOP: Auto-scrolling marquee ─── */}
+          {/* Auto-scrolling marquee row of team cards (Desktop - stays fully automatic) */}
           <div className="mt-16 w-full overflow-hidden pb-8 relative z-10 hidden md:block">
             <div className="marquee-track gap-6">
               {(() => {
@@ -2437,7 +2577,22 @@ export default function Home() {
                   const contribution = teamContributions[language][memberKey as keyof typeof teamContributions['uz']] || teamContributions[language].default;
 
                   return (
-                    <article key={member.id} className="group w-[260px] sm:w-[280px] shrink-0 bg-white/80 border border-white/60 rounded-[32px] p-5 text-center shadow-[0_12px_40px_rgba(108,69,221,0.03)] backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:bg-white hover:shadow-[0_24px_50px_rgba(108,69,221,0.08)] glass-card">
+                    <article
+                      key={member.id}
+                      onClick={() => {
+                        setActiveTeamMember({
+                          id: member.id,
+                          firstName: member.firstName,
+                          lastName: member.lastName,
+                          direction: member.direction,
+                          description: member.description,
+                          image: member.image,
+                          roleName,
+                          contribution,
+                        });
+                      }}
+                      className="group w-[260px] sm:w-[280px] shrink-0 bg-white/80 border border-white/60 rounded-[32px] p-5 text-center shadow-[0_12px_40px_rgba(108,69,221,0.03)] backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:bg-white hover:shadow-[0_24px_50px_rgba(108,69,221,0.08)] glass-card cursor-pointer"
+                    >
                       <div className="relative h-[300px] w-full overflow-hidden rounded-[24px] bg-secondary/10">
                         <div className={`h-full w-full flex items-center justify-center ${bg} text-[#2d174e]/60 font-black text-5xl select-none transition-transform duration-500 group-hover:scale-105`}>
                           {member.firstName[0]}{member.lastName[0]}
@@ -2492,145 +2647,105 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ─── MOBILE: Manual swipe carousel with tap-to-info ─── */}
-          {(() => {
-            const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
-            return (
-              <div className="mt-12 md:hidden relative z-10 px-4">
-                <div
-                  className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-hide"
-                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-                >
-                  {baseList.map((member) => {
-                    const bg = member.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
-                    const memberKey = `${member.firstName} ${member.lastName}`;
-                    const roleName = teamRoles[language][memberKey as keyof typeof teamRoles['uz']] || member.direction;
-                    const contribution = teamContributions[language][memberKey as keyof typeof teamContributions['uz']] || teamContributions[language].default;
-
-                    return (
-                      <article
-                        key={member.id}
-                        onClick={() => setActiveMobileMember(member)}
-                        className="snap-center shrink-0 w-[240px] bg-white/90 border border-white/60 rounded-[28px] p-4 text-center shadow-[0_12px_40px_rgba(108,69,221,0.06)] backdrop-blur-md active:scale-95 transition-transform cursor-pointer"
-                      >
-                        <div className="relative h-[250px] w-full overflow-hidden rounded-[20px] bg-secondary/10">
-                          <div className={`h-full w-full flex items-center justify-center ${bg} text-[#2d174e]/60 font-black text-5xl select-none`}>
-                            {member.firstName[0]}{member.lastName[0]}
-                          </div>
-                          {member.image && (
-                            <img
-                              src={member.image}
-                              alt={`${member.firstName} ${member.lastName}`}
-                              loading="lazy"
-                              decoding="async"
-                              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300"
-                              onLoad={(e) => {
-                                (e.currentTarget as HTMLImageElement).classList.remove("opacity-0");
-                              }}
-                              onError={(e) => {
-                                const img = e.currentTarget as HTMLImageElement;
-                                img.onerror = null;
-                                img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
-                                img.classList.remove("opacity-0");
-                              }}
-                            />
-                          )}
-                        </div>
-                        
-                        <h3 className="mt-3 text-base font-black tracking-tight text-[#2d174e]">
-                          {member.firstName} {member.lastName}
-                        </h3>
-                        <p className="mt-1 text-xs font-extrabold text-[#d54381]/90">{roleName}</p>
-                        <p className="mt-1 text-[10px] font-semibold text-[#6c45dd] bg-[#6c45dd]/10 px-2 py-0.5 rounded-full inline-block">
-                          Bosing →
-                        </p>
-                      </article>
-                    );
-                  })}
-                </div>
-                {/* Scroll hint dots */}
-                <div className="flex justify-center gap-1.5 mt-3">
-                  {baseList.map((m) => (
-                    <span key={m.id} className="h-1.5 w-1.5 rounded-full bg-[#6c45dd]/30 inline-block" />
-                  ))}
-                </div>
+          {/* Mobile Manual Touch Drag / Swipeable Row */}
+          <div className="block md:hidden mt-8">
+            <div className="flex items-center justify-between mb-3 px-4">
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#6c45dd]">
+                <Sparkles className="h-3.5 w-3.5 text-[#f6c94f]" />
+                <span>Qo'lda suring va a'zoga bosing</span>
               </div>
-            );
-          })()}
-
-          {/* ─── MOBILE: Team member info modal ─── */}
-          {activeMobileMember && (
-            <div
-              className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm md:hidden"
-              onClick={() => setActiveMobileMember(null)}
-            >
-              <div
-                className="relative w-full max-w-sm rounded-t-[36px] bg-gradient-to-b from-white to-[#f4efff] p-6 text-center shadow-2xl animate-fadeIn"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Close button */}
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setActiveMobileMember(null)}
-                  className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/10 text-[#2d174e] hover:bg-black/20 transition"
+                  onClick={scrollTeamLeft}
+                  className="grid h-8 w-8 place-items-center rounded-full bg-white border border-[#6c45dd]/20 text-[#6c45dd] shadow-sm active:scale-95 transition hover:bg-[#6c45dd]/10"
+                  title="Oldingi"
                 >
-                  <X className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4" />
                 </button>
+                <button
+                  type="button"
+                  onClick={scrollTeamRight}
+                  className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-r from-[#6c45dd] to-[#d54381] text-white shadow-sm active:scale-95 transition hover:scale-105"
+                  title="Keyingi"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div
+              ref={teamScrollRef}
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-5 pb-6 pt-2 no-scrollbar touch-pan-x scroll-smooth"
+            >
+              {(() => {
+                const baseList = apiTeams.length > 0 ? apiTeams : DEFAULT_TEAMS_INITIAL;
+                return baseList.map((member) => {
+                  const bg = member.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
+                  const memberKey = `${member.firstName} ${member.lastName}`;
+                  const roleName = teamRoles[language][memberKey as keyof typeof teamRoles['uz']] || member.direction;
+                  const contribution = teamContributions[language][memberKey as keyof typeof teamContributions['uz']] || teamContributions[language].default;
 
-                {/* Photo */}
-                <div className="mx-auto h-28 w-28 rounded-3xl overflow-hidden border-4 border-[#6c45dd]/20 shadow-lg">
-                  {(() => {
-                    const bg = activeMobileMember.id % 2 === 0 ? "bg-[#e2e8f0]" : "bg-[#ffdbe8]";
-                    return (
-                      <div className={`relative h-full w-full ${bg} flex items-center justify-center text-[#2d174e]/60 font-black text-4xl`}>
-                        {activeMobileMember.firstName[0]}{activeMobileMember.lastName[0]}
-                        {activeMobileMember.image && (
+                  return (
+                    <article
+                      key={member.id}
+                      onClick={() => {
+                        setActiveTeamMember({
+                          id: member.id,
+                          firstName: member.firstName,
+                          lastName: member.lastName,
+                          direction: member.direction,
+                          description: member.description,
+                          image: member.image,
+                          roleName,
+                          contribution,
+                        });
+                      }}
+                      className="group w-[240px] shrink-0 snap-center bg-white/90 border border-white/70 rounded-[28px] p-4 text-center shadow-[0_10px_30px_rgba(108,69,221,0.06)] backdrop-blur-md active:scale-95 transition-all duration-200 cursor-pointer"
+                    >
+                      <div className="relative h-[230px] w-full overflow-hidden rounded-[20px] bg-secondary/10 shadow-sm">
+                        <div className={`h-full w-full flex items-center justify-center ${bg} text-[#2d174e]/60 font-black text-4xl select-none`}>
+                          {member.firstName[0]}{member.lastName[0]}
+                        </div>
+                        {member.image && (
                           <img
-                            src={activeMobileMember.image}
-                            alt={`${activeMobileMember.firstName} ${activeMobileMember.lastName}`}
-                            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300"
-                            onLoad={(e) => (e.currentTarget as HTMLImageElement).classList.remove("opacity-0")}
+                            src={member.image}
+                            alt={`${member.firstName} ${member.lastName}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 h-full w-full object-cover"
                             onError={(e) => {
                               const img = e.currentTarget as HTMLImageElement;
                               img.onerror = null;
-                              img.src = `/images/team/member${(Math.abs(activeMobileMember.id) % 4) + 1}.svg`;
-                              img.classList.remove("opacity-0");
+                              img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
                             }}
                           />
                         )}
                       </div>
-                    );
-                  })()}
-                </div>
 
-                {/* Name */}
-                <h3 className="mt-4 text-xl font-black text-[#2d174e]">
-                  {activeMobileMember.firstName} {activeMobileMember.lastName}
-                </h3>
+                      <h3 className="mt-3 text-base font-black tracking-tight leading-tight text-[#2d174e]">
+                        {member.firstName} {member.lastName}
+                      </h3>
 
-                {/* Role */}
-                <p className="mt-1 text-sm font-extrabold text-[#d54381]">
-                  {teamRoles[language][`${activeMobileMember.firstName} ${activeMobileMember.lastName}` as keyof typeof teamRoles['uz']] || activeMobileMember.direction}
-                </p>
+                      <div className="mt-1.5 inline-block rounded-full bg-[#6c45dd]/10 px-2.5 py-0.5 text-[11px] font-extrabold text-[#6c45dd]">
+                        {roleName}
+                      </div>
 
-                {/* Experience badge */}
-                {activeMobileMember.description && (
-                  <span className="mt-2 inline-block text-xs font-bold text-[#6c45dd] bg-[#6c45dd]/12 px-3 py-1 rounded-full">
-                    {activeMobileMember.description}
-                  </span>
-                )}
+                      {member.description && (
+                        <p className="mt-1 text-[10px] font-bold text-[#d54381]">
+                          {member.description}
+                        </p>
+                      )}
 
-                {/* Contribution */}
-                <p className="mt-3 text-sm font-semibold leading-relaxed text-[#5d4c78]">
-                  {teamContributions[language][`${activeMobileMember.firstName} ${activeMobileMember.lastName}` as keyof typeof teamContributions['uz']] || teamContributions[language].default}
-                </p>
-
-                {/* Close bar */}
-                <div className="mt-5 h-1 w-12 rounded-full bg-[#6c45dd]/25 mx-auto" />
-              </div>
+                      <div className="mt-2.5 flex items-center justify-center gap-1 text-[11px] font-bold text-[#6c45dd] bg-[#6c45dd]/8 py-1 rounded-xl">
+                        <Sparkles className="h-3 w-3 text-[#f6c94f]" />
+                        Batafsil ma'lumot
+                      </div>
+                    </article>
+                  );
+                });
+              })()}
             </div>
-          )}
-
+          </div>
         </section>
       </SectionDepthWrapper>
 
@@ -2900,6 +3015,17 @@ export default function Home() {
         seekRobotAudio={seekRobotAudio}
         skipRobotAudio={skipRobotAudio}
         formatAudioTime={formatAudioTime}
+      />
+
+      {/* Team Member Profile Modal */}
+      <TeamMemberModal
+        member={activeTeamMember}
+        onClose={() => setActiveTeamMember(null)}
+        onPrev={handlePrevTeamMember}
+        onNext={handleNextTeamMember}
+        currentIndex={currentTeamIndex}
+        totalCount={currentTeamList.length}
+        language={language}
       />
     </div>
   );
