@@ -1507,7 +1507,7 @@ function mapDbIdToPlanetId(dbValue: string): string {
   if (v.includes("jismoniy") || v.includes("mars") || v.includes("harakat") || v.includes("faollik")) return "mars";
   if (v.includes("ijodkorlik") || v.includes("merkuriy") || v.includes("mercury") || v.includes("kasb")) return "mercury";
   if (v.includes("matematika") || v.includes("saturn") || v.includes("mantiq") || v.includes("axloqiy")) return "saturn";
-  if (v.includes("english") || v.includes("vocabulary") || v.includes("uran") || v.includes("nutq")) return "uran";
+  if (v.includes("english") || v.includes("vocabulary") || v.includes("uran") || v.includes("nutq") || v.includes("lug'at") || v.includes("lugat") || v.includes("ingliz")) return "uran";
   if (v.includes("emotsional") || v.includes("neptun") || v.includes("neptune") || v.includes("hissiyot")) return "neptune";
   if (v.includes("virtual") || v.includes("do'kon") || v.includes("dokon") || v.includes("store") || v.includes("venera") || v.includes("venus") || v.includes("gold coin") || v.includes("tanga")) return "venus";
   if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v.includes("yupiter") || v.includes("jupiter") || v.includes("intizom")) return "jupiter";
@@ -1516,13 +1516,25 @@ function mapDbIdToPlanetId(dbValue: string): string {
   return "";
 }
 
+const PLANET_ASTRONOMICAL_NAMES: Record<string, string> = {
+  earth: "Yer",
+  jupiter: "Yupiter",
+  venus: "Venera",
+  saturn: "Saturn",
+  mercury: "Merkuriy",
+  uran: "Uran",
+  mars: "Mars",
+  neptune: "Neptun",
+  sun: "Quyosh",
+};
+
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
   { id: "earth", name: "YER", skill: "Kognitiv ta’lim + AI Tutor", description: "AI bilan cheklangan, maqsadli o‘qish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
   { id: "jupiter", name: "YUPITER", skill: "O‘z-o‘zini boshqarish", description: "Reja, bajarilish, intizom", status: "soon", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
   { id: "venus", name: "VENERA", skill: "Virtual do'kon", description: "Oltin tangalar orqali buyumlar", status: "soon", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
   { id: "saturn", name: "SATURN", skill: "Matematika + mantiq", description: "Masala, test, yechim va mukofot", status: "soon", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
   { id: "mercury", name: "MERKURIY", skill: "Ijodkorlik + kasblar", description: "Kasblarni kashf etish va qiziqish", status: "soon", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
-  { id: "uran", name: "URAN", skill: "English Vocabulary", description: "So‘z, talaffuz, test va mustahkamlash", status: "soon", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
+  { id: "uran", name: "URAN", skill: "Ingliz tili lug'atlari", description: "So‘z, talaffuz, test va mustahkamlash", status: "soon", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
   { id: "mars", name: "MARS", skill: "Jismoniy faollik", description: "Video asosida harakat va mashqlar", status: "soon", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
   { id: "neptune", name: "NEPTUN", skill: "Emotsional savodxonlik", description: "Hissiyotlarni qayd etish va Parent Panel", status: "soon", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
   { id: "sun", name: "QUYOSH", skill: "Quyosh (AI Chat)", description: "AI Suhbatdosh", status: "soon", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
@@ -2157,6 +2169,9 @@ export default function Home() {
                               </div>
                               <p className="mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight sm:text-xs text-white transition-colors duration-200 group-hover:text-[#f6c94f]">
                                 {name}
+                                <span className="block text-[7.5px] min-[400px]:text-[8px] sm:text-[8.5px] font-bold text-[#f6c94f]/85 mt-0.5">
+                                  ({PLANET_ASTRONOMICAL_NAMES[planet.id] || planet.id})
+                                </span>
                               </p>
                               <p className="mx-auto mt-0.5 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[7.5px] min-[400px]:text-[8px] font-bold leading-3 text-white/65 sm:text-[9px]">
                                 {desc}
