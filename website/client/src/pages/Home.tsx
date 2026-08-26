@@ -1960,7 +1960,7 @@ export default function Home() {
                       return (
                         <div
                           key={planet.id}
-                          className="absolute text-center z-10 pointer-events-none select-none"
+                          className="absolute text-center z-10 select-none"
                           style={{
                             left: `calc(50% + var(--orbit-radius) * ${cos.toFixed(4)})`,
                             top: `calc(50% + var(--orbit-radius) * ${sin.toFixed(4)})`,
@@ -1968,23 +1968,50 @@ export default function Home() {
                           }}
                         >
                           <div className="animate-orbit-ccw-slow">
-                            <div className="group cursor-default select-none">
+                            <div
+                              onClick={isEarth ? () => {
+                                setActiveModalPlanet({
+                                  id: planet.id,
+                                  name: "YER — " + name,
+                                  desc,
+                                  image: planetImage,
+                                  ageGroup: planetDetails.age,
+                                  modulesCount: planetDetails.modules,
+                                  skills: planetDetails.skills,
+                                });
+                              } : undefined}
+                              className={`group transition-all duration-300 ${
+                                isEarth
+                                  ? "hover:scale-115 cursor-pointer"
+                                  : "hover:scale-110 cursor-default"
+                              }`}
+                            >
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
-                                <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg" />
+                                <div className={`absolute inset-1 rounded-full transition-all duration-300 ${
+                                  isEarth
+                                    ? "bg-[#f6c94f] opacity-50 blur-lg animate-pulse group-hover:opacity-80"
+                                    : "bg-[#a78cff] opacity-25 blur-lg group-hover:opacity-60 group-hover:blur-xl"
+                                }`} />
                                 
                                 {/* Decoupled hover translate container */}
-                                <div className="relative z-10 w-full h-full flex items-center justify-center">
+                                <div className={`relative z-10 transition-transform duration-200 group-hover:-translate-y-1.5 ${
+                                  isEarth ? "ring-2 ring-[#f6c94f]/70 rounded-full shadow-[0_0_18px_rgba(246,201,79,0.6)]" : ""
+                                } w-full h-full flex items-center justify-center`}>
                                   <img
                                     src={planetImage}
                                     alt={name}
-                                    className="h-full w-full rounded-full object-contain drop-shadow-[0_6px_20px_rgba(0,0,0,0.3)]"
+                                    className="h-full w-full rounded-full object-contain drop-shadow-[0_6px_20px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-105"
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).src = DEFAULT_PLANET_IMAGES[planet.id];
                                     }}
                                   />
                                 </div>
                               </div>
-                              <p className="mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight text-white sm:text-xs">
+                              <p className={`mt-1 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[9px] min-[400px]:text-[10px] font-black leading-tight sm:text-xs transition-colors duration-200 ${
+                                isEarth
+                                  ? "text-[#f6c94f] group-hover:text-[#ffe082]"
+                                  : "text-white group-hover:text-[#c4b5fd]"
+                              }`}>
                                 {name}
                               </p>
                               <p className="mx-auto mt-0.5 max-w-20 min-[400px]:max-w-24 sm:max-w-28 text-[7.5px] min-[400px]:text-[8px] font-bold leading-3 text-white/65 sm:text-[9px]">
@@ -2556,6 +2583,13 @@ export default function Home() {
         </div>
       </footer>
       </SectionDepthWrapper>
+
+      {/* Planet Skill Profile Modal (Only for Earth) */}
+      <PlanetModal
+        planet={activeModalPlanet}
+        onClose={() => setActiveModalPlanet(null)}
+        onTry={handleTry}
+      />
     </div>
   );
 }
