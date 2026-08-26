@@ -505,6 +505,8 @@ function PlanetModal({
   onTry: () => void;
 }) {
   if (!planet) return null;
+  const isEarth = planet.id === "earth" || planet.name.toLowerCase().includes("yer") || planet.name.toLowerCase().includes("kognitiv");
+  if (!isEarth) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-fadeIn">
