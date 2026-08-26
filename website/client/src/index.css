@@ -73,11 +73,6 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
-  scroll-snap-type: y proximity;
-}
-
-section {
-  scroll-snap-align: start;
 }
 
 body {
@@ -87,6 +82,9 @@ body {
   color: var(--foreground);
   font-family: "Nunito", ui-rounded, "Arial Rounded MT Bold", sans-serif;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 button,
@@ -353,19 +351,6 @@ html {
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
-
-/* 3D Vertical Snap Page Carousel */
-html {
-  scroll-behavior: smooth;
-  scroll-snap-type: y mandatory;
-}
-
-.carousel-page-snap {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-
 
 @keyframes animated-yellow {
   0% { background-position: 0% 50%; }

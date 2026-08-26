@@ -153,41 +153,27 @@ function BlurText({
   delay?: number;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once: true, margin: "-40px" });
 
   const words = text.split(" ");
 
   return (
     <motion.span ref={ref} className={`inline-block ${className}`}>
-      {words.map((word, wIndex) => {
-        const charOffset = words.slice(0, wIndex).join("").length;
-        return (
-          <span key={wIndex} className="inline-block whitespace-nowrap mr-[0.25em]">
-            {Array.from(word).map((letter, lIndex) => {
-              const charIndex = charOffset + lIndex;
-              return (
-                <motion.span
-                  key={lIndex}
-                  initial={{ opacity: 0, filter: "blur(12px)", y: 12, scale: 0.88 }}
-                  animate={
-                    inView
-                      ? { opacity: 1, filter: "blur(0px)", y: 0, scale: 1 }
-                      : { opacity: 0, filter: "blur(12px)", y: 12, scale: 0.88 }
-                  }
-                  transition={{
-                    duration: 0.65,
-                    delay: delay + charIndex * 0.022,
-                    ease: PRO_EASE,
-                  }}
-                  className="inline-block"
-                >
-                  {letter}
-                </motion.span>
-              );
-            })}
-          </span>
-        );
-      })}
+      {words.map((word, wIndex) => (
+        <motion.span
+          key={wIndex}
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{
+            duration: 0.5,
+            delay: delay + wIndex * 0.035,
+            ease: PRO_EASE,
+          }}
+          className="inline-block mr-[0.28em] whitespace-nowrap will-change-transform"
+        >
+          {word}
+        </motion.span>
+      ))}
     </motion.span>
   );
 }
@@ -479,27 +465,19 @@ function SectionDepthWrapper({
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["end end", "end start"],
+    offset: ["start end", "end start"],
   });
 
-  // Stay 100% crisp and full size while reading inside section (0 -> 0.70).
-  // ONLY as section exits off the top screen edge (0.70 -> 1.0), it smoothly recedes into 3D carousel depth, blurs, and fades out cleanly!
-  const opacity = useTransform(scrollYProgress, [0, 0.70, 1], [1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.70, 1], [1, 1, 0.94]);
-  const blurValue = useTransform(scrollYProgress, [0, 0.70, 1], [0, 0, 12]);
-  const filter = useTransform(blurValue, (v) => `blur(${v}px)`);
-  const y = useTransform(scrollYProgress, [0, 0.70, 1], [0, 0, -35]);
+  // Butter-smooth subtle entry and exit opacity/y translation
+  const opacity = useTransform(scrollYProgress, [0, 0.12, 0.88, 1], [0.92, 1, 1, 0.94]);
+  const y = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [20, 0, 0, -15]);
 
   return (
-    <div ref={containerRef} className="carousel-page-snap relative z-10 w-full [perspective:1400px]">
+    <div ref={containerRef} id={id} className="relative z-10 w-full">
       <motion.div
-        id={id}
         style={{
           opacity,
-          scale,
-          filter,
           y,
-          transformStyle: "preserve-3d",
         }}
         className={`will-change-transform gpu-accelerated ${className}`}
       >
@@ -1805,20 +1783,20 @@ export default function Home() {
           <div className="container relative z-10">
             <div className="max-w-3xl pt-6">
               <h1 className="max-w-[820px] text-[clamp(3.1rem,7vw,5.4rem)] font-black leading-[0.96] tracking-[-0.065em] text-white">
-                <BlurText text={t.hero.title} delay={0.25} />
+                <BlurText text={t.hero.title} delay={0.02} />
               </h1>
               <motion.p
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.5, delay: 0.12, ease: PRO_EASE }}
                 className="mt-7 max-w-2xl text-base font-semibold leading-8 text-white/74 sm:text-lg"
               >
                 {t.hero.copy}
               </motion.p>
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.5, delay: 0.22, ease: PRO_EASE }}
                 className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
               >
                 <button
@@ -1841,7 +1819,7 @@ export default function Home() {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, delay: 1, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.6, delay: 0.32, ease: PRO_EASE }}
                 className="mt-8 max-w-xl border-l-2 border-[#f6c94f] pl-4 text-sm font-bold leading-6 text-white/60"
               >
                 {t.hero.note}
