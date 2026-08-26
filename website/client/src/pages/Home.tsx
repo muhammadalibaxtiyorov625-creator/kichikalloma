@@ -1432,29 +1432,29 @@ function fixImageUrl(url: string | null): string {
 function mapDbIdToPlanetId(dbValue: string): string {
   const v = dbValue.toLowerCase();
   
-  if (v.includes("kognitiv") || v === "earth") return "earth";
-  if (v.includes("jismoniy") || v === "mars" || v.includes("tanqidiy")) return "mars";
-  if (v.includes("ijodkorlik") || v === "jupiter" || v.includes("kreativ")) return "jupiter";
-  if (v.includes("axloqiy") || v === "saturn" || v.includes("muloqot")) return "saturn";
-  if (v.includes("nutq") || v === "uran" || v.includes("moslashuv")) return "uran";
-  if (v.includes("ijtimoiy") || v === "neptune" || v.includes("hamkorlik")) return "neptune";
-  if (v.includes("emotsional") || v === "venus") return "venus";
-  if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v === "mercury" || v.includes("diqqat")) return "mercury";
+  if (v.includes("kognitiv") || v.includes("yer") || v === "earth" || v.includes("tutor")) return "earth";
+  if (v.includes("jismoniy") || v.includes("mars") || v.includes("harakat") || v.includes("faollik")) return "mars";
+  if (v.includes("ijodkorlik") || v.includes("merkuriy") || v.includes("mercury") || v.includes("kasb")) return "mercury";
+  if (v.includes("matematika") || v.includes("saturn") || v.includes("mantiq") || v.includes("axloqiy")) return "saturn";
+  if (v.includes("english") || v.includes("vocabulary") || v.includes("uran") || v.includes("nutq")) return "uran";
+  if (v.includes("emotsional") || v.includes("neptun") || v.includes("neptune") || v.includes("hissiyot")) return "neptune";
+  if (v.includes("virtual store") || v.includes("store") || v.includes("venera") || v.includes("venus") || v.includes("gold coin")) return "venus";
+  if (v.includes("oz-ozini") || v.includes("o'z-o'zini") || v.includes("yupiter") || v.includes("jupiter") || v.includes("intizom")) return "jupiter";
   if (v.includes("quyosh") || v === "sun") return "sun";
   
   return "";
 }
 
 const DEFAULT_PLANETS_INITIAL: ApiPlanet[] = [
-  { id: "earth", name: "Kognitiv", skill: "Kognitiv", description: "Fikrlash, o'rganish va muammo yechish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
-  { id: "mars", name: "Jismoniy va motorika", skill: "Jismoniy va motorika", description: "Harakat va sog'lom tanaffus", status: "active", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
-  { id: "uran", name: "Nutq va til", skill: "Nutq va til", description: "Muloqot, lug'at va talaffuz", status: "active", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
-  { id: "neptune", name: "Ijtimoiy", skill: "Ijtimoiy", description: "Hamkorlik va ijtimoiy ko'nikmalar", status: "active", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
-  { id: "venus", name: "Emotsional", skill: "Emotsional", description: "Hissiyotlarni anglash va boshqarish", status: "active", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
-  { id: "saturn", name: "Axloqiy", skill: "Axloqiy", description: "Qadriyat, mas'uliyat va tanlov", status: "active", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
-  { id: "jupiter", name: "Ijodkorlik", skill: "Ijodkorlik", description: "Tasavvur va divergent fikrlash", status: "active", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
-  { id: "mercury", name: "O'z-o'zini boshqarish", skill: "O'z-o'zini boshqarish", description: "Rejalashtirish, diqqat va intizom", status: "active", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
-  { id: "sun", name: "Quyosh", skill: "Quyosh", description: "Ai chat", status: "active", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
+  { id: "earth", name: "YER", skill: "Kognitiv ta’lim + AI Tutor", description: "AI bilan cheklangan, maqsadli o‘qish", status: "active", image: "/images/uploads/8b6cbd6f97184342a70030b6158de39a.png" },
+  { id: "jupiter", name: "YUPITER", skill: "O‘z-o‘zini boshqarish", description: "Reja, bajarilish, intizom", status: "active", image: "/images/uploads/9de36f920ee042c8832b256bc9d87055.png" },
+  { id: "venus", name: "VENERA", skill: "Virtual Store", description: "Gold Coin orqali kosmetik buyumlar", status: "active", image: "/images/uploads/74b5ea4003174423a9415afe79a9a3de.png" },
+  { id: "saturn", name: "SATURN", skill: "Matematika + mantiq", description: "Masala, test, yechim va mukofot", status: "active", image: "/images/uploads/01f08df4f9fc431e8f2a7d46c9acece3.png" },
+  { id: "mercury", name: "MERKURIY", skill: "Ijodkorlik + kasblar", description: "Kasblarni kashf etish va qiziqish", status: "active", image: "/images/uploads/4b77c5aa5ef348a6a8017e5d55ce1d0f.png" },
+  { id: "uran", name: "URAN", skill: "English Vocabulary", description: "So‘z, talaffuz, test va mustahkamlash", status: "active", image: "/images/uploads/44ef27031cba4f5284b159e2872d64a7.png" },
+  { id: "mars", name: "MARS", skill: "Jismoniy faollik", description: "Video asosida harakat va mashqlar", status: "active", image: "/images/uploads/626835a96045495da55fc03c79067817.png" },
+  { id: "neptune", name: "NEPTUN", skill: "Emotsional savodxonlik", description: "Hissiyotlarni qayd etish va Parent Panel", status: "active", image: "/images/uploads/43a284015af842a3afae7bd11ae3d152.png" },
+  { id: "sun", name: "QUYOSH", skill: "Quyosh (AI Chat)", description: "AI Suhbatdosh", status: "active", image: "/images/uploads/9db34b97a90c40c9a11f4b7f46da1a0d.png" },
 ];
 
 const DEFAULT_TEAMS_INITIAL: ApiTeam[] = [
