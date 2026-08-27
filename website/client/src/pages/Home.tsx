@@ -2689,15 +2689,11 @@ export default function Home() {
                             alt={`${member.firstName} ${member.lastName}`}
                             loading="lazy"
                             decoding="async"
-                            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 transition-transform duration-500 group-hover:scale-105"
-                            onLoad={(e) => {
-                              (e.currentTarget as HTMLImageElement).classList.remove("opacity-0");
-                            }}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => {
                               const img = e.currentTarget as HTMLImageElement;
                               img.onerror = null;
                               img.src = `/images/team/member${(Math.abs(member.id) % 4) + 1}.svg`;
-                              img.classList.remove("opacity-0");
                             }}
                           />
                         )}
