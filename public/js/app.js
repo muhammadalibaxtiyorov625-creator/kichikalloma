@@ -1342,13 +1342,22 @@ async function handleSendAdminAi(e) {
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> <span>Kutilmoqda...</span>';
   }
 
+  const langSelect = document.getElementById('voice-lang-select');
+  let selLang = 'uzb';
+  if (langSelect && langSelect.value) {
+    if (langSelect.value.startsWith('ru')) selLang = 'rus';
+    else if (langSelect.value.startsWith('en')) selLang = 'eng';
+    else selLang = 'uzb';
+  }
+
   try {
     const payload = {
       message: userText,
       history: aiChatHistory,
       child_name: childName || undefined,
       child_age: childAge || undefined,
-      planet_id: planetId || undefined
+      planet_id: planetId || undefined,
+      language: selLang
     };
 
     const res = await fetch('/api/website/ai/chat', {
@@ -1654,13 +1663,7 @@ function updateMicUiState(recording) {
   }
 }
 
-function speakText(rawText) {
-  if (!('speechSynthesis' in window)) {
-    return;
-  }
-
-  window.speechSynthesis.cancel(); // Avvalgi ovozni to'xtatish
-
+async function speakText(rawText) {
   // Markdown, emoji va keraksiz belgilarni tozalash
   const cleanText = rawText
     .replace(/[*#_`~>]/g, '')
@@ -1671,81 +1674,44 @@ function speakText(rawText) {
 
   if (!cleanText) return;
 
-  // Tilni aniqlash
-  let targetLang = currentVoiceLang || 'ru-RU';
-
-  // Eng yaxshi mavjud ovozni topish
-  function getBestVoice(lang, synth) {
-    const voices = synth.getVoices();
-    if (!voices || voices.length === 0) return null;
-
-    // Prioritet: Google > Microsoft > Boshqa (online > offline)
-    const priority = [
-      v => v.name.toLowerCase().includes('google') && v.lang.startsWith(lang.split('-')[0]),
-      v => v.name.toLowerCase().includes('microsoft') && v.lang.startsWith(lang.split('-')[0]),
-      v => v.lang === lang,
-      v => v.lang.startsWith(lang.split('-')[0]),
-      v => true // fallback: birinchi mavjud ovoz
-    ];
-
-    for (const check of priority) {
-      const found = voices.find(check);
-      if (found) return found;
-    }
-    return voices[0];
+  const langSelect = document.getElementById('voice-lang-select');
+  let selLang = 'uzb';
+  if (langSelect && langSelect.value) {
+    if (langSelect.value.startsWith('ru')) selLang = 'rus';
+    else if (langSelect.value.startsWith('en')) selLang = 'eng';
+    else selLang = 'uzb';
   }
 
-  function doSpeak() {
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    const bestVoice = getBestVoice(targetLang, window.speechSynthesis);
-    if (bestVoice) {
-      utterance.voice = bestVoice;
-      utterance.lang = bestVoice.lang;
-    } else {
-      utterance.lang = targetLang;
+  // 1. Backend Microsoft HD Neural Audio orqali o'qish (Haqiqiy o'zbekcha ovoz)
+  try {
+    const res = await fetch('/api/website/ai/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: cleanText, language: selLang })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.audio_url) {
+        unlockAudio();
+        playNeuralAudio(data.audio_url);
+        return;
+      }
     }
+  } catch (e) {
+    console.warn('Backend TTS xatosi:', e);
+  }
 
-    utterance.rate = 0.9;   // Ravon, tushunarli tezlik
-    utterance.pitch = 1.1;  // Tabiiy, yoqimli ohang
-    utterance.volume = 1.0; // Maksimal ovoz balandligi
-
-    const micBtn = document.getElementById('voice-mic-btn');
-    const statusTitle = document.getElementById('voice-status-title');
-
-    utterance.onstart = () => {
-      if (micBtn) micBtn.classList.add('speaking');
-      if (statusTitle) statusTitle.innerText = '🔊 Alloma AI javob bermoqda...';
-    };
-
-    utterance.onend = () => {
-      if (micBtn) micBtn.classList.remove('speaking');
-      if (statusTitle) statusTitle.innerText = 'Mikrofonga bosing va bemalol gapiring!';
-    };
-
-    utterance.onerror = () => {
-      if (micBtn) micBtn.classList.remove('speaking');
-      if (statusTitle) statusTitle.innerText = 'Mikrofonga bosing va bemalol gapiring!';
-    };
-
+  // 2. Fallback: Agar offline yoki xatolik bo'lsa
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = selLang === 'rus' ? 'ru-RU' : selLang === 'eng' ? 'en-US' : 'uz-UZ';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
   }
-
-  // Ovozlar yuklangan bo'lsa darhol, aks holda kuting
-  const voices = window.speechSynthesis.getVoices();
-  if (voices && voices.length > 0) {
-    doSpeak();
-  } else {
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      doSpeak();
-    };
-    // 500ms kutib ham bo'lmasa, baribir urinib ko'r
-    setTimeout(() => {
-      if (!window.speechSynthesis.speaking) doSpeak();
-    }, 500);
-  }
 }
+
 
 
 // ==========================================================================

@@ -2311,10 +2311,9 @@ async def mobile_ai_chat(req: AiChatRequest, request: Request, current_user: dic
     if not user_prompt:
         raise HTTPException(status_code=400, detail="Xabar matni bo'sh bo'lishi mumkin emas!")
 
-    # Accept-Language header tilni ustuvorlik bilan olish
-    header_lang = get_accept_language(request)
-    if header_lang != "uzb" and (not req.language or req.language == "uzb"):
-        req.language = header_lang
+    # Standart til — O'zbek tili
+    if not req.language:
+        req.language = "uzb"
 
     user_id = current_user.get("id") if current_user else None
     return await _build_ai_response(req, user_prompt, request, user_id=user_id)
@@ -2503,13 +2502,13 @@ async def _build_ai_response(req: AiChatRequest, user_prompt: str, request: Requ
 
     # Tilga mos javob tili ko'rsatmasi
     if ai_lang == "rus":
-        lang_rule = "ОБЯЗАТЕЛЬНО отвечай на русском языке. Никогда не пиши на узбекском."
+        lang_rule = "ОБЯЗАТЕЛЬНО отвечай на русском языке. Никогда не пиши на узбекском или английском."
         greet_text = f"Привет{', ' + child_name if req.child_name else ''}! Чем могу помочь? 😊"
     elif ai_lang == "eng":
-        lang_rule = "ALWAYS respond in English. Never write in Uzbek."
+        lang_rule = "ALWAYS respond in English. Never write in Uzbek or Russian."
         greet_text = f"Hello{', ' + child_name if req.child_name else ''}! How can I help you? 😊"
     else:
-        lang_rule = "O'ZBEK tilida javob ber."
+        lang_rule = "QAT'IY VA MAJBURIY QOIDA: FAQAT VA FAQAT O'ZBEK TILIDA (lotin alifbosida) javob ber! Hech qachon ingliz yoki rus tilida gapirma. Savol qaysi tilda bo'lishidan qat'i nazar, faqat sof, chiroyli va ravon o'zbek tilida gapir."
         greet_text = f"Salom{', ' + child_name if req.child_name else ''}! Qanday yordam bera olaman? 😊"
 
     # 4. YOSHGA MOS INTERAKTIV PEDAGOGIK TIZIM (Qisqa va lo'nda)
@@ -2636,9 +2635,10 @@ async def mobile_ai_voice_chat(
     language: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
-    # 1. Tilni aniqlash
-    header_lang = get_accept_language(request)
-    req_lang = language or header_lang or "uzb"
+    # 1. Tilni aniqlash (Standart: O'zbek tili)
+    req_lang = (language or "uzb").strip().lower()
+    if req_lang not in ("ru", "rus", "ru-ru", "en", "eng", "en-us"):
+        req_lang = "uzb"
 
     # 2. Audio faylni o'qish
     audio_bytes = await file.read()
@@ -2720,8 +2720,10 @@ async def mobile_ai_stt(
     file: UploadFile = File(..., description="Ovozli fayl"),
     language: Optional[str] = Form(None)
 ):
-    header_lang = get_accept_language(request)
-    req_lang = language or header_lang or "uzb"
+    # Standart til — O'zbek tili
+    req_lang = (language or "uzb").strip().lower()
+    if req_lang not in ("ru", "rus", "ru-ru", "en", "eng", "en-us"):
+        req_lang = "uzb"
     audio_bytes = await file.read()
     if not audio_bytes:
         raise HTTPException(status_code=400, detail="Audio fayl bo'sh!")
@@ -3362,9 +3364,8 @@ async def admin_ai_chat(req: AiChatRequest, request: Request):
     user_prompt = req.message.strip()
     if not user_prompt:
         raise HTTPException(status_code=400, detail="Xabar matni bo'sh bo'lishi mumkin emas!")
-    header_lang = get_accept_language(request)
-    if header_lang != "uzb" and (not req.language or req.language == "uzb"):
-        req.language = header_lang
+    if not req.language:
+        req.language = "uzb"
     return await _build_ai_response(req, user_prompt, request)
 
 
