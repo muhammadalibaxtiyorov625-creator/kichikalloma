@@ -46,6 +46,11 @@
           <span>Xabarlar</span>
           <span class="nav-badge alert-badge" id="unread-count-badge">0</span>
         </button>
+        <button class="nav-btn" data-tab="uran">
+          <i class="bi bi-translate"></i>
+          <span>Uran (So'zlar & Test)</span>
+          <span class="nav-badge" id="uran-count-badge">10</span>
+        </button>
         
         <div class="nav-section-title">Havolalar & API</div>
         <a href="/" target="_blank" class="nav-btn external-link">
@@ -237,8 +242,45 @@
             </div>
           </div>
         </section>
+
+        <!-- 4. URAN PLANET TAB (NUTQ VA TIL — SO'ZLAR & TESTLAR) -->
+        <section id="tab-uran" class="tab-content">
+          <div class="section-toolbar">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" id="uran-cat-search" placeholder="Kategoriyalar bo'yicha qidirish..." oninput="renderUranCategories()">
+            </div>
+            <div class="toolbar-actions">
+              <span class="badge" style="background:#eef2ff; color:#4f46e5; padding:8px 14px; border-radius:8px; font-weight:700;">
+                <i class="bi bi-info-circle"></i> Mobil Ilova: /mobile/planets/uran/category/
+              </span>
+            </div>
+          </div>
+
+          <div id="uran-categories-grid" class="cards-grid">
+            <div class="loading-state">Uran kategoriyalari yuklanmoqda...</div>
+          </div>
+        </section>
       </div>
     </main>
+  </div>
+
+  <!-- URAN WORDS & QUIZ MODAL -->
+  <div id="uran-words-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 id="uran-modal-title"><i class="bi bi-translate text-yellow"></i> Kategoriya So'zlari va Test Savollari</h3>
+          <p id="uran-modal-subtitle" style="font-size:13px; color:#64748b; margin:4px 0 0 0;"></p>
+        </div>
+        <button class="modal-close" onclick="closeUranModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div id="uran-words-container">
+          <div class="loading-state">Yuklanmoqda...</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- AMENITY CREATE/EDIT MODAL -->

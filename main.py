@@ -60,7 +60,11 @@ from schemas import (
     AiChatRequest, AiChatResponse, AiTtsRequest,
     AiVoiceChatResponse, AiSttResponse,
     EmotionOption, RecordEmotionRequest, EmotionItemResponse,
-    WeeklyChildEmotionsResponse, ParentChildEmotionsAnalyticsResponse
+    WeeklyChildEmotionsResponse, ParentChildEmotionsAnalyticsResponse,
+    UranCategoryBase, UranCategoryCreate, UranCategoryUpdate, UranCategoryResponse,
+    UranWordBase, UranWordCreate, UranWordUpdate, UranWordResponse,
+    UranQuizOption, UranCategoryDetailResponse,
+    UranQuizSubmitRequest, UranQuizSubmitResponse
 )
 
 # Gemini AI Konfiguratsiyasi
@@ -194,6 +198,26 @@ def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depen
     if not user:
         raise HTTPException(status_code=401, detail="Foydalanuvchi topilmadi!")
     return dict(user)
+
+def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> Optional[dict]:
+    """Token bo'lsa foydalanuvchini aniqlaydi, bo'lmasa xato bermasdan None qaytaradi"""
+    if not credentials or not credentials.credentials:
+        return None
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        raw_uid = payload.get("user_id") or payload.get("sub")
+        if raw_uid is None:
+            return None
+        user_id = int(raw_uid)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    except Exception:
+        return None
 
 def normalize_phone(phone: str) -> str:
     """Telefon raqamni toza +998934472477 formatiga keltirish"""
@@ -2120,9 +2144,422 @@ def delete_child_emotion(emotion_id: int, current_user: dict = Depends(get_curre
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM child_emotions WHERE id = ? AND user_id = ?", (emotion_id, user_id))
-    conn.commit()
     conn.close()
     return {"success": True, "message": "Emotsiya yozuvi muvaffaqiyatli o'chirildi", "id": emotion_id}
+
+
+# ==============================================================================
+# 7.13. URAN (URANUS) / NUTQ VA TIL SAYYORASI — SO'ZLAR VA TESTLAR
+# ==============================================================================
+
+# 7.13.1. URAN KATEGORIYALARI RO'YXATI (/mobile/planets/uran/category/)
+@app.get("/mobile/planets/uran/category/", response_model=List[UranCategoryResponse], tags=["Mobil Ilova (Mobile API)"], summary="7.13.1. Uran / Nutq va Til Sayyorasi — Kategoriyalar Ro'yxati (name, image, words_count)")
+@app.get("/mobile/planets/uran/category", response_model=List[UranCategoryResponse], include_in_schema=False)
+@app.get("/mobile/planets/uranus/category/", response_model=List[UranCategoryResponse], include_in_schema=False)
+@app.get("/mobile/planets/uranus/category", response_model=List[UranCategoryResponse], include_in_schema=False)
+@app.get("/mobile/uran/categories/", response_model=List[UranCategoryResponse], include_in_schema=False)
+@app.get("/mobile/uran/categories", response_model=List[UranCategoryResponse], include_in_schema=False)
+def get_uran_categories(request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT c.*, COUNT(w.id) as words_count 
+        FROM uran_categories c 
+        LEFT JOIN uran_words w ON c.id = w.category_id 
+        WHERE c.status = 'active' 
+        GROUP BY c.id 
+        ORDER BY c.order_num ASC, c.id ASC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    result = []
+    for row in rows:
+        result.append({
+            "id": row["id"],
+            "name": row["name"],
+            "name_en": row["name_en"] or "",
+            "name_ru": row["name_ru"] or "",
+            "image": to_full_image_url(row["image"], request),
+            "description": row["description"] or "",
+            "status": row["status"] or "active",
+            "order_num": row["order_num"] or 0,
+            "words_count": row["words_count"] or 0,
+            "created_at": str(row["created_at"]) if row["created_at"] else None
+        })
+    return result
+
+
+# 7.13.2. URAN KATEGORIYA SO'ZLARI VA TEST SAVOLLARI (/mobile/planets/uran/category/{category_id})
+@app.get("/mobile/planets/uran/category/{category_id}", response_model=UranCategoryDetailResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.13.2. Uran / Kategoriya So'zlari va Test Savollari (Inglizcha-O'zbekcha va 4 Variantli Test)")
+@app.get("/mobile/planets/uran/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
+@app.get("/mobile/planets/uranus/category/{category_id}", response_model=UranCategoryDetailResponse, include_in_schema=False)
+@app.get("/mobile/planets/uranus/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
+@app.get("/mobile/uran/category/{category_id}", response_model=UranCategoryDetailResponse, include_in_schema=False)
+@app.get("/mobile/uran/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
+def get_uran_category_detail(category_id: int, request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 1. Kategoriya ma'lumoti
+    cursor.execute("SELECT * FROM uran_categories WHERE id = ?", (category_id,))
+    cat_row = cursor.fetchone()
+    if not cat_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Kategoriya topilmadi")
+
+    # 2. Kategoriyadagi barcha so'zlar
+    cursor.execute("SELECT * FROM uran_words WHERE category_id = ? ORDER BY order_num ASC, id ASC", (category_id,))
+    word_rows = cursor.fetchall()
+
+    # 3. Test variantlari uchun boshqa barcha so'zlar zaxirasi
+    cursor.execute("SELECT word_uz, word_en FROM uran_words WHERE category_id != ?", (category_id,))
+    other_word_rows = cursor.fetchall()
+    conn.close()
+
+    category_image_url = to_full_image_url(cat_row["image"], request)
+
+    words_list = []
+    tests_list = []
+
+    # Kategoriyadagi o'zbekcha so'zlar to'plami
+    cat_uz_words = [w["word_uz"] for w in word_rows]
+    other_uz_words = [w["word_uz"] for w in other_word_rows]
+
+    for idx, w in enumerate(word_rows):
+        word_img = to_full_image_url(w["image"] or cat_row["image"], request)
+        audio_url = to_full_image_url(w["audio_url"], request) if w["audio_url"] else None
+
+        word_item = {
+            "id": w["id"],
+            "category_id": w["category_id"],
+            "word_uz": w["word_uz"],
+            "word_en": w["word_en"],
+            "word_ru": w["word_ru"] or "",
+            "transcription": w["transcription"] or "",
+            "image": word_img,
+            "audio_url": audio_url,
+            "example_sentence": w["example_sentence"] or "",
+            "example_translation": w["example_translation"] or "",
+            "order_num": w["order_num"] or 0,
+            "created_at": str(w["created_at"]) if w["created_at"] else None
+        }
+        words_list.append(word_item)
+
+        # 4 ta variantli test savoli tayyorlash:
+        correct_ans = w["word_uz"]
+        # Chalg'ituvchi variantlar (noto'g'ri 3 ta javob)
+        cat_distractors = [u for u in cat_uz_words if u != correct_ans]
+        other_distractors = [u for u in other_uz_words if u != correct_ans and u not in cat_distractors]
+
+        distractors = []
+        if len(cat_distractors) >= 3:
+            distractors = random.sample(cat_distractors, 3)
+        else:
+            distractors = list(cat_distractors)
+            needed = 3 - len(distractors)
+            if len(other_distractors) >= needed:
+                distractors.extend(random.sample(other_distractors, needed))
+            else:
+                distractors.extend(other_distractors)
+                fallback = ["Olma", "Kitob", "Quyosh", "Sher", "Mashina", "Doira", "Qizil"]
+                for fb in fallback:
+                    if len(distractors) >= 3:
+                        break
+                    if fb != correct_ans and fb not in distractors:
+                        distractors.append(fb)
+
+        options = [correct_ans] + distractors[:3]
+        random.shuffle(options)
+
+        test_item = {
+            "id": idx + 1,
+            "word_id": w["id"],
+            "word_en": w["word_en"],
+            "question": w["word_en"],
+            "prompt": f"'{w['word_en']}' so'zining o'zbekcha tarjimasi qaysi?",
+            "correct_answer": correct_ans,
+            "options": options,
+            "image": word_img,
+            "explanation": f"'{w['word_en']}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
+        }
+        tests_list.append(test_item)
+
+    return {
+        "id": cat_row["id"],
+        "name": cat_row["name"],
+        "name_en": cat_row["name_en"] or "",
+        "name_ru": cat_row["name_ru"] or "",
+        "image": category_image_url,
+        "description": cat_row["description"] or "",
+        "words_count": len(words_list),
+        "words": words_list,
+        "tests": tests_list,
+        "quiz": tests_list
+    }
+
+
+# 7.13.3. URAN TEST NATIJASINI TOPSHIRISH VA SAQLASH
+@app.post("/mobile/planets/uran/category/{category_id}/submit-test", response_model=UranQuizSubmitResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.13.3. Uran / Test Natijasini Saqlash va Baholash")
+@app.post("/mobile/planets/uran/category/{category_id}/submit-test/", response_model=UranQuizSubmitResponse, include_in_schema=False)
+@app.post("/mobile/planets/uran/submit-quiz", response_model=UranQuizSubmitResponse, include_in_schema=False)
+@app.post("/mobile/planets/uran/submit-quiz/", response_model=UranQuizSubmitResponse, include_in_schema=False)
+def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    total = max(payload.total_questions, 1)
+    score = min(max(payload.score, 0), total)
+    percentage = round((score / total) * 100, 1)
+    passed = percentage >= 60.0
+
+    if percentage >= 90.0:
+        stars = 3
+        congrat = "Barakalla! Sen barcha so'zlarni a'lo darajada o'rganding! 🌟🌟🌟"
+    elif percentage >= 70.0:
+        stars = 2
+        congrat = "Juda yaxshi natija! Yangi so'zlarni puxta o'zlashtirding! 🌟🌟"
+    elif percentage >= 50.0:
+        stars = 1
+        congrat = "Yaxshi! Yana bir bor mashq qilib, 100% natijaga erishishing mumkin! 🌟"
+    else:
+        stars = 0
+        congrat = "Harakatdan to'xtama! So'zlarni qaytadan takrorlab ko'r, albatta uddalaysan! 💪"
+
+    user_id = current_user["id"] if current_user else 1
+    child_id = payload.child_id or 1
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO child_uran_quiz_results (user_id, child_id, category_id, score, total_questions, percentage)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, child_id, category_id, score, total, percentage))
+
+        # Vaqt statistikasini yangilash
+        spent_mins = max(1, (payload.time_spent_seconds or 60) // 60)
+        today = datetime.now().strftime("%Y-%m-%d")
+        cursor.execute("SELECT id, minutes_spent FROM child_activities WHERE child_id = ? AND date = ?", (child_id, today))
+        act_row = cursor.fetchone()
+        if act_row:
+            cursor.execute("UPDATE child_activities SET minutes_spent = minutes_spent + ? WHERE id = ?", (spent_mins, act_row["id"]))
+        else:
+            cursor.execute("""
+                INSERT INTO child_activities (user_id, child_id, date, minutes_spent, messages_count, planet_id)
+                VALUES (?, ?, ?, ?, 1, 44)
+            """, (user_id, child_id, today, spent_mins))
+
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Quiz natijasini saqlashda xatolik:", e)
+
+    return {
+        "success": True,
+        "message": "Test natijasi muvaffaqiyatli saqlandi!",
+        "score": score,
+        "total_questions": total,
+        "percentage": percentage,
+        "passed": passed,
+        "stars_earned": stars,
+        "congratulation": congrat
+    }
+
+
+# ==============================================================================
+# 7.13.4. ADMIN PANEL — URAN KATEGORIYALARI VA SO'ZLARI CRUD
+# ==============================================================================
+@app.get("/api/website/uran/categories", response_model=List[UranCategoryResponse], tags=["Website & Admin API"], summary="Admin: Uran Kategoriyalar Ro'yxati")
+def admin_get_uran_categories(request: Request):
+    return get_uran_categories(request)
+
+@app.post("/api/website/uran/categories", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, tags=["Website & Admin API"], summary="Admin: Yangi Uran Kategoriyasi Qo'shish")
+def admin_create_uran_category(payload: UranCategoryCreate, request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO uran_categories (name, name_en, name_ru, image, description, status, order_num)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (payload.name, payload.name_en or "", payload.name_ru or "", payload.image or "/images/categories/fruits.svg", payload.description or "", payload.status or "active", payload.order_num or 0))
+    cat_id = cursor.lastrowid
+    conn.commit()
+    cursor.execute("SELECT * FROM uran_categories WHERE id = ?", (cat_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "name_en": row["name_en"],
+        "name_ru": row["name_ru"],
+        "image": to_full_image_url(row["image"], request),
+        "description": row["description"],
+        "status": row["status"],
+        "order_num": row["order_num"],
+        "words_count": 0,
+        "created_at": str(row["created_at"])
+    }
+
+@app.put("/api/website/uran/categories/{cat_id}", response_model=UranCategoryResponse, tags=["Website & Admin API"], summary="Admin: Uran Kategoriyasini Tahrirlash")
+def admin_update_uran_category(cat_id: int, payload: UranCategoryUpdate, request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM uran_categories WHERE id = ?", (cat_id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Kategoriya topilmadi")
+
+    name = payload.name if payload.name is not None else row["name"]
+    name_en = payload.name_en if payload.name_en is not None else row["name_en"]
+    name_ru = payload.name_ru if payload.name_ru is not None else row["name_ru"]
+    image = payload.image if payload.image is not None else row["image"]
+    description = payload.description if payload.description is not None else row["description"]
+    status_val = payload.status if payload.status is not None else row["status"]
+    order_num = payload.order_num if payload.order_num is not None else row["order_num"]
+
+    cursor.execute("""
+        UPDATE uran_categories 
+        SET name = ?, name_en = ?, name_ru = ?, image = ?, description = ?, status = ?, order_num = ?
+        WHERE id = ?
+    """, (name, name_en, name_ru, image, description, status_val, order_num, cat_id))
+    conn.commit()
+
+    cursor.execute("SELECT COUNT(*) as words_count FROM uran_words WHERE category_id = ?", (cat_id,))
+    w_cnt = cursor.fetchone()["words_count"]
+    cursor.execute("SELECT * FROM uran_categories WHERE id = ?", (cat_id,))
+    updated_row = cursor.fetchone()
+    conn.close()
+
+    return {
+        "id": updated_row["id"],
+        "name": updated_row["name"],
+        "name_en": updated_row["name_en"],
+        "name_ru": updated_row["name_ru"],
+        "image": to_full_image_url(updated_row["image"], request),
+        "description": updated_row["description"],
+        "status": updated_row["status"],
+        "order_num": updated_row["order_num"],
+        "words_count": w_cnt,
+        "created_at": str(updated_row["created_at"])
+    }
+
+@app.delete("/api/website/uran/categories/{cat_id}", tags=["Website & Admin API"], summary="Admin: Uran Kategoriyasini O'chirish")
+def admin_delete_uran_category(cat_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM uran_categories WHERE id = ?", (cat_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Kategoriya va uning barcha so'zlari muvaffaqiyatli o'chirildi", "id": cat_id}
+
+@app.get("/api/website/uran/words", response_model=List[UranWordResponse], tags=["Website & Admin API"], summary="Admin: Uran So'zlar Ro'yxati")
+def admin_get_uran_words(category_id: Optional[int] = None, request: Request = None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if category_id:
+        cursor.execute("SELECT * FROM uran_words WHERE category_id = ? ORDER BY order_num ASC, id ASC", (category_id,))
+    else:
+        cursor.execute("SELECT * FROM uran_words ORDER BY category_id ASC, order_num ASC, id ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {
+            "id": r["id"],
+            "category_id": r["category_id"],
+            "word_uz": r["word_uz"],
+            "word_en": r["word_en"],
+            "word_ru": r["word_ru"] or "",
+            "transcription": r["transcription"] or "",
+            "image": to_full_image_url(r["image"], request) if request else r["image"],
+            "audio_url": to_full_image_url(r["audio_url"], request) if (r["audio_url"] and request) else r["audio_url"],
+            "example_sentence": r["example_sentence"] or "",
+            "example_translation": r["example_translation"] or "",
+            "order_num": r["order_num"] or 0,
+            "created_at": str(r["created_at"]) if r["created_at"] else None
+        }
+        for r in rows
+    ]
+
+@app.post("/api/website/uran/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Website & Admin API"], summary="Admin: Yangi So'z Qo'shish")
+def admin_create_uran_word(payload: UranWordCreate, request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO uran_words (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (payload.category_id, payload.word_uz, payload.word_en, payload.word_ru or "", payload.transcription or "", payload.image or "", payload.audio_url or "", payload.example_sentence or "", payload.example_translation or "", payload.order_num or 0))
+    word_id = cursor.lastrowid
+    conn.commit()
+    cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return {
+        "id": row["id"],
+        "category_id": row["category_id"],
+        "word_uz": row["word_uz"],
+        "word_en": row["word_en"],
+        "word_ru": row["word_ru"],
+        "transcription": row["transcription"],
+        "image": to_full_image_url(row["image"], request),
+        "audio_url": to_full_image_url(row["audio_url"], request) if row["audio_url"] else None,
+        "example_sentence": row["example_sentence"],
+        "example_translation": row["example_translation"],
+        "order_num": row["order_num"],
+        "created_at": str(row["created_at"])
+    }
+
+@app.put("/api/website/uran/words/{word_id}", response_model=UranWordResponse, tags=["Website & Admin API"], summary="Admin: So'zni Tahrirlash")
+def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="So'z topilmadi")
+
+    category_id = payload.category_id if payload.category_id is not None else row["category_id"]
+    word_uz = payload.word_uz if payload.word_uz is not None else row["word_uz"]
+    word_en = payload.word_en if payload.word_en is not None else row["word_en"]
+    word_ru = payload.word_ru if payload.word_ru is not None else row["word_ru"]
+    transcription = payload.transcription if payload.transcription is not None else row["transcription"]
+    image = payload.image if payload.image is not None else row["image"]
+    audio_url = payload.audio_url if payload.audio_url is not None else row["audio_url"]
+    example_sentence = payload.example_sentence if payload.example_sentence is not None else row["example_sentence"]
+    example_translation = payload.example_translation if payload.example_translation is not None else row["example_translation"]
+    order_num = payload.order_num if payload.order_num is not None else row["order_num"]
+
+    cursor.execute("""
+        UPDATE uran_words 
+        SET category_id = ?, word_uz = ?, word_en = ?, word_ru = ?, transcription = ?, image = ?, audio_url = ?, example_sentence = ?, example_translation = ?, order_num = ?
+        WHERE id = ?
+    """, (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num, word_id))
+    conn.commit()
+    cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
+    updated_row = cursor.fetchone()
+    conn.close()
+
+    return {
+        "id": updated_row["id"],
+        "category_id": updated_row["category_id"],
+        "word_uz": updated_row["word_uz"],
+        "word_en": updated_row["word_en"],
+        "word_ru": updated_row["word_ru"],
+        "transcription": updated_row["transcription"],
+        "image": to_full_image_url(updated_row["image"], request),
+        "audio_url": to_full_image_url(updated_row["audio_url"], request) if updated_row["audio_url"] else None,
+        "example_sentence": updated_row["example_sentence"],
+        "example_translation": updated_row["example_translation"],
+        "order_num": updated_row["order_num"],
+        "created_at": str(updated_row["created_at"])
+    }
+
+@app.delete("/api/website/uran/words/{word_id}", tags=["Website & Admin API"], summary="Admin: So'zni O'chirish")
+def admin_delete_uran_word(word_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM uran_words WHERE id = ?", (word_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "So'z muvaffaqiyatli o'chirildi", "id": word_id}
 
 
 # 8. MOBIL SAYYORALAR RO'YXATI (/mobile/planets/ va /mobile/planets)

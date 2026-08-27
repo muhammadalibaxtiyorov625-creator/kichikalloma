@@ -290,8 +290,238 @@ def init_db():
         )
         print("Boshlang'ich FAQ savollari bazaga muvaffaqiyatli kiritildi.")
 
+    # 12. Uran / Nutq va Til Sayyorasi — Kategoriyalar jadvali (Uran Categories)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS uran_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            name_en TEXT DEFAULT '',
+            name_ru TEXT DEFAULT '',
+            image TEXT DEFAULT '/images/categories/fruits.svg',
+            description TEXT DEFAULT '',
+            status TEXT DEFAULT 'active',
+            order_num INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 13. Uran / Nutq va Til Sayyorasi — So'zlar jadvali (Uran Words)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS uran_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category_id INTEGER NOT NULL,
+            word_uz TEXT NOT NULL,
+            word_en TEXT NOT NULL,
+            word_ru TEXT DEFAULT '',
+            transcription TEXT DEFAULT '',
+            image TEXT DEFAULT '',
+            audio_url TEXT DEFAULT '',
+            example_sentence TEXT DEFAULT '',
+            example_translation TEXT DEFAULT '',
+            order_num INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (category_id) REFERENCES uran_categories (id) ON DELETE CASCADE
+        )
+    """)
+
+    # 14. Uran / Test Natijalari (Child Quiz Results)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_uran_quiz_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            category_id INTEGER NOT NULL,
+            score INTEGER DEFAULT 0,
+            total_questions INTEGER DEFAULT 0,
+            percentage REAL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
+    # Uran kategoriyalari bo'shmi? Bo'lsa boyitilgan boshlang'ich ma'lumotlar bilan to'ldiramiz
+    cursor.execute("SELECT COUNT(*) as cnt FROM uran_categories")
+    uran_cat_cnt = cursor.fetchone()["cnt"]
+    if uran_cat_cnt == 0:
+        initial_uran_data = [
+            {
+                "category": ("Meva va Sabzavotlar", "Fruits & Vegetables", "Фрукты и Овощи", "/images/categories/fruits.svg", "Meva va sabzavotlarning inglizcha va o'zbekcha nomlarini o'rganamiz", "active", 1),
+                "words": [
+                    ("Olma", "Apple", "Яблоко", "[ˈæp.əl]", "An apple a day keeps the doctor away.", "Kuniga bitta olma shifokordan asraydi.", 1),
+                    ("Banan", "Banana", "Банан", "[bəˈnæn.ə]", "Monkeys love sweet yellow bananas.", "Maymunlar shirin sariq bananlarni yaxshi ko'radi.", 2),
+                    ("Apelsin", "Orange", "Апельсин", "[ˈɒr.ɪndʒ]", "Orange is full of healthy vitamin C.", "Apelsin foydali vitamin C ga boy.", 3),
+                    ("Qulupnay", "Strawberry", "Клубника", "[ˈstrɔː.bər.i]", "Strawberries are red and very sweet.", "Qulupnaylar qizil va juda shirin.", 4),
+                    ("Tarvuz", "Watermelon", "Арбуз", "[ˈwɔː.təˌmel.ən]", "Watermelon is a juicy summer fruit.", "Tarvuz sersuv yozgi mevadir.", 5),
+                    ("Uzum", "Grape", "Виноград", "[ɡreɪp]", "Sweet grapes grow in big bunches.", "Shirin uzumlar katta shingil bo'lib o'sadi.", 6),
+                    ("Limon", "Lemon", "Лимон", "[ˈlem.ən]", "Lemon has a fresh sour taste.", "Limon yangi nordon ta'mga ega.", 7),
+                    ("Shaftoli", "Peach", "Персик", "[piːtʃ]", "Fresh peaches are soft and delicious.", "Yangi shaftolilar yumshoq va mazali.", 8),
+                    ("Sabzi", "Carrot", "Морковь", "[ˈkær.ət]", "Rabbits like eating crunchy carrots.", "Quyonlar qarsildoq sabzini yeyishni yoqtiradi.", 9),
+                    ("Pomidor", "Tomato", "Помидор", "[təˈmɑː.təʊ]", "Red tomatoes are used in fresh salad.", "Qizil pomidorlar yangi salatda ishlatiladi.", 10),
+                    ("Bodring", "Cucumber", "Огурец", "[ˈkjuː.kʌm.bər]", "Cucumber is crispy, cool and green.", "Bodring qarsildoq, salqin va yashil.", 11),
+                    ("Kartoshka", "Potato", "Картофель", "[pəˈteɪ.təʊ]", "Potatoes can be boiled or baked.", "Kartoshkani qaynatish yoki pishirish mumkin.", 12)
+                ]
+            },
+            {
+                "category": ("Hayvonlar olami", "Animals", "Животные", "/images/categories/animals.svg", "Yovvoyi va uy hayvonlarining nomlarini o'rganamiz", "active", 2),
+                "words": [
+                    ("Sher", "Lion", "Лев", "[ˈlaɪ.ən]", "The lion is the king of the savanna.", "Sher savanna podshohidir.", 1),
+                    ("Fil", "Elephant", "Слон", "[ˈel.ɪ.fənt]", "The elephant is the largest land animal.", "Fil quruqlikdagi eng katta hayvondir.", 2),
+                    ("Yo'lbars", "Tiger", "Тигр", "[ˈtaɪ.ɡər]", "The tiger has beautiful striped fur.", "Yo'lbarsning go'zal chiziqli terisi bor.", 3),
+                    ("Maymun", "Monkey", "Обезьяна", "[ˈmʌŋ.ki]", "The monkey swings cheerfully on branches.", "Maymun daraxt shoxlarida quvnoq uchadi.", 4),
+                    ("Kuchuk", "Dog", "Собака", "[dɒɡ]", "The dog is a faithful friend to people.", "Kuchuk odamlarga sadoqatli do'stdir.", 5),
+                    ("Mushuk", "Cat", "Кошка", "[kæt]", "The cat purrs softly when stroked.", "Mushuk silaganda ohista xurillaydi.", 6),
+                    ("Ot", "Horse", "Лошадь", "[hɔːs]", "The horse gallops swiftly across the field.", "Ot dala bo'ylab chaqqon yuguradi.", 7),
+                    ("Quyon", "Rabbit", "Кролик", "[ˈræb.ɪt]", "The rabbit has soft fur and long ears.", "Quyonning yumshoq yungi va uzun quloqlari bor.", 8),
+                    ("Ayiq", "Bear", "Медведь", "[beər]", "The bear loves eating fresh forest berries.", "Ayiq yangi o'rmon mevalarini yeyishni yoqtiradi.", 9),
+                    ("Jirafa", "Giraffe", "Жираф", "[dʒɪˈrɑːf]", "The giraffe reaches the highest green leaves.", "Jirafa eng baland yashil barglarga yetadi.", 10),
+                    ("Bo'ri", "Wolf", "Волк", "[wʊlf]", "The grey wolf lives together in a pack.", "Kulrang bo'ri to'dada birga yashaydi.", 11),
+                    ("Tulki", "Fox", "Лиса", "[fɒks]", "The cunning fox has a fluffy tail.", "Ayyor tulkining momiq dumi bor.", 12)
+                ]
+            },
+            {
+                "category": ("Ranglar va Shakllar", "Colors & Shapes", "Цвета и Формы", "/images/categories/colors.svg", "Asosiy ranglar va geometrik shakllar", "active", 3),
+                "words": [
+                    ("Qizil", "Red", "Красный", "[red]", "The red apple is ripe and sweet.", "Qizil olma pishgan va shirin.", 1),
+                    ("Ko'k", "Blue", "Синий", "[bluː]", "The clear summer sky is bright blue.", "Musaffo yozgi osmon yorqin ko'k rangda.", 2),
+                    ("Yashil", "Green", "Зеленый", "[ɡriːn]", "Fresh green leaves grow on trees.", "Daraxtlarda yangi yashil barglar o'smoqda.", 3),
+                    ("Sariq", "Yellow", "Желтый", "[ˈjel.əʊ]", "The morning sun shines bright yellow.", "Ertalabki quyosh yorqin sariq porlaydi.", 4),
+                    ("Oq", "White", "Белый", "[waɪt]", "Soft white snow covers the garden.", "Yumshoq oq qor bog'ni qoplab olgan.", 5),
+                    ("Qora", "Black", "Черный", "[blæk]", "The midnight sky is completely black.", "Yarim tunda osmon butunlay qora.", 6),
+                    ("To'q sariq", "Orange", "Оранжевый", "[ˈɒr.ɪndʒ]", "Ripe oranges are bright orange.", "Pishgan apelsinlar yorqin to'q sariq.", 7),
+                    ("Doira", "Circle", "Круг", "[ˈsɜː.kəl]", "The round wheel has a circle shape.", "Dumaloq g'ildirak doira shakliga ega.", 8),
+                    ("Kvadrat", "Square", "Квадрат", "[skweər]", "A square box has four equal sides.", "Kvadrat qutining to'rtta teng tomoni bor.", 9),
+                    ("Uchburchak", "Triangle", "Треугольник", "[ˈtraɪ.æŋ.ɡəl]", "A slice of yummy pizza is a triangle.", "Mazali pitssa bo'lagi uchburchakdir.", 10)
+                ]
+            },
+            {
+                "category": ("Oila va Inson", "Family & People", "Семья и Люди", "/images/categories/family.svg", "Oila a'zolari va odamlar", "active", 4),
+                "words": [
+                    ("Ota", "Father", "Отец", "[ˈfɑː.ðər]", "My father helps me with my studies.", "Otam menga darslarimda yordam beradi.", 1),
+                    ("Ona", "Mother", "Мать", "[ˈmʌð.ər]", "My mother gives the warmest hugs.", "Onam eng samimiy quchoq ochadi.", 2),
+                    ("Aka / Uka", "Brother", "Брат", "[ˈbrʌð.ər]", "I love playing games with my brother.", "Men ukam bilan o'yin o'ynashni yaxshi ko'raman.", 3),
+                    ("Opa / Singil", "Sister", "Сестра", "[ˈsɪs.tər]", "My sister shares her favorite toys.", "Singlim sevimli o'yinchoqlarini baham ko'radi.", 4),
+                    ("Bobo", "Grandfather", "Дедушка", "[ˈɡræn.fɑː.ðər]", "Grandfather tells magical fairy tales.", "Bobom sehrli ertaklar aytib beradi.", 5),
+                    ("Buvi", "Grandmother", "Бабушка", "[ˈɡræn.mʌð.ər]", "Grandmother bakes delicious honey cake.", "Buvim mazali asalli tort pishiradi.", 6),
+                    ("O'g'il bola", "Boy", "Мальчик", "[bɔɪ]", "The brave boy solved the puzzle.", "Jasur o'g'il bola jumboqni yechdi.", 7),
+                    ("Qiz bola", "Girl", "Девочка", "[ɡɜːl]", "The smart girl reads many books.", "Aqlli qiz bola ko'p kitob o'qiydi.", 8),
+                    ("Chaqaloq", "Baby", "Малыш", "[ˈbeɪ.bi]", "The cute baby giggles cheerfully.", "Yoqimtoy chaqaloq quvnoq kuladi.", 9),
+                    ("Do'st", "Friend", "Друг", "[frend]", "A true friend is always by your side.", "Haqiqiy do'st doimo yoningizda bo'ladi.", 10)
+                ]
+            },
+            {
+                "category": ("Maktab va O'qish", "School & Learning", "Школа и Учеба", "/images/categories/school.svg", "Maktab anjomlari va ta'lim so'zlari", "active", 5),
+                "words": [
+                    ("Kitob", "Book", "Книга", "[bʊk]", "Reading books gives great wisdom.", "Kitob o'qish katta donolik beradi.", 1),
+                    ("Ruchka", "Pen", "Ручка", "[pen]", "I write my exercises with a blue pen.", "Men mashqlarimni ko'k ruchkada yozaman.", 2),
+                    ("Qalam", "Pencil", "Карандаш", "[ˈpen.səl]", "Draw a picture with this sharp pencil.", "Bu o'tkir qalam bilan rasm chizing.", 3),
+                    ("Maktab", "School", "Школа", "[skuːl]", "We learn exciting knowledge at school.", "Biz maktabda ajoyib bilimlarni o'rganamiz.", 4),
+                    ("O'qituvchi", "Teacher", "Учитель", "[ˈtiː.tʃər]", "Our teacher explains everything kindly.", "O'qituvchimiz hamma narsani mehribonlik bilan tushuntiradi.", 5),
+                    ("O'quvchi", "Student", "Ученик", "[ˈstjuː.dənt]", "Every student listens carefully in class.", "Har bir o'quvchi darsda diqqat bilan tinglaydi.", 6),
+                    ("Sumka", "Bag", "Сумка", "[bæɡ]", "Put your notebooks into your school bag.", "Daftarlaringizni maktab sumkangizga soling.", 7),
+                    ("Parta", "Desk", "Парта", "[desk]", "Sit straight at your classroom desk.", "Sinf partangizda to'g'ri o'tiring.", 8),
+                    ("Chizg'ich", "Ruler", "Линейка", "[ˈruː.lər]", "Use a ruler to draw a straight line.", "To'g'ri chiziq chizish uchun chizg'ichdan foydalaning.", 9),
+                    ("O'chirg'ich", "Eraser", "Ластик", "[ɪˈreɪ.zər]", "An eraser cleans pencil marks neatly.", "O'chirg'ich qalam izlarini toza o'chiradi.", 10)
+                ]
+            },
+            {
+                "category": ("Kiyim-kechak", "Clothes", "Одежда", "/images/categories/clothes.svg", "Kiyimlar va poyabzallar", "active", 6),
+                "words": [
+                    ("Ko'ylak", "Shirt", "Рубашка", "[ʃɜːt]", "I iron my clean white shirt.", "Men toza oq ko'ylagimni dazmollayman.", 1),
+                    ("Futbolka", "T-shirt", "Футболка", "[ˈtiː.ʃɜːt]", "I wear a bright yellow T-shirt in summer.", "Yozda men yorqin sariq futbolka kiyaman.", 2),
+                    ("Shim", "Pants", "Брюки", "[pænts]", "These warm pants are great for cold days.", "Bu issiq shim sovuq kunlar uchun ajoyib.", 3),
+                    ("Poyabzal", "Shoes", "Обувь", "[ʃuːz]", "Tie your running shoes tightly.", "Yugurish poyabzalingizni mahkam bog'lang.", 4),
+                    ("Bosh kiyim", "Hat", "Шляпа", "[hæt]", "Put on your hat on sunny days.", "Quyoshli kunlarda bosh kiyimingizni kiying.", 5),
+                    ("Kurtka", "Jacket", "Куртка", "[ˈdʒæk.ɪt]", "Wear a thick jacket when going outside.", "Tashqariga chiqqanda qalin kurtka kiying.", 6),
+                    ("Paypoq", "Socks", "Носки", "[sɒks]", "Soft cotton socks keep feet comfortable.", "Yumshoq paxta paypoqlar oyoqlarga qulaylik beradi.", 7),
+                    ("Ko'ylak (ayollar)", "Dress", "Платье", "[dres]", "She wore a lovely pink dress.", "U chiroyli pushti ko'ylak kiyib oldi.", 8),
+                    ("Etik", "Boots", "Сапоги", "[buːts]", "Rubber boots are perfect for rain.", "Rezina etiklar yomg'ir uchun juda mos.", 9),
+                    ("Qo'lqop", "Gloves", "Перчатки", "[ɡlʌvz]", "Warm gloves protect hands from frost.", "Issiq qo'lqoplar qo'llarni sovuqdan asraydi.", 10)
+                ]
+            },
+            {
+                "category": ("Tabiat va Ob-havo", "Nature & Weather", "Природа и Погода", "/images/categories/nature.svg", "Tabiat hodisalari va koinot", "active", 7),
+                "words": [
+                    ("Quyosh", "Sun", "Солнце", "[sʌn]", "The bright sun warms the Earth.", "Yorqin quyosh Yerni isitadi.", 1),
+                    ("Oy", "Moon", "Луна", "[muːn]", "The silver moon shines at night.", "Kumushrang oy kechasi nur sochadi.", 2),
+                    ("Yulduz", "Star", "Звезда", "[stɑːr]", "Stars twinkle brightly in the night sky.", "Yulduzlar tungi osmonda yorqin miltillaydi.", 3),
+                    ("Daraxt", "Tree", "Дерево", "[triː]", "The green tree gives fresh oxygen.", "Yashil daraxt toza kislorod beradi.", 4),
+                    ("Gul", "Flower", "Цветок", "[ˈflaʊ.ər]", "The red flower blooms in the garden.", "Qizil gul bog'da unib chiqadi.", 5),
+                    ("Bulut", "Cloud", "Облако", "[klaʊd]", "Fluffy white clouds float in the sky.", "Momiq oq bulutlar osmonda suzadi.", 6),
+                    ("Yomg'ir", "Rain", "Дождь", "[reɪn]", "Raindrops fall gently on the ground.", "Yomg'ir tomchilari yerga mayin yog'adi.", 7),
+                    ("Qor", "Snow", "Снег", "[snəʊ]", "Children love playing in fresh snow.", "Bolalar yangi qorda o'ynashni yaxshi ko'radi.", 8),
+                    ("Tog'", "Mountain", "Гора", "[ˈmaʊn.tɪn]", "The high mountain touches the blue sky.", "Baland tog' ko'k osmonga tegib turadi.", 9),
+                    ("Dengiz", "Sea", "Море", "[siː]", "The blue sea is full of fascinating fish.", "Moviy dengiz ajoyib baliqlarga to'la.", 10)
+                ]
+            },
+            {
+                "category": ("Transport va Sayohat", "Transport & Travel", "Транспорт и Путешествия", "/images/categories/transport.svg", "Transport vositalari va sayohat", "active", 8),
+                "words": [
+                    ("Mashina", "Car", "Машина", "[kɑːr]", "The fast electric car drives smoothly.", "Tezkor elektromobil ravon harakatlanadi.", 1),
+                    ("Avtobus", "Bus", "Автобус", "[bʌs]", "The yellow bus carries passengers safely.", "Sariq avtobus yo'lovchilarni xavfsiz tashiydi.", 2),
+                    ("Samolyot", "Airplane", "Самолет", "[ˈeə.pleɪn]", "The airplane flies high above the clouds.", "Samolyot bulutlardan balandda uchadi.", 3),
+                    ("Poezd", "Train", "Поезд", "[treɪn]", "The fast train moves on strong steel rails.", "Tezkor poezd mustahkam po'lat relslarda yuradi.", 4),
+                    ("Velosiped", "Bicycle", "Велосипед", "[ˈbaɪ.sɪ.kəl]", "Riding a bicycle is very good for health.", "Velosiped minish salomatlik uchun juda foydali.", 5),
+                    ("Kema", "Ship", "Корабль", "[ʃɪp]", "The large ship crosses the deep ocean.", "Katta kema chuqur okeanni kesib o'tadi.", 6),
+                    ("Vertolyot", "Helicopter", "Вертолет", "[ˈhel.ɪˌkɒp.tər]", "The rescue helicopter lands quickly.", "Qutqaruv vertolyoti tezda qo'nadi.", 7),
+                    ("Raketa", "Rocket", "Ракета", "[ˈrɒk.ɪt]", "The space rocket journeys to distant planets.", "Koinot raketasi olis sayyoralarga yo'l oladi.", 8),
+                    ("Qayiq", "Boat", "Лодка", "[bəʊt]", "We paddle a small boat on the quiet lake.", "Biz sokin ko'lda kichik qayiqda suzamiz.", 9),
+                    ("Taksi", "Taxi", "Такси", "[ˈtæk.si]", "The yellow taxi arrived on time.", "Sariq taksi o'z vaqtida yetib keldi.", 10)
+                ]
+            },
+            {
+                "category": ("Uy va Buyumlar", "Home & Objects", "Дом и Вещи", "/images/categories/home.svg", "Uy-ro'zg'or buyumlari va jihozlar", "active", 9),
+                "words": [
+                    ("Uy", "House", "Дом", "[haʊs]", "Our warm house is very welcoming.", "Bizning issiq uyimiz juda mehmondo'st.", 1),
+                    ("Xona", "Room", "Комната", "[ruːm]", "My bright room is tidy and organized.", "Mening yorug' xonam ozoda va tartibli.", 2),
+                    ("Eshik", "Door", "Дверь", "[dɔːr]", "Please close the room door quietly.", "Iltimos, xona eshigini ohista yoping.", 3),
+                    ("Deraza", "Window", "Окно", "[ˈwɪn.dəʊ]", "Fresh breeze comes through the open window.", "Ochiq derazadan toza shabada keladi.", 4),
+                    ("Stol", "Table", "Стол", "[ˈteɪ.bəl]", "We enjoy dinner together at the big table.", "Biz katta stolda birga kechki ovqat qilamiz.", 5),
+                    ("Stul", "Chair", "Стул", "[tʃeər]", "Sit down on this comfortable chair.", "Bu qulay stulga o'tiring.", 6),
+                    ("Karavot", "Bed", "Кровать", "[bed]", "Sleep peacefully in your cozy bed.", "Shinam karavotingizda tinch uxlang.", 7),
+                    ("Soat", "Clock", "Часы", "[klɒk]", "The clock on the wall shows the exact time.", "Devordagi soat aniq vaqtni ko'rsatadi.", 8),
+                    ("Chiroq", "Lamp", "Лампа", "[læmp]", "Turn on the reading lamp for your homework.", "Uy vazifangiz uchun dars chirog'ini yoqing.", 9),
+                    ("Finjon", "Cup", "Чашка", "[kʌp]", "Drink sweet warm cocoa from your mug.", "Finjoningizdan shirin iliq kakao iching.", 10)
+                ]
+            },
+            {
+                "category": ("Kasblar", "Professions", "Профессии", "/images/categories/professions.svg", "Kasblar va mutaxassisliklar", "active", 10),
+                "words": [
+                    ("Shifokor", "Doctor", "Врач", "[ˈdɒk.tər]", "The doctor helps people stay healthy.", "Shifokor odamlarga sog'lom bo'lishga yordam beradi.", 1),
+                    ("O'qituvchi", "Teacher", "Учитель", "[ˈtiː.tʃər]", "The teacher inspires students to learn.", "O'qituvchi o'quvchilarni o'rganishga ilhomlantiradi.", 2),
+                    ("Uchuvchi", "Pilot", "Пилот", "[ˈpaɪ.lət]", "The pilot flies airplanes to other countries.", "Uchuvchi samolyotlarni boshqa davlatlarga boshqaradi.", 3),
+                    ("Kosmonavt", "Astronaut", "Космонавт", "[ˈæs.trə.nɔːt]", "The astronaut explores the universe in space.", "Kosmonavt koinotda borliqni tadqiq qiladi.", 4),
+                    ("Politsiya", "Police", "Полицейский", "[pəˈliːs]", "Police officers protect our safety every day.", "Politsiya xodimlari har kuni xavfsizligimizni himoya qiladi.", 5),
+                    ("O't o'chiruvchi", "Firefighter", "Пожарный", "[ˈfaɪəˌfaɪ.tər]", "The brave firefighter puts out fires.", "Jasur o't o'chiruvchi olovni o'chiradi.", 6),
+                    ("Oshpaz", "Chef", "Повар", "[ʃef]", "The master chef cooks delicious food.", "Usta oshpaz mazali taomlar tayyorlaydi.", 7),
+                    ("Rassom", "Artist", "Художник", "[ˈɑː.tɪst]", "The talented artist paints lively portraits.", "Iqtidorli rassom jonli portretlar chizadi.", 8),
+                    ("Quruvchi", "Builder", "Строитель", "[ˈbɪl.dər]", "Builders construct sturdy new houses.", "Quruvchilar mustahkam yangi uylar qurishadi.", 9),
+                    ("Haydovchi", "Driver", "Водитель", "[ˈdraɪ.vər]", "The driver drives passenger buses safely.", "Haydovchi yo'lovchi avtobuslarini xavfsiz boshqaradi.", 10)
+                ]
+            }
+        ]
+
+        for item in initial_uran_data:
+            cat_tuple = item["category"]
+            cursor.execute(
+                "INSERT INTO uran_categories (name, name_en, name_ru, image, description, status, order_num) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                cat_tuple
+            )
+            cat_id = cursor.lastrowid
+            cat_image = cat_tuple[3]
+            words_to_insert = [
+                (cat_id, w[0], w[1], w[2], w[3], cat_image, "", w[4], w[5], w[6])
+                for w in item["words"]
+            ]
+            cursor.executemany(
+                "INSERT INTO uran_words (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                words_to_insert
+            )
+        print("Boshlang'ich Uran (Nutq va Til) kategoriyalari va so'zlari muvaffaqiyatli kiritildi.")
+
     conn.commit()
     conn.close()
 
 if __name__ == "__main__":
     init_db()
+

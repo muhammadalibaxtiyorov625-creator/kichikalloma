@@ -202,7 +202,9 @@ textarea:not(:disabled) {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
+/* === MOBILE FIRST: animatsiyalar o'chirilgan === */
+/* planet-float faqat desktop (md+) da ishlaydi */
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
   .planet-float {
     animation: planet-drift 14s ease-in-out infinite;
   }
@@ -218,32 +220,34 @@ textarea:not(:disabled) {
   }
 }
 
-/* Glass Shimmer Reflection Effect */
+/* Glass Shimmer — faqat desktop hover da */
 .glass-card {
   position: relative;
   overflow: hidden;
 }
 
-.glass-card::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: skewX(-25deg);
-  pointer-events: none;
-  transition: left 1s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
+@media (min-width: 768px) {
+  .glass-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg);
+    pointer-events: none;
+    transition: left 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
 
-.glass-card:hover::after {
-  left: 150%;
+  .glass-card:hover::after {
+    left: 150%;
+  }
 }
 
 @keyframes marquee {
@@ -259,48 +263,53 @@ textarea:not(:disabled) {
 }
 
 @keyframes orbit-cw {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes orbit-ccw {
-  0% {
-    transform: rotate(0deg);
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+/* orbit animatsiyalar faqat desktop da */
+@media (min-width: 768px) {
+  .animate-orbit-cw-slow {
+    animation: orbit-cw 80s linear infinite;
   }
-  100% {
-    transform: rotate(-360deg);
+
+  .animate-orbit-ccw-slow {
+    animation: orbit-ccw 80s linear infinite;
   }
 }
 
-.animate-orbit-cw-slow {
-  animation: orbit-cw 80s linear infinite;
-}
-
-.animate-orbit-ccw-slow {
-  animation: orbit-ccw 80s linear infinite;
+/* mobilda orbit animatsiya yo'q */
+@media (max-width: 767px) {
+  .animate-orbit-cw-slow,
+  .animate-orbit-ccw-slow {
+    animation: none;
+  }
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-.glass-card,
-.observation-card,
-.marquee-track,
-.planet-float {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
+/* will-change faqat desktop da */
+@media (min-width: 768px) {
+  .glass-card,
+  .observation-card,
+  .marquee-track,
+  .planet-float {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
 }
 
 /* Apple Liquid Glassmorphism Utilities */
+/* Mobilda backdrop-filter o'chirilgan (GPU tejamkorligi) */
 .liquid-glass-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.05) 100%);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 
     inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.45),
@@ -308,6 +317,14 @@ html {
     0 25px 65px 0 rgba(22, 10, 50, 0.35);
   position: relative;
   overflow: hidden;
+}
+
+/* Desktop da blur effekti */
+@media (min-width: 768px) {
+  .liquid-glass-card {
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+  }
 }
 
 .liquid-glass-card::before {
@@ -323,11 +340,16 @@ html {
 
 .liquid-glass-input {
   background: rgba(255, 255, 255, 0.12) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.28) !important;
   box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.25), 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+  .liquid-glass-input {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }
 
 .liquid-glass-input:focus {
@@ -336,20 +358,25 @@ html {
   box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.4), 0 0 25px rgba(246, 201, 79, 0.4) !important;
 }
 
-/* 60/120 FPS Hardware Acceleration & Ultra-Smooth Performance */
+/* 60/120 FPS Hardware Acceleration — faqat desktop */
 .gpu-accelerated {
   transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  will-change: transform, opacity;
 }
 
-.animate-orbit-cw-slow,
-.animate-orbit-ccw-slow,
-.planet-float,
-.liquid-glass-card,
-.observation-card {
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
+@media (min-width: 768px) {
+  .gpu-accelerated {
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .animate-orbit-cw-slow,
+  .animate-orbit-ccw-slow,
+  .planet-float,
+  .liquid-glass-card,
+  .observation-card {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
 }
 
 @keyframes animated-yellow {
@@ -371,3 +398,4 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+

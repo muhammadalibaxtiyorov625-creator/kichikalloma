@@ -6,6 +6,7 @@ let teamsList = [];
 let galleryList = [];
 let messagesList = [];
 let faqsList = [];
+let uranCategoriesList = [];
 let messageFilter = 'all';
 
 // Initialize
@@ -57,6 +58,7 @@ function switchTab(tabId) {
     'gallery': { title: 'Galereya (Gallery)', subtitle: 'Platforma fotosuratlari va rasmlarini boshqarish' },
     'messages': { title: 'Kelgan Xabarlar', subtitle: 'Mijozlar tomonidan yuborilgan so\'rov va murojaatlar' },
     'faqs': { title: 'Ko\'p So\'raladigan Savollar (FAQ)', subtitle: 'Mobil ilova va vebsayt uchun tez-tez beriladigan savol-javoblarni boshqarish' },
+    'uran': { title: 'Uran / Nutq va Til Sayyorasi (So\'zlar va Testlar)', subtitle: 'Mobil ilova uchun inglizcha-o\'zbekcha lug\'at kategoriyalari, so\'zlar va 4 ta variantli testlar' },
     'ai': { title: 'Alloma AI Ta\'lim Yordamchisi', subtitle: 'Google Gemini 3.6 Flash asosidagi ta\'limiy va pedagogik AI' }
   };
 
@@ -125,7 +127,8 @@ async function loadAllData() {
     fetchTeams(),
     fetchGallery(),
     fetchMessages(),
-    fetchFaqs()
+    fetchFaqs(),
+    fetchUranCategories()
   ]);
   syncAllCounts();
   renderDashboard();
@@ -162,6 +165,10 @@ function syncAllCounts() {
   const faqsStat = document.getElementById('stat-total-faqs');
   if (faqsBadge) faqsBadge.innerText = faqsList.length;
   if (faqsStat) faqsStat.innerText = faqsList.length;
+
+  // Uran Kategoriyalari
+  const uranBadge = document.getElementById('uran-count-badge');
+  if (uranBadge) uranBadge.innerText = uranCategoriesList.length;
 
   // Xabarlar
   const messagesStat = document.getElementById('stat-total-messages');
@@ -1921,3 +1928,142 @@ async function handleToggleFaqStatus(id) {
     showToast("Xatolik yuz berdi", "error");
   }
 }
+
+// ==============================================================================
+// URAN (NUTQ VA TIL) KATEGORIYALARI VA SO'ZLARI BOSHQARUVI
+// ==============================================================================
+
+async function fetchUranCategories() {
+  try {
+    const res = await fetch('/api/website/uran/categories');
+    if (!res.ok) throw new Error("Uran kategoriyalarini yuklashda xatolik");
+    uranCategoriesList = await res.json();
+    renderUranCategories();
+    syncAllCounts();
+  } catch (err) {
+    console.error("fetchUranCategories error:", err);
+  }
+}
+
+function renderUranCategories() {
+  const container = document.getElementById('uran-categories-grid');
+  if (!container) return;
+
+  const searchInput = document.getElementById('uran-cat-search');
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+  const filtered = uranCategoriesList.filter(c => {
+    return (c.name || '').toLowerCase().includes(query) ||
+           (c.name_en || '').toLowerCase().includes(query) ||
+           (c.description || '').toLowerCase().includes(query);
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="bi bi-translate"></i><p>Kategoriyalar topilmadi</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(cat => `
+    <div class="card item-card">
+      <div class="card-image-box" style="background:#f8fafc; height:120px; display:flex; align-items:center; justify-content:center; padding:12px;">
+        <img src="${cat.image || '/images/categories/fruits.svg'}" alt="${cat.name}" style="max-height:80px; max-width:80px; object-fit:contain;" onerror="this.src='/images/categories/fruits.svg'">
+      </div>
+      <div class="card-content" style="padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <h4 style="font-size:16px; font-weight:800; color:#1e293b; margin:0;">${cat.name}</h4>
+          <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:700; white-space:nowrap;">
+            ${cat.words_count || 0} ta so'z
+          </span>
+        </div>
+        <p style="font-size:12px; color:#6366f1; font-weight:700; margin:4px 0 6px 0;">${cat.name_en || ''}</p>
+        <p style="font-size:13px; color:#64748b; line-height:1.4; margin:0 0 14px 0;">${cat.description || ''}</p>
+        
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-yellow" style="flex:1; padding:8px 12px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="openUranCategoryWordsModal(${cat.id})">
+            <i class="bi bi-book-half"></i> So'zlar & Test
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function openUranCategoryWordsModal(catId) {
+  const modal = document.getElementById('uran-words-modal');
+  const container = document.getElementById('uran-words-container');
+  const title = document.getElementById('uran-modal-title');
+  const subtitle = document.getElementById('uran-modal-subtitle');
+
+  if (!modal || !container) return;
+
+  modal.classList.add('active');
+  container.innerHTML = '<div class="loading-state">So\'zlar va test savollari yuklanmoqda...</div>';
+
+  try {
+    const res = await fetch(`/mobile/planets/uran/category/${catId}`);
+    if (!res.ok) throw new Error("Ma'lumotlarni yuklab bo'lmadi");
+    const data = await res.json();
+
+    if (title) title.innerHTML = `<i class="bi bi-translate text-yellow"></i> ${data.name} (${data.name_en || ''})`;
+    if (subtitle) subtitle.innerText = `${data.words_count} ta so'z va 4 ta variantli test savollari`;
+
+    const wordsHtml = (data.words || []).map(w => `
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="font-size:15px; color:#0f172a;">${w.word_en}</strong>
+            <span style="color:#64748b; font-size:13px; font-style:italic;">${w.transcription || ''}</span>
+            <span style="color:#94a3b8;">&rarr;</span>
+            <span style="color:#4f46e5; font-weight:700; font-size:15px;">${w.word_uz}</span>
+          </div>
+          ${w.example_sentence ? `<p style="font-size:12px; color:#475569; margin:4px 0 0 0;"><em>"${w.example_sentence}"</em> — ${w.example_translation || ''}</p>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    const testsHtml = (data.tests || []).map(q => `
+      <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:10px; padding:12px 14px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <strong style="color:#1e293b;">#${q.id}. Inglizcha so'z: <span style="color:#2563eb;">${q.word_en}</span></strong>
+          <span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:11px;">To'g'ri: ${q.correct_answer}</span>
+        </div>
+        <p style="font-size:13px; color:#475569; margin:0 0 8px 0;">${q.prompt}</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          ${q.options.map(opt => `
+            <div style="background:${opt === q.correct_answer ? '#dcfce7' : '#ffffff'}; border:1px solid ${opt === q.correct_answer ? '#86efac' : '#e2e8f0'}; padding:8px 10px; border-radius:8px; font-size:13px; font-weight:${opt === q.correct_answer ? '700' : '500'}; color:${opt === q.correct_answer ? '#166534' : '#334155'};">
+              ${opt === q.correct_answer ? '✅ ' : '⚪ '} ${opt}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = `
+      <div style="margin-bottom:24px;">
+        <h4 style="font-size:16px; font-weight:800; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <i class="bi bi-card-text text-yellow"></i> 1. Kategoriya So'zlari (${data.words_count} ta)
+        </h4>
+        <div style="max-height:280px; overflow-y:auto; padding-right:6px;">
+          ${wordsHtml}
+        </div>
+      </div>
+
+      <div>
+        <h4 style="font-size:16px; font-weight:800; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <i class="bi bi-question-circle text-yellow"></i> 2. Yakuniy Test Savollari (4 ta Variantli)
+        </h4>
+        <div style="max-height:320px; overflow-y:auto; padding-right:6px;">
+          ${testsHtml}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle text-danger"></i><p>${err.message}</p></div>`;
+  }
+}
+
+function closeUranModal() {
+  const modal = document.getElementById('uran-words-modal');
+  if (modal) modal.classList.remove('active');
+}
+

@@ -393,3 +393,104 @@ class ParentChildEmotionsAnalyticsResponse(BaseModel):
     weekly_emotions: List[EmotionItemResponse]
     all_history: List[EmotionItemResponse]
     ai_recommendation: Optional[str] = None
+
+# ==========================================
+# URAN (URANUS) / NUTQ VA TIL SAYYORASI SCHEMAS
+# ==========================================
+class UranCategoryBase(BaseModel):
+    name: str = Field(..., example="Meva va Sabzavotlar", description="Kategoriya nomi")
+    name_en: Optional[str] = Field("", example="Fruits & Vegetables", description="Inglizcha nomi")
+    name_ru: Optional[str] = Field("", example="Фрукты и Овощи", description="Ruscha nomi")
+    image: Optional[str] = Field("/images/categories/fruits.svg", example="/images/categories/fruits.svg", description="Kategoriya rasmi")
+    description: Optional[str] = Field("", example="Meva va sabzavotlar nomlarini o'rganamiz", description="Kategoriya tavsifi")
+    status: Optional[str] = Field("active", example="active", description="'active' yoki 'inactive'")
+    order_num: Optional[int] = Field(0, example=1, description="Tartib raqami")
+
+class UranCategoryCreate(UranCategoryBase):
+    pass
+
+class UranCategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ru: Optional[str] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    order_num: Optional[int] = None
+
+class UranCategoryResponse(UranCategoryBase):
+    id: int
+    words_count: int = Field(0, example=10, description="Ushbu kategoriyadagi so'zlar soni")
+    created_at: Optional[str] = None
+
+class UranWordBase(BaseModel):
+    category_id: int = Field(..., example=1, description="Kategoriya ID si")
+    word_uz: str = Field(..., example="Olma", description="O'zbekcha so'z")
+    word_en: str = Field(..., example="Apple", description="Inglizcha so'z")
+    word_ru: Optional[str] = Field("", example="Яблоко", description="Ruscha so'z")
+    transcription: Optional[str] = Field("", example="[ˈæp.əl]", description="Inglizcha talaffuz transkripsiyasi")
+    image: Optional[str] = Field("", example="/images/categories/fruits.svg", description="So'z rasmi")
+    audio_url: Optional[str] = Field(None, example="http://localhost:3000/audio_cache/abc.mp3", description="Inglizcha talaffuz audio havolasi")
+    example_sentence: Optional[str] = Field("", example="I like red apple.", description="Misol gap (inglizcha)")
+    example_translation: Optional[str] = Field("", example="Men qizil olmani yoqtiraman.", description="Misol gap tarjimasi (o'zbekcha)")
+    order_num: Optional[int] = Field(0, example=1, description="Tartib raqami")
+
+class UranWordCreate(UranWordBase):
+    pass
+
+class UranWordUpdate(BaseModel):
+    category_id: Optional[int] = None
+    word_uz: Optional[str] = None
+    word_en: Optional[str] = None
+    word_ru: Optional[str] = None
+    transcription: Optional[str] = None
+    image: Optional[str] = None
+    audio_url: Optional[str] = None
+    example_sentence: Optional[str] = None
+    example_translation: Optional[str] = None
+    order_num: Optional[int] = None
+
+class UranWordResponse(UranWordBase):
+    id: int
+    created_at: Optional[str] = None
+
+class UranQuizOption(BaseModel):
+    id: int
+    word_id: int
+    word_en: str = Field(..., example="Apple", description="Inglizcha berilgan so'z")
+    question: str = Field(..., example="Apple", description="Inglizcha so'z savoli")
+    prompt: str = Field(..., example="'Apple' so'zining o'zbekcha tarjimasi qaysi?", description="Savol matni")
+    correct_answer: str = Field(..., example="Olma", description="To'g'ri o'zbekcha javob")
+    options: List[str] = Field(..., example=["Olma", "Nok", "Banan", "Uzum"], description="4 ta o'zbekcha javob varianti (1 tasi to'g'ri, 3 tasi noto'g'ri)")
+    image: Optional[str] = Field("", example="/images/categories/fruits.svg", description="So'z/kategoriya rasmi")
+    explanation: Optional[str] = Field("", example="'Apple' so'zi o'zbek tilida 'Olma' deb tarjima qilinadi.", description="Qisqacha izoh")
+
+class UranCategoryDetailResponse(BaseModel):
+    id: int
+    name: str = Field(..., example="Meva va Sabzavotlar")
+    name_en: Optional[str] = Field("", example="Fruits & Vegetables")
+    name_ru: Optional[str] = Field("", example="Фрукты и Овощи")
+    image: str = Field(..., example="/images/categories/fruits.svg")
+    description: Optional[str] = Field("", example="Meva va sabzavotlar nomlarini o'rganamiz")
+    words_count: int = Field(0, example=12)
+    words: List[UranWordResponse] = Field(..., description="Kategoriya ichidagi so'zlar ro'yxati (o'zbekcha va inglizcha)")
+    tests: List[UranQuizOption] = Field(..., description="So'zlar tugagach topshiriladigan test savollari (inglizcha so'z va 4 ta o'zbekcha variant)")
+    quiz: List[UranQuizOption] = Field(..., description="Test savollari (tests ning muqobil nomi)")
+
+class UranQuizSubmitRequest(BaseModel):
+    child_id: Optional[int] = Field(None, example=1, description="Farzand ID raqami")
+    category_id: int = Field(..., example=1, description="Kategoriya ID raqami")
+    score: int = Field(..., example=8, description="To'g'ri topilgan javoblar soni")
+    total_questions: int = Field(..., example=10, description="Umumiy savollar soni")
+    time_spent_seconds: Optional[int] = Field(60, example=60, description="Testga sarflangan vaqt (soniya)")
+
+class UranQuizSubmitResponse(BaseModel):
+    success: bool = True
+    message: str = "Test natijasi muvaffaqiyatli saqlandi!"
+    score: int
+    total_questions: int
+    percentage: float
+    passed: bool
+    stars_earned: int
+    congratulation: str
+
