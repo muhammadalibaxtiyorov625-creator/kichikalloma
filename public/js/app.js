@@ -1807,11 +1807,6 @@ function renderFaqs() {
             <i class="bi bi-trash-fill"></i>
           </button>
         </div>
-      </div>
-    </div>
-  `).join('');
-}
-
 function openFaqModal(id = null) {
   const modal = document.getElementById('faq-modal');
   const modalTitle = document.getElementById('faq-modal-title');
@@ -1824,7 +1819,7 @@ function openFaqModal(id = null) {
     if (item) {
       document.getElementById('faq-id').value = item.id;
       document.getElementById('faq-name').value = item.name || '';
-      document.getElementById('faq-desc').value = item.description || '';
+      document.getElementById('faq-description').value = item.description || '';
       document.getElementById('faq-status').value = item.status || 'active';
       document.getElementById('faq-order').value = item.order_num || 0;
       modalTitle.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> <span>FAQ Savolni Tahrirlash</span>';
@@ -1836,19 +1831,19 @@ function openFaqModal(id = null) {
     modalTitle.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> <span>Yangi FAQ Savol Qo\'shish</span>';
   }
 
-  modal.classList.add('show');
+  modal.classList.add('active');
 }
 
 function closeFaqModal() {
   const modal = document.getElementById('faq-modal');
-  if (modal) modal.classList.remove('show');
+  if (modal) modal.classList.remove('active');
 }
 
 async function handleSaveFaq(event) {
   event.preventDefault();
   const id = document.getElementById('faq-id').value;
   const name = document.getElementById('faq-name').value.trim();
-  const description = document.getElementById('faq-desc').value.trim();
+  const description = document.getElementById('faq-description').value.trim();
   const status = document.getElementById('faq-status').value;
   const order_num = parseInt(document.getElementById('faq-order').value, 10) || 0;
 
@@ -1982,6 +1977,9 @@ function renderUranCategories() {
           <button class="btn btn-yellow" style="flex:1; padding:8px 12px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="openUranCategoryWordsModal(${cat.id})">
             <i class="bi bi-book-half"></i> So'zlar & Test
           </button>
+          <button class="btn btn-secondary" style="padding:8px 10px; font-size:13px; display:flex; align-items:center; gap:5px;" onclick="openUranWordModal(${cat.id}, '${cat.name}')">
+            <i class="bi bi-plus-lg"></i> So'z Qo'sh
+          </button>
         </div>
       </div>
     </div>
@@ -2067,3 +2065,89 @@ function closeUranModal() {
   if (modal) modal.classList.remove('active');
 }
 
+// ==============================================================================
+// URAN SO'Z QO'SHISH / TAHRIRLASH MODALI
+// ==============================================================================
+
+function openUranWordModal(categoryId, categoryName, wordId = null) {
+  const modal = document.getElementById('uran-word-modal');
+  const form = document.getElementById('uran-word-form');
+  const catLabel = document.getElementById('uran-word-modal-cat');
+  const titleEl = document.getElementById('uran-word-modal-title');
+
+  form.reset();
+  document.getElementById('uran-word-category-id').value = categoryId;
+  document.getElementById('uran-word-id').value = wordId || '';
+
+  if (catLabel) catLabel.innerText = `Kategoriya: ${categoryName}`;
+  if (titleEl) {
+    titleEl.innerHTML = wordId
+      ? '<i class="bi bi-pencil-square text-yellow"></i> So\'zni Tahrirlash'
+      : '<i class="bi bi-plus-circle text-yellow"></i> Yangi So\'z Qo\'shish';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeUranWordModal() {
+  const modal = document.getElementById('uran-word-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function handleSaveUranWord(event) {
+  event.preventDefault();
+  const wordId = document.getElementById('uran-word-id').value;
+  const categoryId = document.getElementById('uran-word-category-id').value;
+  const word_en = document.getElementById('uran-word-en').value.trim();
+  const word_uz = document.getElementById('uran-word-uz').value.trim();
+  const word_ru = document.getElementById('uran-word-ru').value.trim();
+  const transcription = document.getElementById('uran-word-transcription').value.trim();
+  const example_sentence = document.getElementById('uran-word-example').value.trim();
+  const example_translation = document.getElementById('uran-word-example-uz').value.trim();
+
+  if (!word_en || !word_uz) {
+    showToast("Inglizcha va O'zbekcha so'zlarni kiriting!", "error");
+    return;
+  }
+
+  const payload = {
+    category_id: parseInt(categoryId),
+    word_en, word_uz, word_ru: word_ru || null,
+    transcription: transcription || null,
+    example_sentence: example_sentence || null,
+    example_translation: example_translation || null
+  };
+
+  const saveBtn = document.getElementById('save-uran-word-btn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    let res;
+    if (wordId) {
+      res = await fetch(`/api/website/uran/words/${wordId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch('/api/website/uran/words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || "So'z saqlashda xatolik");
+    }
+
+    showToast(wordId ? "So'z muvaffaqiyatli yangilandi!" : `"${word_en} → ${word_uz}" so'zi muvaffaqiyatli qo'shildi! ✅`, "success");
+    closeUranWordModal();
+    await fetchUranCategories();
+  } catch (err) {
+    showToast(err.message || "Xatolik yuz berdi!", "error");
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
