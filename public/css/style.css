@@ -1315,7 +1315,8 @@ body {
   overflow-y: auto;
 }
 
-.modal-overlay.show {
+.modal-overlay.show,
+.modal-overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
@@ -1337,7 +1338,8 @@ body {
   overflow: hidden;
 }
 
-.modal-overlay.show .modal-card {
+.modal-overlay.show .modal-card,
+.modal-overlay.active .modal-card {
   transform: translateY(0) scale(1);
 }
 

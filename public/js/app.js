@@ -160,6 +160,8 @@ function handleOverlayClick(event, modalId) {
     if (modalId === 'team-modal') closeTeamModal();
     if (modalId === 'gallery-modal') closeGalleryModal();
     if (modalId === 'faq-modal') closeFaqModal();
+    if (modalId === 'uran-word-modal') closeUranWordModal();
+    if (modalId === 'uran-words-modal') closeUranModal();
   }
 }
 
@@ -1900,12 +1902,22 @@ function openFaqModal(id = null) {
     if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> <span>Yangi FAQ Savol Qo\'shish</span>';
   }
 
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('show', 'active');
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
+    modal.style.display = 'flex';
+  }
 }
 
 function closeFaqModal() {
   const modal = document.getElementById('faq-modal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('show', 'active');
+    modal.style.opacity = '';
+    modal.style.pointerEvents = '';
+    modal.style.display = 'none';
+  }
 }
 
 async function handleSaveFaq(event) {
@@ -2284,7 +2296,9 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
   }
 
   if (modal) {
-    modal.classList.add('active');
+    modal.classList.add('show', 'active');
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
     modal.style.display = 'flex';
   }
 }
@@ -2292,7 +2306,9 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
 function closeUranWordModal() {
   const modal = document.getElementById('uran-word-modal');
   if (modal) {
-    modal.classList.remove('active');
+    modal.classList.remove('show', 'active');
+    modal.style.opacity = '';
+    modal.style.pointerEvents = '';
     modal.style.display = 'none';
   }
 }

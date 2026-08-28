@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <!-- Custom Style -->
-  <link rel="stylesheet" href="/css/style.css?v=20260820_v3">
+  <link rel="stylesheet" href="/css/style.css?v=20260828_v23_modal_active_fix">
 </head>
 <body>
   <div class="app-layout">
@@ -996,14 +996,14 @@
   </div>
 
   <!-- URAN WORDS & QUIZ MODAL -->
-  <div id="uran-words-modal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+  <div id="uran-words-modal" class="modal-overlay" onclick="handleOverlayClick(event, 'uran-words-modal')">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
         <div>
           <h3 id="uran-modal-title"><i class="bi bi-translate text-yellow"></i> Kategoriya So'zlari va Test Savollari</h3>
           <p id="uran-modal-subtitle" style="font-size:13px; color:#64748b; margin:4px 0 0 0;"></p>
         </div>
-        <button class="modal-close" onclick="closeUranModal()">&times;</button>
+        <button type="button" class="modal-close" onclick="closeUranModal()" title="Yopish (Esc)">&times;</button>
       </div>
       <div class="modal-body" style="padding: 20px;">
         <div id="uran-words-container">
@@ -1014,14 +1014,14 @@
   </div>
 
   <!-- URAN WORD ADD/EDIT MODAL -->
-  <div id="uran-word-modal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 720px;">
+  <div id="uran-word-modal" class="modal-overlay" onclick="handleOverlayClick(event, 'uran-word-modal')">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 720px;">
       <div class="modal-header">
         <div>
-          <h3 id="uran-word-modal-title"><i class="bi bi-plus-circle text-yellow"></i> Yangi Inglizcha So'z Qo'shish</h3>
+          <h3 id="uran-word-modal-title"><i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish</h3>
           <p id="uran-word-modal-cat" style="font-size:13px; color:#64748b; margin:4px 0 0 0;"></p>
         </div>
-        <button class="modal-close" onclick="closeUranWordModal()">&times;</button>
+        <button type="button" class="modal-close" onclick="closeUranWordModal()" title="Yopish (Esc)">&times;</button>
       </div>
       <form id="uran-word-form" onsubmit="handleSaveUranWord(event)">
         <input type="hidden" id="uran-word-id">
@@ -1095,6 +1095,6 @@
   </div>
 
   <!-- App Script -->
-  <script src="/js/app.js?v=20260828_v21_fix_click_and_faqs"></script>
+  <script src="/js/app.js?v=20260828_v23_modal_active_fix"></script>
 </body>
 </html>
