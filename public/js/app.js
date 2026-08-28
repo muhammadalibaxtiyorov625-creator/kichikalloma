@@ -2248,8 +2248,8 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
   if (form) form.reset();
   populateUranCategoryDropdowns();
 
-  const targetCatId = categoryId || currentOpenCatId;
-  const targetCatName = categoryName || currentOpenCatName;
+  const targetCatId = categoryId || currentOpenCatId || (uranCategoriesList.length > 0 ? uranCategoriesList[0].id : 1);
+  const targetCatName = categoryName || currentOpenCatName || (uranCategoriesList.length > 0 ? uranCategoriesList[0].name : '');
 
   if (document.getElementById('uran-word-id')) {
     document.getElementById('uran-word-id').value = wordId || '';
@@ -2455,3 +2455,27 @@ function playWordAudio(word) {
     console.error("Audio error:", e);
   }
 }
+
+
+// Explicitly expose functions to window for inline onclick attributes
+window.currentOpenCatId = currentOpenCatId;
+window.currentOpenCatName = currentOpenCatName;
+window.openUranWordModal = openUranWordModal;
+window.closeUranWordModal = closeUranWordModal;
+window.openUranCategoryDetail = openUranCategoryDetail;
+window.closeUranCategoryDetail = closeUranCategoryDetail;
+window.filterUranDetailWords = filterUranDetailWords;
+window.renderUranCategories = renderUranCategories;
+window.renderUranDetailWords = renderUranDetailWords;
+window.handleSaveUranWord = handleSaveUranWord;
+window.handleDeleteUranWord = handleDeleteUranWord;
+window.handleAiSuggestWord = handleAiSuggestWord;
+window.playWordAudio = playWordAudio;
+window.openFaqModal = openFaqModal;
+window.closeFaqModal = closeFaqModal;
+window.handleSaveFaq = handleSaveFaq;
+window.handleDeleteFaq = handleDeleteFaq;
+window.handleToggleFaqStatus = handleToggleFaqStatus;
+window.renderFaqs = renderFaqs;
+window.fetchFaqs = fetchFaqs;
+window.switchTab = switchTab;

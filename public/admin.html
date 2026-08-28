@@ -358,8 +358,8 @@
               </div>
 
               <div class="toolbar-actions">
-                <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
-                  <i class="bi bi-plus-circle-fill"></i> + Yangi Inglizcha So'z Qo'shish
+                <button class="btn btn-yellow" onclick="openUranWordModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-plus-circle-fill"></i> <span>Yangi So'z Qo'shish</span>
                 </button>
               </div>
             </div>
@@ -377,8 +377,8 @@
                 <i class="bi bi-arrow-left"></i> <span>Barcha Mavzularga Qaytish</span>
               </button>
               
-              <button id="uran-detail-add-btn" class="btn btn-yellow" onclick="openUranWordModal(currentOpenCatId, currentOpenCatName)" style="padding: 10px 18px; font-weight: 700; border-radius: 10px; font-size: 14px;">
-                <i class="bi bi-plus-circle-fill"></i> + Yangi So'z Qo'shish
+              <button id="uran-detail-add-btn" class="btn btn-yellow" onclick="openUranWordModal()" style="padding: 10px 18px; font-weight: 700; border-radius: 10px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="bi bi-plus-circle-fill"></i> <span>Yangi So'z Qo'shish</span>
               </button>
             </div>
 
@@ -422,13 +422,137 @@
               <input type="text" id="faq-search" placeholder="Savol yoki javob bo'yicha qidirish..." oninput="renderFaqs()">
             </div>
             <div class="toolbar-actions">
-              <button class="btn btn-yellow" onclick="openFaqModal()">
-                <i class="bi bi-plus-circle-fill"></i> + Yangi FAQ Savol Qo'shish
+              <button class="btn btn-yellow" onclick="openFaqModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="bi bi-plus-circle-fill"></i> <span>Yangi FAQ Qo'shish</span>
               </button>
             </div>
           </div>
 
-          <div id="faqs-grid" class="cards-grid faq-cards-grid">
+                    <div id="faqs-grid" class="cards-grid faq-cards-grid">
+            <div class="card item-card faq-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #eab308; padding: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(234, 179, 8, 0.15); color: #eab308; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px;">#1</span>
+                    <span class="status-badge status-active">Faol</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">ID: 1</div>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+                  <i class="bi bi-patch-question text-yellow" style="margin-right: 4px;"></i> Kichik Alloma platformasi nima va u kimlar uchun mo'ljallangan?
+                </h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px;">Kichik Alloma — 3 yoshdan 11 yoshgacha bo'lgan bolalarning aqliy, mantiqiy, nutqiy va ijodiy salohiyatini rivojlantiruvchi interaktiv ta'lim platformasidir. Platforma bolalarga sayyoralar bo'ylab qiziqarli o'yinlar, ertaklar, so'z boyligi va sun'iy intellekt orqali ta'lim beradi.</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="handleToggleFaqStatus(1)" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-eye-slash"></i> Yashirish
+                </button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="action-btn-sm" title="Tahrirlash" onclick="openFaqModal(1)"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteFaq(1)"><i class="bi bi-trash-fill"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card item-card faq-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #eab308; padding: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(234, 179, 8, 0.15); color: #eab308; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px;">#2</span>
+                    <span class="status-badge status-active">Faol</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">ID: 2</div>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+                  <i class="bi bi-patch-question text-yellow" style="margin-right: 4px;"></i> Alloma AI yordamchisi qanday ishlaydi va uning ovozli muloqot xususiyati bormi?
+                </h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px;">Alloma AI — Google Gemini ilg'or sun'iy intellekt texnologiyasi asosida yaratilgan pedagogik yordamchidir. Bola unga mikrofon orqali ovozli savollar berishi, darslar haqida so'rashi, ertaklar eshitishi yoki yangi bilimlarni xavfsiz va tushunarli tilda o'rganishi mumkin.</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="handleToggleFaqStatus(2)" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-eye-slash"></i> Yashirish
+                </button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="action-btn-sm" title="Tahrirlash" onclick="openFaqModal(2)"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteFaq(2)"><i class="bi bi-trash-fill"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card item-card faq-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #eab308; padding: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(234, 179, 8, 0.15); color: #eab308; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px;">#3</span>
+                    <span class="status-badge status-active">Faol</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">ID: 3</div>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+                  <i class="bi bi-patch-question text-yellow" style="margin-right: 4px;"></i> Uran sayyorasida ingliz tilini qanday o'rganish mumkin (So'zlar, talaffuz va testlar)?
+                </h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px;">Uran sayyorasi bolalarning chet tilini o'rganishi uchun mo'ljallangan bo'lib, 10 ta asosiy mavzu (Mevalar, Hayvonlar, Ranglar, Maktab, Oila va h.k.), har bir so'zning sof audio talaffuzi, rasmlar, transkripsiya va 4 ta variantli interaktiv test savollarini o'z ichiga oladi.</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="handleToggleFaqStatus(3)" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-eye-slash"></i> Yashirish
+                </button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="action-btn-sm" title="Tahrirlash" onclick="openFaqModal(3)"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteFaq(3)"><i class="bi bi-trash-fill"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card item-card faq-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #eab308; padding: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(234, 179, 8, 0.15); color: #eab308; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px;">#4</span>
+                    <span class="status-badge status-active">Faol</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">ID: 4</div>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+                  <i class="bi bi-patch-question text-yellow" style="margin-right: 4px;"></i> Ota-onalar farzandining ta'lim jarayonini qanday nazorat qiladi (Ota-onalar burchagi)?
+                </h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px;">Maxsus himoyalangan 'Ota-onalar burchagi' orqali bolaning qaysi sayyoralarni o'rganganligi, kunlik sarflagan vaqti, test natijalari, so'z boyligi o'sishi va muvaffaqiyat hisobotlarini real vaqtda kuzatib borish mumkin.</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="handleToggleFaqStatus(4)" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-eye-slash"></i> Yashirish
+                </button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="action-btn-sm" title="Tahrirlash" onclick="openFaqModal(4)"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteFaq(4)"><i class="bi bi-trash-fill"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card item-card faq-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #eab308; padding: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: rgba(234, 179, 8, 0.15); color: #eab308; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px;">#5</span>
+                    <span class="status-badge status-active">Faol</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">ID: 5</div>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+                  <i class="bi bi-patch-question text-yellow" style="margin-right: 4px;"></i> Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?
+                </h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px;">Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="handleToggleFaqStatus(5)" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-eye-slash"></i> Yashirish
+                </button>
+                <div style="display: flex; gap: 6px;">
+                  <button class="action-btn-sm" title="Tahrirlash" onclick="openFaqModal(5)"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteFaq(5)"><i class="bi bi-trash-fill"></i></button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -971,6 +1095,6 @@
   </div>
 
   <!-- App Script -->
-  <script src="/js/app.js?v=20260828_v20_soz_qoshish_clean"></script>
+  <script src="/js/app.js?v=20260828_v21_fix_click_and_faqs"></script>
 </body>
 </html>
