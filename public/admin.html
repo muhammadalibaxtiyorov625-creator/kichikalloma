@@ -312,7 +312,7 @@
           </div>
         </section>
 
-        <!-- 6.4 INGLIZ TILI (URAN SAYYORASI — SO'ZLAR & TESTLAR) TAB -->
+        <!-- 6.4 INGLIZ TILI (URAN SAYYORASI — MAVZULAR, SO'ZLAR & TESTLAR) TAB -->
         <section id="tab-uran" class="tab-content">
           <!-- Statistics Cards -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
@@ -328,7 +328,7 @@
 
             <div class="card" style="padding: 16px 20px; border-left: 4px solid #3b82f6; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
               <div>
-                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Mavzular (Kategoriyalar)</p>
+                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Lug'at Mavzulari</p>
                 <h3 id="stat-uran-cats-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">10 ta</h3>
               </div>
               <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 22px;">
@@ -351,38 +351,18 @@
           <div class="section-toolbar" style="flex-wrap: wrap; gap: 12px; align-items: center;">
             <div class="search-box" style="flex: 1; min-width: 240px;">
               <i class="bi bi-search"></i>
-              <input type="text" id="uran-search-input" placeholder="Inglizcha, o'zbekcha yoki ruscha so'z qidirish..." oninput="filterUranWords()">
-            </div>
-
-            <div style="min-width: 180px;">
-              <select id="uran-category-filter-select" class="form-control" onchange="filterUranWords()" style="background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px;">
-                <option value="all">🌐 Barcha Mavzular</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <button class="filter-btn active" id="uran-view-words-btn" onclick="setUranView('words')">
-                <i class="bi bi-list-ul"></i> So'zlar Ro'yxati
-              </button>
-              <button class="filter-btn" id="uran-view-cats-btn" onclick="setUranView('cats')">
-                <i class="bi bi-grid-fill"></i> Mavzular (10 ta)
-              </button>
+              <input type="text" id="uran-cat-search" placeholder="Mavzu yoki so'z bo'yicha qidiruv..." oninput="renderUranCategories()">
             </div>
 
             <div class="toolbar-actions">
               <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
-                <i class="bi bi-plus-circle-fill"></i> Yangi So'z Qo'shish
+                <i class="bi bi-plus-circle-fill"></i> Yangi Inglizcha So'z Qo'shish
               </button>
             </div>
           </div>
 
-          <!-- 1. Barcha So'zlar Ko'rinishi (Words Grid) -->
-          <div id="uran-words-list-container" class="cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-            <div class="loading-state">Ingliz tili so'zlari yuklanmoqda...</div>
-          </div>
-
-          <!-- 2. Mavzular / Kategoriyalar Ko'rinishi (Categories Grid) -->
-          <div id="uran-categories-grid" class="cards-grid" style="display: none;">
+          <!-- Mavzular / Kategoriyalar Ko'rinishi (Categories Grid) -->
+          <div id="uran-categories-grid" class="cards-grid">
             <div class="loading-state">Uran kategoriyalari yuklanmoqda...</div>
           </div>
         </section>
@@ -945,6 +925,6 @@
   </div>
 
   <!-- App Script -->
-  <script src="/js/app.js?v=20260828_v15_english_faq_final"></script>
+  <script src="/js/app.js?v=20260828_v18_final_categories_and_faqs"></script>
 </body>
 </html>
