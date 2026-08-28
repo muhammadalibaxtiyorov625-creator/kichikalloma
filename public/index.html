@@ -67,6 +67,11 @@
           <span>Xabarlar</span>
           <span class="nav-badge alert-badge" id="unread-count-badge">0</span>
         </button>
+        <button class="nav-btn" data-tab="uran" onclick="switchTab('uran')">
+          <i class="bi bi-translate"></i>
+          <span>Uran (So'zlar & Test)</span>
+          <span class="nav-badge" id="uran-count-badge">10</span>
+        </button>
         <button class="nav-btn" data-tab="faqs" onclick="switchTab('faqs')">
           <i class="bi bi-question-circle-fill"></i>
           <span>FAQ Savollar</span>
@@ -304,6 +309,25 @@
             <div id="messages-list" class="messages-table-card">
               <div class="loading-state">Xabarlar yuklanmoqda...</div>
             </div>
+          </div>
+        </section>
+
+        <!-- 6.4 URAN (NUTQ VA TIL — SO'ZLAR & TESTLAR) TAB -->
+        <section id="tab-uran" class="tab-content">
+          <div class="section-toolbar">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" id="uran-cat-search" placeholder="Kategoriyalar bo'yicha qidirish..." oninput="renderUranCategories()">
+            </div>
+            <div class="toolbar-actions">
+              <span class="badge" style="background:#eef2ff; color:#4f46e5; padding:8px 14px; border-radius:8px; font-weight:700;">
+                <i class="bi bi-info-circle"></i> Mobil Ilova: /mobile/planets/uran/category/
+              </span>
+            </div>
+          </div>
+
+          <div id="uran-categories-grid" class="cards-grid">
+            <div class="loading-state">Uran kategoriyalari yuklanmoqda...</div>
           </div>
         </section>
 
@@ -759,6 +783,77 @@
           <button type="button" class="btn btn-secondary" onclick="closeFaqModal()">Bekor qilish</button>
           <button type="submit" class="btn btn-yellow" id="save-faq-btn">
             <i class="bi bi-check2-circle"></i> Saqlash
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- URAN WORDS & QUIZ MODAL -->
+  <div id="uran-words-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 id="uran-modal-title"><i class="bi bi-translate text-yellow"></i> Kategoriya So'zlari va Test Savollari</h3>
+          <p id="uran-modal-subtitle" style="font-size:13px; color:#64748b; margin:4px 0 0 0;"></p>
+        </div>
+        <button class="modal-close" onclick="closeUranModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div id="uran-words-container">
+          <div class="loading-state">Yuklanmoqda...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URAN WORD ADD/EDIT MODAL -->
+  <div id="uran-word-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 700px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="uran-word-modal-title"><i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish</h3>
+          <p id="uran-word-modal-cat" style="font-size:13px; color:#64748b; margin:4px 0 0 0;"></p>
+        </div>
+        <button class="modal-close" onclick="closeUranWordModal()">&times;</button>
+      </div>
+      <form id="uran-word-form" onsubmit="handleSaveUranWord(event)">
+        <input type="hidden" id="uran-word-id">
+        <input type="hidden" id="uran-word-category-id">
+        <div class="modal-body">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-word-en">Inglizcha So'z: *</label>
+              <input type="text" id="uran-word-en" class="form-control" placeholder="Apple" required>
+            </div>
+            <div class="form-group">
+              <label for="uran-word-uz">O'zbekcha tarjima: *</label>
+              <input type="text" id="uran-word-uz" class="form-control" placeholder="Olma" required>
+            </div>
+          </div>
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-word-ru">Ruscha tarjima:</label>
+              <input type="text" id="uran-word-ru" class="form-control" placeholder="Яблоко">
+            </div>
+            <div class="form-group">
+              <label for="uran-word-transcription">Transkripsiya:</label>
+              <input type="text" id="uran-word-transcription" class="form-control" placeholder="[ˈæp.əl]">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="uran-word-example">Misol gap (Inglizcha):</label>
+            <input type="text" id="uran-word-example" class="form-control" placeholder="An apple a day keeps the doctor away.">
+          </div>
+          <div class="form-group">
+            <label for="uran-word-example-uz">Misol gapning tarjimasi (O'zbekcha):</label>
+            <input type="text" id="uran-word-example-uz" class="form-control" placeholder="Kuniga bitta olma shifokordan asraydi.">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeUranWordModal()">Bekor qilish</button>
+          <button type="submit" class="btn btn-yellow" id="save-uran-word-btn">
+            <i class="bi bi-check2-circle"></i> So'zni Saqlash
           </button>
         </div>
       </form>

@@ -1807,31 +1807,42 @@ function renderFaqs() {
             <i class="bi bi-trash-fill"></i>
           </button>
         </div>
+      </div>
+    </div>
+  `).join('');
+}
+
 function openFaqModal(id = null) {
   const modal = document.getElementById('faq-modal');
   const modalTitle = document.getElementById('faq-modal-title');
   const form = document.getElementById('faq-form');
 
-  form.reset();
+  if (form) form.reset();
+
+  const descEl = document.getElementById('faq-description') || document.getElementById('faq-desc');
+  const nameEl = document.getElementById('faq-name');
+  const idEl = document.getElementById('faq-id');
+  const statusEl = document.getElementById('faq-status');
+  const orderEl = document.getElementById('faq-order');
 
   if (id) {
     const item = faqsList.find(f => f.id === id);
     if (item) {
-      document.getElementById('faq-id').value = item.id;
-      document.getElementById('faq-name').value = item.name || '';
-      document.getElementById('faq-description').value = item.description || '';
-      document.getElementById('faq-status').value = item.status || 'active';
-      document.getElementById('faq-order').value = item.order_num || 0;
-      modalTitle.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> <span>FAQ Savolni Tahrirlash</span>';
+      if (idEl) idEl.value = item.id;
+      if (nameEl) nameEl.value = item.name || '';
+      if (descEl) descEl.value = item.description || '';
+      if (statusEl) statusEl.value = item.status || 'active';
+      if (orderEl) orderEl.value = item.order_num || 0;
+      if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> <span>FAQ Savolni Tahrirlash</span>';
     }
   } else {
-    document.getElementById('faq-id').value = '';
-    document.getElementById('faq-status').value = 'active';
-    document.getElementById('faq-order').value = faqsList.length + 1;
-    modalTitle.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> <span>Yangi FAQ Savol Qo\'shish</span>';
+    if (idEl) idEl.value = '';
+    if (statusEl) statusEl.value = 'active';
+    if (orderEl) orderEl.value = faqsList.length + 1;
+    if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> <span>Yangi FAQ Savol Qo\'shish</span>';
   }
 
-  modal.classList.add('active');
+  if (modal) modal.classList.add('active');
 }
 
 function closeFaqModal() {
@@ -1841,11 +1852,12 @@ function closeFaqModal() {
 
 async function handleSaveFaq(event) {
   event.preventDefault();
-  const id = document.getElementById('faq-id').value;
-  const name = document.getElementById('faq-name').value.trim();
-  const description = document.getElementById('faq-description').value.trim();
-  const status = document.getElementById('faq-status').value;
-  const order_num = parseInt(document.getElementById('faq-order').value, 10) || 0;
+  const id = document.getElementById('faq-id') ? document.getElementById('faq-id').value : '';
+  const name = document.getElementById('faq-name') ? document.getElementById('faq-name').value.trim() : '';
+  const descEl = document.getElementById('faq-description') || document.getElementById('faq-desc');
+  const description = descEl ? descEl.value.trim() : '';
+  const status = document.getElementById('faq-status') ? document.getElementById('faq-status').value : 'active';
+  const order_num = parseInt(document.getElementById('faq-order') ? document.getElementById('faq-order').value : 0, 10) || 0;
 
   if (!name || !description) {
     showToast("Iltimos, savol sarlavhasi va javob matnini to'ldiring!", "error");
