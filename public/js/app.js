@@ -2270,10 +2270,16 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
     document.getElementById('uran-word-category-id').value = targetCatId || '';
   }
 
+  // Set hidden category select value
+  const catSelectHidden = document.getElementById('uran-word-category-select');
+  if (catSelectHidden && targetCatId) {
+    catSelectHidden.value = String(targetCatId);
+  }
+
   if (wordId) {
     const item = uranWordsList.find(w => w.id === wordId) || (currentCatDetailData && currentCatDetailData.words ? currentCatDetailData.words.find(w => w.id === wordId) : null);
     if (item) {
-      if (catSelect) catSelect.value = String(item.category_id);
+      if (catSelectHidden) catSelectHidden.value = String(item.category_id);
       if (document.getElementById('uran-word-en')) document.getElementById('uran-word-en').value = item.word_en || '';
       if (document.getElementById('uran-word-uz')) document.getElementById('uran-word-uz').value = item.word_uz || '';
       if (document.getElementById('uran-word-ru')) document.getElementById('uran-word-ru').value = item.word_ru || '';
@@ -2283,10 +2289,7 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
       if (titleEl) titleEl.innerHTML = `<i class="bi bi-pencil-square text-yellow"></i> So'zni Tahrirlash`;
     }
   } else {
-    if (targetCatId && catSelect) {
-      catSelect.value = String(targetCatId);
-    }
-    if (titleEl) titleEl.innerHTML = `<i class="bi bi-plus-circle text-yellow"></i> + Yangi So'z Qo'shish`;
+    if (titleEl) titleEl.innerHTML = `<i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish`;
   }
 
   if (catLabel) {
