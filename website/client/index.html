@@ -4,15 +4,60 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta name="theme-color" content="#0b0e27" />
-    <meta name="description" content="Kichik Alloma — 7–10 yoshli bolalar uchun kosmik ta'lim ekotizimi." />
+    <meta name="description" content="Kichik Alloma — 7–11 yoshli bolalar uchun kosmik ta'lim ekotizimi." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400..1000;1,400..1000&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>Kichik Alloma — Savol beradigan bolalar uchun katta koinot</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="/css/cosmic-3d.css" />
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- KICHIK ALLOMA 3D COSMIC MODAL (Cinematic Video Experience) -->
+    <div id="cosmic-3d-modal">
+      <div id="cosmic-3d-canvas-container"></div>
+      <div id="cosmic-ambient-glow" class="cosmic-ambient-glow"></div>
+
+      <!-- Close Button -->
+      <button type="button" class="cosmic-close-btn" onclick="closeCosmicUniverse()" title="Yopish (Esc)">
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <!-- Vertical Step Indicators (Left Side) -->
+      <div id="cosmic-steps-indicator" class="cosmic-steps-indicator"></div>
+
+      <!-- Editorial Text HUD (Left) -->
+      <div class="cosmic-editorial-hud">
+        <div id="cosmic-text-block" class="cosmic-text-block">
+          <div id="cosmic-slide-badge" class="cosmic-slide-badge">01 / 06 • SAYYORA</div>
+          <h1 id="cosmic-slide-title" class="cosmic-slide-title">KICHIK ALLOMA</h1>
+          <div id="cosmic-slide-subtitle" class="cosmic-slide-subtitle">8 Sayyorali Rivojlanish Ekotizimi</div>
+          <p id="cosmic-slide-desc" class="cosmic-slide-desc">
+            Bolajonlar uchun interaktiv kosmik ta'lim platformasi.
+          </p>
+          <div id="cosmic-items-grid" class="cosmic-items-grid"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation Controls -->
+      <div class="cosmic-bottom-nav">
+        <button type="button" class="cosmic-nav-arrow" onclick="prevCosmicSlide()" title="Oldingi (↑)">
+          <i class="bi bi-chevron-up"></i>
+        </button>
+        <div id="cosmic-scroll-status" class="cosmic-scroll-status">
+          <span>↓ Mishka skrolli bilan o'tkazing</span>
+        </div>
+        <button type="button" class="cosmic-nav-arrow" onclick="nextCosmicSlide()" title="Keyingi (↓)">
+          <i class="bi bi-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+
+    <script src="/js/three.min.js"></script>
+    <script src="/js/cosmic-3d.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

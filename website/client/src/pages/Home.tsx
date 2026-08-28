@@ -1160,7 +1160,7 @@ const assets = {
   logo: "/logo.png",
   sun: "/sun.png",
   labImage: "/dashboard-ui.jpg",
-  constellationImage: "/constellation.jpg",
+  constellationImage: "/space-kids.jpg",
   earth: "/earth.png",
   mars: "/mars.png",
   uran: "/uran.png",
@@ -1191,7 +1191,7 @@ const content = {
       copy: "Kichik Alloma bolalarga mustaqil fikrlash va o'sishga yordam beradi — AI bilan kosmik o'rganish sayohati orqali.",
       primary: "Sayohatni boshlash",
       secondary: "Koinotni kashf eting",
-      note: "8 ta o'sish dunyosi · 7–10 yosh uchun · 100% bolalar uchun xavfsiz AI",
+      note: "8 ta o'sish dunyosi · 7 yoshdan 11 yoshgacha · 100% bolalar uchun xavfsiz AI",
     },
     orbit: {
       eyebrow: "O'rganish koinoti",
@@ -1232,12 +1232,17 @@ const content = {
         {
           label: "02",
           title: "Fikrlab o'rganing",
-          copy: "AI hamroh javob berish o'rniga, yo'l ko'rsatuvchi savollar beradi.",
+          copy: "AI hamroh javob berish o'rniga, Sokratik yo'naltiruvchi savollar beradi.",
         },
         {
           label: "03",
           title: "Missiyalarni bajaring",
           copy: "Qisqa va maqsadli missiyalar mashqni kunlik odatga aylantiradi.",
+        },
+        {
+          label: "04",
+          title: "Rag'bat va o'sish",
+          copy: "Gold Coin ishlang, avatarni yangilang va rivojlanishni Parent Panelda kuzatib boring.",
         },
       ],
     },
@@ -1352,13 +1357,30 @@ const content = {
       },
     },
     method: {
-      eyebrow: "Как это работает",
-      title: "Четыре шага от любопытства к прогрессу.",
-      copy: "Простой цикл, который дети понимают с первого дня — и которому родители доверяют с первой недели.",
+      eyebrow: "Qanday ishlaydi",
+      title: "To'rt qadam qiziqishdan taraqqiyotgacha.",
+      copy: "Oddiy jarayon — bolalar birinchi kundanoq tushunadi, ota-onalar esa birinchi haftadan ishonadi.",
       cards: [
-        { label: "01", title: "Выберите мир", copy: "Ребёнок открывает панель солнечной системы и выбирает планету, которую хочет исследовать сегодня." },
-        { label: "02", title: "Учитесь думать", copy: "AI-спутник задаёт направляющие вопросы вместо того, чтобы давать ответы." },
-        { label: "03", title: "Выполняйте миссии", copy: "Короткие целевые миссии превращают практику в ежедневную привычку." },
+        {
+          label: "01",
+          title: "Dunyoni tanlang",
+          copy: "Bola Quyosh tizimi panelini ochadi va bugun kashf etmoqchi bo'lgan sayyorasini tanlaydi.",
+        },
+        {
+          label: "02",
+          title: "Fikrlab o'rganing",
+          copy: "AI hamroh javob berish o'rniga, Sokratik yo'naltiruvchi savollar beradi.",
+        },
+        {
+          label: "03",
+          title: "Missiyalarni bajaring",
+          copy: "Qisqa va maqsadli missiyalar mashqni kunlik odatga aylantiradi.",
+        },
+        {
+          label: "04",
+          title: "Rag'bat va o'sish",
+          copy: "Gold Coin ishlang, avatarni yangilang va rivojlanishni Parent Panelda kuzatib boring.",
+        },
       ],
     },
     steps: {
@@ -1456,13 +1478,30 @@ const content = {
       },
     },
     method: {
-      eyebrow: "How it works",
-      title: "Four steps from curiosity to progress.",
-      copy: "A simple loop children understand on their first day — and parents trust from the first week.",
+      eyebrow: "Qanday ishlaydi",
+      title: "To'rt qadam qiziqishdan taraqqiyotgacha.",
+      copy: "Oddiy jarayon — bolalar birinchi kundanoq tushunadi, ota-onalar esa birinchi haftadan ishonadi.",
       cards: [
-        { label: "01", title: "Choose a world", copy: "The child opens the solar-system dashboard and picks the planet they want to explore today." },
-        { label: "02", title: "Learn by thinking", copy: "The AI companion asks guiding questions instead of handing over answers." },
-        { label: "03", title: "Complete missions", copy: "Short focused missions turn practice into a daily habit worth returning to." },
+        {
+          label: "01",
+          title: "Dunyoni tanlang",
+          copy: "Bola Quyosh tizimi panelini ochadi va bugun kashf etmoqchi bo'lgan sayyorasini tanlaydi.",
+        },
+        {
+          label: "02",
+          title: "Fikrlab o'rganing",
+          copy: "AI hamroh javob berish o'rniga, Sokratik yo'naltiruvchi savollar beradi.",
+        },
+        {
+          label: "03",
+          title: "Missiyalarni bajaring",
+          copy: "Qisqa va maqsadli missiyalar mashqni kunlik odatga aylantiradi.",
+        },
+        {
+          label: "04",
+          title: "Rag'bat va o'sish",
+          copy: "Gold Coin ishlang, avatarni yangilang va rivojlanishni Parent Panelda kuzatib boring.",
+        },
       ],
     },
     steps: {
@@ -1704,6 +1743,7 @@ export default function Home() {
   const [langPos, setLangPos] = useState({ top: 60, right: 100 });
   const [apiPlanets, setApiPlanets] = useState<ApiPlanet[]>(DEFAULT_PLANETS_INITIAL);
   const [apiStats, setApiStats] = useState<ApiStats | null>(null);
+  const [activeAdvantageModal, setActiveAdvantageModal] = useState<{ id: string; icon: string; badge: string; title: string; desc: string; fullInfo: string; color: string } | null>(null);
   const [apiTeams, setApiTeams] = useState<ApiTeam[]>(DEFAULT_TEAMS_INITIAL);
   const [activeModalPlanet, setActiveModalPlanet] = useState<{
     id: string;
@@ -2175,97 +2215,225 @@ export default function Home() {
           <div className="absolute right-[14%] top-[32%] hidden h-2 w-2 rounded-full bg-[#f6c94f] shadow-[0_0_24px_10px_rgba(246,201,79,0.3)] lg:block" />
 
           <div className="container relative z-10">
-            <div className="max-w-3xl pt-6">
-              <h1 className="max-w-[820px] text-[clamp(3.1rem,7vw,5.4rem)] font-black leading-[0.96] tracking-[-0.065em] text-white">
-                <BlurText text={t.hero.title} delay={0.02} />
-              </h1>
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.12, ease: PRO_EASE }}
-                className="mt-7 max-w-2xl text-base font-semibold leading-8 text-white/74 sm:text-lg"
-              >
-                {t.hero.copy}
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.22, ease: PRO_EASE }}
-                className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
-              >
-                <button
-                  type="button"
-                  onClick={handleTry}
-                  className="group inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#f6c94f] px-6 text-base font-black text-[#28163f] shadow-[0_18px_40px_rgba(246,201,79,0.2)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#ffdc77] active:scale-[0.97]"
+            <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] pt-4 lg:pt-8">
+              {/* Left Column: Typography in White, Blue, Yellow */}
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-md mb-6">
+                  <span className="h-2 w-2 rounded-full bg-[#38bdf8] animate-ping" />
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-[#38bdf8]">
+                    {t.hero.eyebrow}
+                  </span>
+                </div>
+
+                <h1 className="text-[clamp(2.8rem,6vw,4.8rem)] font-black leading-[1.02] tracking-[-0.05em]">
+                  <span className="text-white drop-shadow-md">O'rganishni </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38bdf8] via-[#60a5fa] to-[#a78bfa]">sarguzashtga </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f6c94f] via-[#fbbf24] to-[#f59e0b] drop-shadow-[0_0_35px_rgba(246,201,79,0.4)]">aylantiring.</span>
+                </h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.12, ease: PRO_EASE }}
+                  className="mt-6 text-base font-semibold leading-relaxed text-slate-200/85 sm:text-lg"
                 >
-                  {t.hero.primary}
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.8} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("raqamlar")}
-                  className="group inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 text-base font-black text-white backdrop-blur-sm transition hover:bg-white/18 active:scale-[0.97]"
+                  {t.hero.copy}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.22, ease: PRO_EASE }}
+                  className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
                 >
-                  <Rocket className="h-4 w-4 text-[#f6c94f] transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
-                  {t.hero.secondary}
-                </button>
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.32, ease: PRO_EASE }}
-                className="mt-8 max-w-xl border-l-2 border-[#f6c94f] pl-4 text-sm font-bold leading-6 text-white/60"
-              >
-                {t.hero.note}
-              </motion.p>
+                  <button
+                    type="button"
+                    onClick={handleTry}
+                    className="group inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#f6c94f] to-[#fbbf24] px-7 text-base font-black text-[#1c1033] shadow-[0_18px_40px_rgba(246,201,79,0.3)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(246,201,79,0.45)] active:scale-[0.97]"
+                  >
+                    <span>{t.hero.primary}</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.8} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection("sayyoralar")}
+                    className="group inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-[#38bdf8]/30 bg-[#38bdf8]/10 px-6 text-base font-black text-white backdrop-blur-md transition hover:bg-[#38bdf8]/20 hover:border-[#38bdf8]/60 active:scale-[0.97]"
+                  >
+                    <Rocket className="h-4 w-4 text-[#38bdf8] transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+                    <span>{t.hero.secondary}</span>
+                  </button>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.32, ease: PRO_EASE }}
+                  className="mt-8 flex items-center gap-3 border-l-2 border-[#f6c94f] pl-4 text-xs sm:text-sm font-bold text-white/80"
+                >
+                  <span className="text-[#38bdf8]">🪐 8 ta o'sish dunyosi</span>
+                  <span>•</span>
+                  <span className="text-[#f6c94f]">7 yoshdan 11 yoshgacha</span>
+                  <span>•</span>
+                  <span className="text-[#34d399]">🛡️ 100% bolalar uchun xavfsiz AI</span>
+                </motion.div>
+              </div>
+
+              {/* Right Column: Kid-Friendly Interactive 3D Cosmic Holographic Sphere */}
+              <div className="relative hidden lg:flex items-center justify-center">
+                <div className="relative w-[440px] h-[440px] flex items-center justify-center">
+                  {/* Outer Cosmic Aura & Star Field */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#6c45dd]/35 via-[#38bdf8]/30 to-[#f6c94f]/35 blur-[80px] animate-pulse pointer-events-none" />
+                  
+                  {/* Orbiting Planetary Guide Rings */}
+                  <div className="absolute inset-2 rounded-full border border-dashed border-[#38bdf8]/35 animate-spin-slow pointer-events-none" style={{ animationDuration: "40s" }} />
+                  <div className="absolute inset-10 rounded-full border border-[#f6c94f]/25 animate-spin-slow pointer-events-none" style={{ animationDuration: "28s", animationDirection: "reverse" }} />
+                  
+                  {/* Orbiting Micro Planets */}
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#38bdf8]/20 border border-[#38bdf8]/50 backdrop-blur-md text-[11px] font-black text-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.4)] animate-bounce" style={{ animationDuration: "4s" }}>
+                    <span>🚀</span> <span>8 Sayyora</span>
+                  </div>
+
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f6c94f]/20 border border-[#f6c94f]/50 backdrop-blur-md text-[11px] font-black text-[#f6c94f] shadow-[0_0_20px_rgba(246,201,79,0.4)] animate-bounce" style={{ animationDuration: "4.5s" }}>
+                    <span>🪙</span> <span>Gold Coin</span>
+                  </div>
+
+                  <div className="absolute top-1/2 -left-6 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#34d399]/20 border border-[#34d399]/50 backdrop-blur-md text-[11px] font-black text-[#34d399] shadow-[0_0_20px_rgba(52,211,153,0.4)] animate-bounce" style={{ animationDuration: "5s" }}>
+                    <span>🤖</span> <span>AI Tutor</span>
+                  </div>
+
+                  <div className="absolute top-1/2 -right-6 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ec4899]/20 border border-[#ec4899]/50 backdrop-blur-md text-[11px] font-black text-[#ec4899] shadow-[0_0_20px_rgba(236,72,153,0.4)] animate-bounce" style={{ animationDuration: "3.8s" }}>
+                    <span>⭐</span> <span>7–11 yosh</span>
+                  </div>
+
+                  {/* Central Core: Holographic Glass Globe with 3D Sun */}
+                  <motion.div
+                    animate={{ y: [-6, 6, -6], scale: [1, 1.02, 1] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                    onClick={() => (window as any).openCosmicUniverse?.('logo')}
+                    className="group relative cursor-pointer rounded-full h-64 w-64 border border-white/25 bg-gradient-to-br from-[#24124e]/90 via-[#150935]/95 to-[#0a041c]/95 p-6 shadow-[0_0_80px_rgba(108,69,221,0.5),_inset_0_0_40px_rgba(246,201,79,0.2)] backdrop-blur-2xl flex flex-col items-center justify-center text-center select-none hover:scale-110 transition-transform"
+                    title="3D Koinotni ochish"
+                  >
+                    {/* Glowing Sun Center */}
+                    <div className="relative w-28 h-28 mb-2">
+                      <div className="absolute inset-0 rounded-full bg-[#ffb703] blur-2xl opacity-60 animate-pulse pointer-events-none" />
+                      <div className="relative z-10 w-full h-full rounded-full bg-[radial-gradient(circle_at_35%_35%,#fff8db_0%,#f6c94f_40%,#ff9900_75%,#d97706_100%)] shadow-[0_0_35px_rgba(246,201,79,0.9)] flex items-center justify-center">
+                        <span className="text-4xl drop-shadow-md select-none">✨</span>
+                      </div>
+                    </div>
+
+                    <div className="text-base font-black text-white group-hover:text-[#f6c94f] transition-colors leading-tight">
+                      Kichik Alloma
+                    </div>
+                    <div className="text-[11px] font-bold text-[#38bdf8] mt-0.5">
+                      3D AI Koinoti →
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
       </SectionDepthWrapper>
 
         <SectionDepthWrapper id="raqamlar">
-          <section className="relative scroll-mt-24 bg-gradient-to-b from-[#fbfaff] to-[#f2efff] py-16 sm:py-20 overflow-hidden">
-          <div className="container max-w-5xl mx-auto">
-            <Reveal delay={0.1}>
-              <div className="rounded-[36px] liquid-glass-card bg-white/75 p-6 sm:p-10 shadow-[0_20px_60px_rgba(108,69,221,0.08)] backdrop-blur-xl">
-                <div className="grid gap-8 md:grid-cols-3 md:gap-0 items-center divide-y md:divide-y-0 md:divide-x divide-[#6c45dd]/15">
+          <section
+            className="relative scroll-mt-24 py-12 sm:py-16 overflow-hidden bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('/space-bg.jpg')" }}
+          >
+            {/* Seamless Cosmic Dark Overlay */}
+            <div className="absolute inset-0 bg-[#0b0722]/85 pointer-events-none" />
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[650px] h-[250px] bg-[#6c45dd]/20 blur-[90px] pointer-events-none rounded-full" />
+
+            <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+              <Reveal delay={0.1}>
+                {/* Seamless Cosmic Glassmorphism Card (No harsh borders or cut lines) */}
+                <div className="relative rounded-[32px] border border-white/[0.08] bg-[#12082b]/75 p-6 sm:p-8 lg:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl overflow-hidden group">
                   
-                  <div className="text-center px-4 py-4 sm:py-2 group">
-                    <div className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#6c45dd] to-[#d54381] leading-none pb-1 transition-transform duration-300 group-hover:scale-105">
-                      <AnimatedCounter value={apiStats?.totalPlanets ?? 1060844} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 items-center">
+                    
+                    {/* STAT 1: O'quvchilar (Students) */}
+                    <div className="text-center px-4 py-3 group/item transition-all duration-300 hover:-translate-y-1 relative">
+                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] border border-white/10 mb-2.5 shadow-sm">
+                        <span className="text-xl">🎓</span>
+                      </div>
+                      <div className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#ffffff] via-[#f6c94f] to-[#ffdc77] leading-none pb-1">
+                        <AnimatedCounter value={25480 + (apiStats?.totalPlanets ? apiStats.totalPlanets * 120 : 0)} />
+                        <span className="text-[#f6c94f] ml-1 text-2xl sm:text-3xl font-black">+</span>
+                      </div>
+                      <div className="mt-2 text-xs sm:text-sm font-black tracking-[0.14em] text-[#f6c94f] uppercase">
+                        {t.stats.students}
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-300/70 font-medium leading-relaxed max-w-[190px] mx-auto">
+                        8 ta sayyora bo'ylab faol ta'lim olayotgan yosh allomalar
+                      </p>
+                      
+                      {/* Soft vertical separator for desktop */}
+                      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-20 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
                     </div>
-                    <div className="mt-3 text-xs sm:text-sm font-black tracking-[0.16em] text-[#6d5b91] uppercase transition-colors duration-300 group-hover:text-[#6c45dd]">
-                      {t.stats.students}
-                    </div>
-                    <div className="mx-auto mt-3.5 h-[3px] w-8 rounded-full bg-gradient-to-r from-[#6c45dd] to-[#f6c94f] transition-all duration-300 group-hover:w-16" />
-                  </div>
 
-                  <div className="text-center px-4 py-4 sm:py-2 group">
-                    <div className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#6c45dd] to-[#d54381] leading-none pb-1 transition-transform duration-300 group-hover:scale-105">
-                      <AnimatedCounter value={apiStats?.activePlanets ?? 30} />
-                    </div>
-                    <div className="mt-3 text-xs sm:text-sm font-black tracking-[0.16em] text-[#6d5b91] uppercase transition-colors duration-300 group-hover:text-[#6c45dd]">
-                      {t.stats.courses}
-                    </div>
-                    <div className="mx-auto mt-3.5 h-[3px] w-8 rounded-full bg-gradient-to-r from-[#6c45dd] to-[#f6c94f] transition-all duration-300 group-hover:w-16" />
-                  </div>
+                    {/* STAT 2: Kurslar va Modullar (Courses & Modules) */}
+                    <div className="text-center px-4 py-3 group/item transition-all duration-300 hover:-translate-y-1 relative">
+                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] border border-white/10 mb-2.5 shadow-sm">
+                        <span className="text-xl">🪐</span>
+                      </div>
+                      <div className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#ffffff] via-[#38bdf8] to-[#67e8f9] leading-none pb-1">
+                        <AnimatedCounter value={120 + (apiStats?.activePlanets ? apiStats.activePlanets * 5 : 0)} />
+                        <span className="text-[#38bdf8] ml-1 text-2xl sm:text-3xl font-black">+</span>
+                      </div>
+                      <div className="mt-2 text-xs sm:text-sm font-black tracking-[0.14em] text-[#38bdf8] uppercase">
+                        {t.stats.courses}
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-300/70 font-medium leading-relaxed max-w-[190px] mx-auto">
+                        Ingliz tili, Matematika, AI Tutor va Mantiq darslari
+                      </p>
 
-                  <div className="text-center px-4 py-4 sm:py-2 group">
-                    <div className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#6c45dd] to-[#d54381] leading-none pb-1 transition-transform duration-300 group-hover:scale-105">
-                      <AnimatedCounter value={apiStats?.totalTeams ?? 30} />
+                      {/* Soft vertical separator for desktop */}
+                      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-20 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
                     </div>
-                    <div className="mt-3 text-xs sm:text-sm font-black tracking-[0.16em] text-[#6d5b91] uppercase transition-colors duration-300 group-hover:text-[#6c45dd]">
-                      {t.stats.specialists}
-                    </div>
-                    <div className="mx-auto mt-3.5 h-[3px] w-8 rounded-full bg-gradient-to-r from-[#6c45dd] to-[#f6c94f] transition-all duration-300 group-hover:w-16" />
-                  </div>
 
+                    {/* STAT 3: Mutaxassislar (Specialists) */}
+                    <div className="text-center px-4 py-3 group/item transition-all duration-300 hover:-translate-y-1 relative">
+                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] border border-white/10 mb-2.5 shadow-sm">
+                        <span className="text-xl">👨‍🏫</span>
+                      </div>
+                      <div className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#ffffff] via-[#fb923c] to-[#f59e0b] leading-none pb-1">
+                        <AnimatedCounter value={50 + (apiStats?.totalTeams ? apiStats.totalTeams : 0)} />
+                        <span className="text-[#fb923c] ml-1 text-2xl sm:text-3xl font-black">+</span>
+                      </div>
+                      <div className="mt-2 text-xs sm:text-sm font-black tracking-[0.14em] text-[#fb923c] uppercase">
+                        {t.stats.specialists}
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-300/70 font-medium leading-relaxed max-w-[190px] mx-auto">
+                        Pedagoglar, bolalar psixologlari va AI mutaxassislari
+                      </p>
+
+                      {/* Soft vertical separator for desktop */}
+                      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-20 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+                    </div>
+
+                    {/* STAT 4: Natija va Ishonch (Success Rate) */}
+                    <div className="text-center px-4 py-3 group/item transition-all duration-300 hover:-translate-y-1">
+                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] border border-white/10 mb-2.5 shadow-sm">
+                        <span className="text-xl">⭐</span>
+                      </div>
+                      <div className="text-4xl sm:text-5xl font-black tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#ffffff] via-[#ec4899] to-[#f472b6] leading-none pb-1">
+                        <span>99.4</span>
+                        <span className="text-[#ec4899] ml-1 text-2xl sm:text-3xl font-black">%</span>
+                      </div>
+                      <div className="mt-2 text-xs sm:text-sm font-black tracking-[0.14em] text-[#ec4899] uppercase">
+                        Ijobiy Natija
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-300/70 font-medium leading-relaxed max-w-[190px] mx-auto">
+                        Ota-onalar va o'quvchilarning ishonchli yuqori bahosi
+                      </p>
+                    </div>
+
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-      </SectionDepthWrapper>
+              </Reveal>
+            </div>
+          </section>
+        </SectionDepthWrapper>
 
         <SectionDepthWrapper id="sayyoralar">
           <section
@@ -2289,8 +2457,7 @@ export default function Home() {
               </Reveal>
 
               <Reveal delay={0.15}>
-                <div className="orbital-board relative mx-auto w-full max-w-[690px] overflow-hidden rounded-[34px] border border-white bg-[linear-gradient(145deg,#7151d7_0%,#5839bb_48%,#2e1a65_100%)] p-2 min-[400px]:p-3 sm:p-6 shadow-[0_25px_70px_rgba(59,36,134,0.28)]">
-                <div className="pointer-events-none absolute inset-0 opacity-55 [background-image:radial-gradient(rgba(255,255,255,0.54)_1px,transparent_1px)] [background-size:23px_23px]" />
+                <div className="orbital-board relative mx-auto w-full max-w-[690px] p-2 min-[400px]:p-3 sm:p-6">
 
                 {/* Responsive spacer to maintain proper container aspect */}
                 <div className="pointer-events-none invisible h-[430px] min-[400px]:h-[480px] min-[500px]:h-[560px] sm:h-[680px] lg:h-[740px]" />
@@ -2302,7 +2469,9 @@ export default function Home() {
 
                 {/* Sun center (Prominent, clean, larger than all orbiting planets without harsh border lines) */}
                 <div
-                  className="group pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none"
+                  onClick={() => (window as any).openCosmicUniverse?.('logo')}
+                  title="Quyosh & Kichik Alloma 3D Logotipi"
+                  className="group cursor-pointer absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none hover:scale-110 transition-transform"
                 >
                   <div className="relative grid place-items-center h-[88px] w-[88px] min-[400px]:h-[100px] min-[400px]:w-[100px] min-[500px]:h-[120px] min-[500px]:w-[120px] sm:h-[150px] sm:w-[150px] lg:h-[165px] lg:w-[165px]">
                     {/* Solar Corona & Soft Radiant Energy Glow (No harsh border line) */}
@@ -2324,6 +2493,19 @@ export default function Home() {
                 {/* Planets in orbit around the sun */}
                 <div className="absolute inset-0 z-10 animate-orbit-cw-slow">
                   {(() => {
+                    const getPlanet3DKey = (pId: string, pName: string = "") => {
+                        const low = (pId + " " + pName).toLowerCase().trim();
+                        if (low.includes("merkur") || low.includes("mercury")) return "mercury";
+                        if (low.includes("vener") || low.includes("venus")) return "venera";
+                        if (low.includes("yer") || low.includes("earth") || low.includes("zamin")) return "earth";
+                        if (low.includes("mars")) return "mars";
+                        if (low.includes("yupiter") || low.includes("jupiter")) return "jupiter";
+                        if (low.includes("saturn")) return "saturn";
+                        if (low.includes("uran") || low.includes("uranus")) return "uran";
+                        if (low.includes("neptun") || low.includes("neptune")) return "neptune";
+                        if (low.includes("sun") || low.includes("quyosh")) return "logo";
+                        return "logo";
+                      };
                     const planetSkillsDetails: Record<string, { age: string; modules: number; skills: string[] }> = {
                       sun: { age: "5 - 12 yosh", modules: 24, skills: ["Koinot metodologiyasi", "Intellektual rivojlanish", "Diqqat o'yinlari"] },
                       earth: { age: "6 - 12 yosh", modules: 18, skills: ["Kognitiv ta'lim", "Maqsadli o'qish"] },
@@ -2349,6 +2531,8 @@ export default function Home() {
                       const planetDetails = planetSkillsDetails[planet.id] || { age: "6 - 12 yosh", modules: 15, skills: ["Intellektual rivojlanish", "Mantiq"] };
                       const isEarth = planet.id === "earth";
 
+
+
                       return (
                         <div
                           key={planet.id}
@@ -2361,22 +2545,12 @@ export default function Home() {
                         >
                           <div className="animate-orbit-ccw-slow">
                             <div
-                              onClick={isEarth ? () => {
-                                setActiveModalPlanet({
-                                  id: planet.id,
-                                  name: "YER — " + name,
-                                  desc,
-                                  image: planetImage,
-                                  ageGroup: planetDetails.age,
-                                  modulesCount: planetDetails.modules,
-                                  skills: planetDetails.skills,
-                                });
-                              } : undefined}
-                              className={`group relative transition-all duration-300 ${
-                                isEarth
-                                  ? "hover:scale-115 cursor-pointer"
-                                  : "hover:scale-110 cursor-default"
-                              }`}
+                              onClick={() => {
+                                const shapeKey = getPlanet3DKey(planet.id, name);
+                                (window as any).openCosmicUniverse?.(shapeKey);
+                              }}
+                              title={`${name} — 3D Zarrachali ko'rinishni ochish`}
+                              className="group relative transition-all duration-300 hover:scale-125 cursor-pointer"
                             >
                               <div className="planet-float relative mx-auto grid h-[52px] w-[52px] min-[400px]:h-[60px] min-[400px]:w-[60px] min-[500px]:h-[70px] min-[500px]:w-[70px] sm:h-[92px] sm:w-[92px] lg:h-[102px] lg:w-[102px] place-items-center">
                                 <div className="absolute inset-1 rounded-full bg-[#a78cff] opacity-25 blur-lg transition-all duration-300 group-hover:opacity-60 group-hover:blur-xl" />
@@ -2426,12 +2600,13 @@ export default function Home() {
                   <SectionHeader align="left" eyebrow={t.method.eyebrow} title={t.method.title} copy={t.method.copy} />
                   <div className="mt-10 space-y-3">
                     {t.method.cards.map((card, index) => {
-                      const icons = [Compass, MessageCircleQuestion, Rocket];
-                      const Icon = icons[index];
+                      const icons = [Compass, MessageCircleQuestion, Rocket, Sparkles];
+                      const Icon = icons[index % icons.length];
                       const iconClasses = [
                         "transition-transform duration-500 group-hover:rotate-180",
                         "transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12",
                         "transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1",
+                        "transition-transform duration-300 group-hover:scale-125 group-hover:rotate-45",
                       ];
                       return (
                         <Reveal key={card.label} delay={index * 0.1}>
@@ -2452,10 +2627,66 @@ export default function Home() {
                 </div>
               </Reveal>
               <Reveal delay={0.15}>
-                <div className="relative mx-auto w-full max-w-md lg:pt-8">
-                  <div className="absolute -inset-7 -z-0 rounded-[48px] bg-[#8d6be8]/25 blur-2xl" />
-                  <div className="relative overflow-hidden rounded-[34px] border-[8px] border-white/60 liquid-glass-card bg-[#38206d]/90 p-3 shadow-[0_30px_70px_rgba(45,21,95,0.28)] backdrop-blur-2xl">
-                    <img src={assets.constellationImage} alt="Kichik Alloma kosmik maketi" className="w-full h-auto rounded-[24px] object-cover" />
+                <div className="relative mx-auto w-full max-w-md lg:pt-4">
+                  <div className="absolute -inset-6 -z-0 rounded-[48px] bg-gradient-to-br from-[#6c45dd]/30 via-[#38bdf8]/20 to-[#f6c94f]/25 blur-3xl pointer-events-none" />
+                  
+                  {/* Dynamic Kid-Friendly Mission Control Display */}
+                  <div className="relative overflow-hidden rounded-[36px] border border-white/20 bg-gradient-to-br from-[#170c38]/95 via-[#0e0624]/95 to-[#080318]/95 p-6 sm:p-8 shadow-[0_30px_80px_rgba(45,21,95,0.4)] backdrop-blur-2xl">
+                    
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-tr from-[#38bdf8] to-[#60a5fa] text-white shadow-md text-xl">
+                          🚀
+                        </div>
+                        <div>
+                          <div className="text-sm font-black text-white">Kosmik Alloma Missiyasi</div>
+                          <div className="text-[11px] font-bold text-[#f6c94f]">7–11 yosh bolalar uchun</div>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-[#34d399]/20 border border-[#34d399]/40 text-[10px] font-black text-[#34d399]">
+                        Faol
+                      </span>
+                    </div>
+
+                    {/* Progress Display */}
+                    <div className="space-y-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all hover:bg-white/[0.08]">
+                        <div className="flex items-center justify-between text-xs font-black text-white mb-2">
+                          <span className="text-[#38bdf8]">🌍 AI Tutor Kognitiv dars</span>
+                          <span className="text-[#f6c94f]">85%</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-[#38bdf8] to-[#f6c94f] w-[85%]" />
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all hover:bg-white/[0.08]">
+                        <div className="flex items-center justify-between text-xs font-black text-white mb-2">
+                          <span className="text-[#a78bfa]">💎 Uran Ingliz tili lug'atlari</span>
+                          <span className="text-[#34d399]">100% (Bajarildi)</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-[#a78bfa] to-[#34d399] w-[100%]" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="rounded-2xl border border-[#f6c94f]/25 bg-[#f6c94f]/10 p-3 text-center">
+                          <div className="text-xl font-black text-[#f6c94f]">1,250 🪙</div>
+                          <div className="text-[10px] font-bold text-white/70">Gold Coin jamg'arildi</div>
+                        </div>
+                        <div className="rounded-2xl border border-[#38bdf8]/25 bg-[#38bdf8]/10 p-3 text-center">
+                          <div className="text-xl font-black text-[#38bdf8]">7 kun 🔥</div>
+                          <div className="text-[10px] font-bold text-white/70">Uzluksiz Streak</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-bold text-white/75">
+                      <span>🤖 AI Hamroh: Sokratik yordam</span>
+                      <span className="text-[#38bdf8]">20 min / kun</span>
+                    </div>
                   </div>
                 </div>
               </Reveal>
@@ -2465,80 +2696,110 @@ export default function Home() {
       </SectionDepthWrapper>
 
         <SectionDepthWrapper id="afzalliklar">
-          <section className="scroll-mt-24 relative overflow-hidden bg-gradient-to-b from-[#dcd1ff] via-[#fff3f7] to-[#fbfaff] py-24 sm:py-32">
-          {/* Floating Crystal Top-Left */}
-          <div className="absolute left-[8%] top-[15%] h-12 w-8 rotate-12 rounded-lg border border-white/40 bg-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-[2px] hidden md:block opacity-60" />
-          {/* Floating Petal Bottom-Right */}
-          <div className="absolute right-[6%] bottom-[12%] h-10 w-8 -rotate-45 rounded-br-3xl rounded-tl-3xl bg-gradient-to-tr from-[#d54381]/30 to-[#f6c94f]/20 blur-[1px] hidden md:block opacity-50" />
-          
-          <div className="container relative z-10">
-            <SectionHeader align="center" title={t.advantages.title} />
+          <section className="scroll-mt-24 relative overflow-hidden bg-cover bg-center bg-no-repeat py-20 sm:py-28" style={{ backgroundImage: "url('/space-bg.jpg')" }}>
+            <div className="absolute inset-0 bg-[#09041a]/92 pointer-events-none" />
+            <div className="absolute -top-32 left-1/3 w-96 h-96 bg-[#6c45dd]/25 blur-[120px] pointer-events-none rounded-full" />
+            <div className="absolute -bottom-32 right-1/4 w-96 h-96 bg-[#38bdf8]/20 blur-[120px] pointer-events-none rounded-full" />
 
-            {/* Main Horizontal Hanging Wire/String Line Across All Posters */}
-            <div className="relative mt-20">
-              <div className="absolute -top-10 left-4 right-4 h-1 bg-gradient-to-r from-transparent via-[#8d6ee0]/40 to-transparent border-b border-dashed border-[#8d6ee0]/60 hidden sm:block z-0" />
+            <div className="container relative z-10">
+              {/* Section Header with Blue, White, Yellow Palette */}
+              <div className="text-center max-w-3xl mx-auto mb-16">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-[#38bdf8]/30 backdrop-blur-md mb-4">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-[#38bdf8]">
+                    Platforma Imkoniyatlari
+                  </span>
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                  <span className="text-white">Nega Aynan </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f6c94f] via-[#fbbf24] to-[#f59e0b]">Kichik Alloma?</span>
+                </h2>
+                <p className="mt-4 text-sm sm:text-base font-semibold text-slate-300/85 max-w-2xl mx-auto leading-relaxed">
+                  Farzandingiz (7 yoshdan 11 yoshgacha) uchun AI asosidagi xavfsiz, qiziqarli va har tomonlama rivojlantiruvchi koinot.
+                </p>
+                <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-[#38bdf8] via-[#f6c94f] to-[#60a5fa]" />
+              </div>
 
-              <StaggerGroup className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-start">
-                {t.advantages.cards.map((card, index) => {
-                  const icons = [GraduationCap, Award, MessageSquare, Clock];
-                  const Icon = icons[index];
-                  const sphereStyles = [
-                    { glow: "from-[#ff79b0]/30 to-[#ff3b80]/10", border: "from-white to-[#ffebf3] bg-[#fff5f8]", icon: "text-[#d54381]" },
-                    { glow: "from-[#a78cff]/30 to-[#6c45dd]/10", border: "from-white to-[#f0ebff] bg-[#f8f6ff]", icon: "text-[#6c45dd]" },
-                    { glow: "from-[#4ade80]/30 to-[#10b981]/10", border: "from-white to-[#ebfaf0] bg-[#f4fbf7]", icon: "text-[#10b981]" },
-                    { glow: "from-[#f6c94f]/30 to-[#e65c00]/10", border: "from-white to-[#fff9eb] bg-[#fffdf9]", icon: "text-[#e65c00]" },
-                  ];
-                  const styles = sphereStyles[index];
-
-                  // Natural hanging poster tilt angles
-                  const hangingAngles = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-1.5"];
-                  const currentAngle = hangingAngles[index];
-
-                  return (
-                    <StaggerItem key={card.title} className="relative pt-6">
-                      {/* Hanging Ropes & Clips */}
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between w-28 pointer-events-none">
-                        {/* Left Rope & Pin */}
-                        <div className="flex flex-col items-center">
-                          <div className="h-6 w-0.5 bg-gradient-to-b from-[#8d6ee0] to-[#d54381]" />
-                          <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-tr from-[#f6c94f] to-[#ffe89c] border border-white shadow-md" />
+              {/* 4 Cards Grid */}
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+                {[
+                  {
+                    id: "teachers",
+                    icon: "🎓",
+                    badge: "Ekspertlar",
+                    title: "Professional O'qituvchilar",
+                    desc: "Pedagogika va bolalar psixologiyasi sohasidagi yetakchi mutaxassislar tomonidan tuzilgan dastur.",
+                    fullInfo: "Har bir sayyora topshiriqlari va mashqlari bolalar psixologlari hamda xalqaro toifadagi pedagoglar ishtirokida 7-11 yosh bolalarning yosh xususiyatlariga moslab ishlab chiqilgan.",
+                    color: "text-[#f6c94f]",
+                    borderGlow: "group-hover:border-[#f6c94f]/50"
+                  },
+                  {
+                    id: "certificates",
+                    icon: "📜",
+                    badge: "Yutuqlar",
+                    title: "Rasmiy Sertifikatlar",
+                    desc: "Har bir sayyora modulini to'liq tugatganda nufuzli diplom va yutuq nishonlari taqdim etiladi.",
+                    fullInfo: "Bola sayyoralardagi topshiriqlar va testlarni muvaffaqiyatli tamomlagach, maxsus QR kodli rasmiy sertifikat va virtual unvonlarga ega bo'ladi.",
+                    color: "text-[#38bdf8]",
+                    borderGlow: "group-hover:border-[#38bdf8]/50"
+                  },
+                  {
+                    id: "community",
+                    icon: "🌟",
+                    badge: "Hamjamiyat",
+                    title: "Do'stona Hamjamiyat",
+                    desc: "Tengdoshlar bilan xavfsiz bilim bellashuvlari, reytinglar va do'stona fikr almashish.",
+                    fullInfo: "Bolalar o'z yutuqlari bilan o'rtoqlashadi, koinot yetakchilar doskasida o'rin egallaydi va qiziqarli do'stona muhitda birga rivojlanadi.",
+                    color: "text-[#f6c94f]",
+                    borderGlow: "group-hover:border-[#f6c94f]/50"
+                  },
+                  {
+                    id: "schedule",
+                    icon: "⏱️",
+                    badge: "20 daqiqa",
+                    title: "Qulay Erkin Jadval",
+                    desc: "Kunlik 20 daqiqalik me'yorda bolaning ko'zi va miyasini toliqtirmagan holda ta'lim olishi.",
+                    fullInfo: "Platformada o'rnatilgan avtomatik 20 daqiqalik vaqt chegarasi bolani ekranga bog'lanib qolishdan himoya qiladi va kunlik doimiy odatni shakllantiradi.",
+                    color: "text-[#38bdf8]",
+                    borderGlow: "group-hover:border-[#38bdf8]/50"
+                  }
+                ].map((item, idx) => (
+                  <Reveal key={item.id} delay={idx * 0.1}>
+                    <div
+                      onClick={() => setActiveAdvantageModal(item)}
+                      className={`group relative h-full cursor-pointer rounded-[30px] border border-white/15 bg-gradient-to-b from-[#160a35]/90 via-[#0e0625]/95 to-[#080319]/95 p-6 sm:p-7 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-2.5 ${item.borderGlow} hover:shadow-[0_20px_60px_rgba(108,69,221,0.35)] flex flex-col justify-between overflow-hidden`}
+                    >
+                      {/* Top Header in Card */}
+                      <div>
+                        <div className="flex items-center justify-between mb-5">
+                          <div className="inline-flex h-13 w-13 items-center justify-center rounded-2xl bg-white/[0.08] border border-white/20 text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                            {item.icon}
+                          </div>
+                          <span className={`text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-white/[0.06] border border-white/15 ${item.color}`}>
+                            {item.badge}
+                          </span>
                         </div>
-                        {/* Right Rope & Pin */}
-                        <div className="flex flex-col items-center">
-                          <div className="h-6 w-0.5 bg-gradient-to-b from-[#8d6ee0] to-[#d54381]" />
-                          <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-tr from-[#f6c94f] to-[#ffe89c] border border-white shadow-md" />
-                        </div>
+
+                        <h3 className={`text-lg font-black text-white group-hover:${item.color} transition-colors leading-snug`}>
+                          {item.title}
+                        </h3>
+
+                        <p className="mt-3 text-xs sm:text-sm text-slate-300/80 leading-relaxed font-medium">
+                          {item.desc}
+                        </p>
                       </div>
 
-                      {/* Top Wooden Hanger Bar */}
-                      <div className="relative mx-auto h-3 w-[88%] rounded-t-lg bg-[#5c3a21] border-b border-[#3d2412] shadow-sm z-10" />
-
-                      {/* Hanging Poster Article Body */}
-                      <article className={`group origin-top transform ${currentAngle} transition-all duration-500 hover:rotate-0 hover:scale-105 hover:-translate-y-2 bg-white/95 border border-white/80 rounded-b-[36px] rounded-t-[6px] p-8 text-center shadow-[0_20px_50px_rgba(108,69,221,0.08)] backdrop-blur-md relative z-0 glass-card`}>
-                        {/* Subtle Paper Texture Line */}
-                        <div className="absolute top-2 left-6 right-6 border-t border-dashed border-[#e2d9f7]" />
-
-                        <div className="relative mx-auto mt-2 mb-6 flex h-16 w-16 items-center justify-center rounded-full">
-                          {/* Outer glow */}
-                          <div className={`absolute inset-0 rounded-full bg-gradient-to-tr ${styles.glow} blur-md opacity-80 group-hover:scale-110 transition-transform duration-300`} />
-                          {/* Inner Sphere Container */}
-                          <div className={`absolute inset-0 rounded-full border border-white/70 bg-gradient-to-tr ${styles.border} shadow-[inset_-3px_-3px_8px_rgba(0,0,0,0.03),3px_3px_8px_rgba(0,0,0,0.02)] flex items-center justify-center`} />
-                          {/* Icon */}
-                          <Icon className={`relative z-10 h-6 w-6 ${styles.icon} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12`} />
-                        </div>
-
-                        <h3 className="text-lg font-black tracking-tight text-[#2d174e]">{card.title}</h3>
-                        <div className="mx-auto mt-2.5 h-0.5 w-6 rounded-full bg-[#ebdffd] transition-all duration-300 group-hover:w-12 group-hover:bg-[#d54381]" />
-                        <p className="mt-4 text-xs font-semibold leading-relaxed text-[#6d5b91]">{card.copy}</p>
-                      </article>
-                    </StaggerItem>
-                  );
-                })}
-              </StaggerGroup>
+                      {/* Clickable Action Button */}
+                      <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-black">
+                        <span className={`${item.color} group-hover:underline`}>Batafsil ma'lumot</span>
+                        <span className={`${item.color} transition-transform duration-200 group-hover:translate-x-1`}>→</span>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      </SectionDepthWrapper>
+          </section>
+        </SectionDepthWrapper>
 
         <SectionDepthWrapper id="bosqichlar">
           <section className="scroll-mt-24 relative overflow-hidden bg-gradient-to-b from-[#fbfaff] via-[#f0ebff] to-[#fbfaff] py-20 sm:py-28">
@@ -2633,14 +2894,7 @@ export default function Home() {
 
         <SectionDepthWrapper id="jamoa">
           <section className="scroll-mt-24 relative overflow-hidden bg-gradient-to-b from-[#fbfaff] to-[#f4efff] py-24 sm:py-32">
-          {/* Decorative butterfly background element on the right */}
-          <div className="absolute right-[4%] top-[10%] h-12 w-16 opacity-30 pointer-events-none hidden md:block">
-            <svg className="h-full w-full text-[#d54381]" viewBox="0 0 100 100" fill="currentColor">
-              <path d="M 50 50 C 35 20, 10 30, 20 60 C 25 70, 45 60, 50 50 Z" />
-              <path d="M 50 50 C 65 20, 90 30, 80 60 C 75 70, 55 60, 50 50 Z" />
-              <path d="M 50 40 L 50 65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-          </div>
+          
 
           <div className="container relative z-10">
             <SectionHeader align="center" eyebrow={t.team.eyebrow} title={t.team.title} copy={t.team.copy} />
@@ -2965,118 +3219,256 @@ export default function Home() {
       </main>
 
       <SectionDepthWrapper id="footer">
-      <footer className="bg-[#0a061b] text-white/60 py-16 border-t border-white/10 min-h-[360px] flex flex-col justify-between relative overflow-hidden">
-        {/* Subtle ambient lighting */}
-        <div className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-[#6c45dd]/10 blur-[100px]" />
-        <div className="pointer-events-none absolute -top-32 right-0 h-80 w-80 rounded-full bg-[#f6c94f]/5 blur-[100px]" />
+      <footer className="relative bg-[#070314] text-white/70 pt-20 pb-12 border-t border-white/10 overflow-hidden">
+        {/* Subtle Ambient Cosmic Glows */}
+        <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#6c45dd]/15 blur-[120px]" />
+        <div className="pointer-events-none absolute -top-32 right-1/4 h-80 w-80 rounded-full bg-[#38bdf8]/10 blur-[100px]" />
+        <div className="pointer-events-none absolute top-1/2 right-0 h-96 w-96 rounded-full bg-[#f6c94f]/10 blur-[120px]" />
 
-        <div className="container relative z-10">
-          <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between pb-12 border-b border-white/10">
-            {/* Left side: Brand Logo & Tagline */}
-            <div className="flex flex-col items-start text-left max-w-sm">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid gap-12 lg:grid-cols-[1.4fr_0.8fr_0.8fr_1fr] pb-16 border-b border-white/10">
+            
+            {/* Column 1: Brand Info & Mission */}
+            <div className="flex flex-col items-start text-left">
               <a
                 href="#bosh"
                 onClick={(e) => {
                   e.preventDefault();
                   scrollToSection("bosh");
                 }}
-                className="flex items-center gap-1.5 sm:gap-2 group"
+                className="flex items-center gap-2.5 group"
                 aria-label="Kichik Alloma bosh sahifa"
               >
-                <img src="/logo-a.png" alt="Kichik Alloma A" className="h-10 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_4px_12px_rgba(246,201,79,0.4)]" />
-                <img src="/logo-text.png" alt="Kichik Alloma Yozuvi" className="h-6 sm:h-7 w-auto object-contain transition-all duration-300 group-hover:opacity-90" />
+                <div className="relative">
+                  <div className="absolute -inset-1 rounded-full bg-[#f6c94f]/30 blur-md group-hover:bg-[#f6c94f]/60 transition-all" />
+                  <img src="/logo-a.png" alt="Kichik Alloma A" className="relative z-10 h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-110" />
+                </div>
+                <img src="/logo-text.png" alt="Kichik Alloma" className="h-7 w-auto object-contain transition-all duration-300 group-hover:brightness-110" />
               </a>
-              <p className="mt-4 text-xs sm:text-sm font-semibold leading-relaxed text-white/50">
-                {t.footer.copy}
+
+              <p className="mt-5 text-sm font-semibold leading-relaxed text-slate-300/80 max-w-sm">
+                Kichik savollardan katta olamlargacha. Bolalarga mustaqil fikrlash, kashf qilish va o'sishga yordam beruvchi AI ta'lim koinoti.
               </p>
-              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-white/40">
-                <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Koinot ta'lim platformasi</span>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-xs font-bold text-[#38bdf8]">
+                  <span className="h-2 w-2 rounded-full bg-[#34d399] animate-pulse" />
+                  <span>8 Sayyorali AI Platforma</span>
+                </div>
+                <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f6c94f]/10 border border-[#f6c94f]/30 text-xs font-bold text-[#f6c94f]">
+                  <span>⭐ 7–11 yosh</span>
+                </div>
               </div>
             </div>
 
-            {/* Right side: Grouped Columns pushed to the right */}
-            <div className="flex flex-wrap gap-12 sm:gap-20 lg:gap-28 lg:justify-end">
-              {/* Column 1: KOMPANIYA */}
-              <div className="text-left min-w-[140px]">
-                <h4 className="text-xs font-black tracking-[0.2em] text-white uppercase mb-5 flex items-center gap-2">
-                  <span className="h-1 w-3 rounded-full bg-[#f6c94f]" />
-                  {t.footer.col2}
-                </h4>
-                <ul className="space-y-3 text-xs font-bold text-white/60">
-                  <li>
-                    <button onClick={() => scrollToSection("sayyoralar")} className="hover:text-[#f6c94f] transition-colors duration-200">
-                      {language === "uz" ? "Biz haqimizda" : language === "ru" ? "О нас" : "About Us"}
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => scrollToSection("jamoa")} className="hover:text-[#f6c94f] transition-colors duration-200">
-                      {language === "uz" ? "Jamoamiz" : language === "ru" ? "Команда" : "Our Team"}
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => scrollToSection("afzalliklar")} className="hover:text-[#f6c94f] transition-colors duration-200">
-                      {language === "uz" ? "Afzalliklari" : language === "ru" ? "Преимущества" : "Advantages"}
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => scrollToSection("bosqichlar")} className="hover:text-[#f6c94f] transition-colors duration-200">
-                      {language === "uz" ? "Ota-onalar uchun" : language === "ru" ? "Для родителей" : "For Parents"}
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            {/* Column 2: Bo'limlar (Navigation) */}
+            <div className="text-left">
+              <h4 className="text-xs font-black tracking-[0.2em] text-[#38bdf8] uppercase mb-5 flex items-center gap-2">
+                <span className="h-1 w-3 rounded-full bg-[#38bdf8]" />
+                Bo'limlar
+              </h4>
+              <ul className="space-y-3.5 text-xs sm:text-sm font-bold text-slate-300/75">
+                <li>
+                  <button onClick={() => scrollToSection("sayyoralar")} className="hover:text-[#f6c94f] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>🪐</span> <span>8 Ta'lim Dunyosi</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection("yondashuv")} className="hover:text-[#f6c94f] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>🚀</span> <span>Qanday Ishlaydi</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection("afzalliklar")} className="hover:text-[#f6c94f] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>✨</span> <span>Platforma Afzalliklari</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection("jamoa")} className="hover:text-[#f6c94f] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>👨‍🏫</span> <span>Mutaxassislar Jamoasi</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
 
-              {/* Column 2: ALOQA */}
-              <div className="text-left min-w-[140px]">
-                <h4 className="text-xs font-black tracking-[0.2em] text-white uppercase mb-5 flex items-center gap-2">
-                  <span className="h-1 w-3 rounded-full bg-[#6c45dd]" />
-                  {t.footer.col3}
-                </h4>
-                <ul className="space-y-3.5 text-xs font-bold">
-                  <li>
-                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors duration-200">
-                      <div className="grid h-8 w-8 place-items-center rounded-xl bg-white/5 border border-white/10 group-hover:bg-[#ff0000]/15 group-hover:border-[#ff0000]/30 transition-all duration-300">
-                        <svg className="h-4 w-4 text-[#ff0000] fill-current" viewBox="0 0 24 24">
-                          <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.388.555A3.002 3.002 0 0 0 .502 6.163C0 8.04 0 12 0 12s0 3.96.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.48 20.5 12 20.5 12 20.5s7.52 0 9.388-.555a3.002 3.002 0 0 0 2.11-2.108C24 15.96 24 12 24 12s0-3.96-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                        </svg>
-                      </div>
-                      <span>YouTube</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors duration-200">
-                      <div className="grid h-8 w-8 place-items-center rounded-xl bg-white/5 border border-white/10 group-hover:bg-[#e1306c]/15 group-hover:border-[#e1306c]/30 transition-all duration-300">
-                        <svg className="h-4 w-4 text-[#e1306c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                        </svg>
-                      </div>
-                      <span>Instagram</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://t.me" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors duration-200">
-                      <div className="grid h-8 w-8 place-items-center rounded-xl bg-white/5 border border-white/10 group-hover:bg-[#0088cc]/15 group-hover:border-[#0088cc]/30 transition-all duration-300">
-                        <svg className="h-4 w-4 text-[#0088cc] fill-current" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.6 1.48-1.52 2.72-2.58 3.99-3.85.57-.57 1.15-1.33 1.15-1.33 0 0-.08.08-.22.22-.52.52-1.48 1.15-2.23 1.65l-2.23 1.47c-.55.37-1.05.55-1.5.53-.49-.02-.96-.29-1.33-.41-.45-.15-.81-.23-.78-.49.02-.14.21-.29.58-.45 2.27-.99 3.79-1.65 4.56-1.97 4.35-1.8 5.25-2.12 5.84-2.13.13 0 .42.03.61.19.16.13.21.32.22.46-.01.1-.01.21-.02.32z" />
-                        </svg>
-                      </div>
-                      <span>Telegram</span>
-                    </a>
-                  </li>
-                </ul>
+            {/* Column 3: Sayyoralar (Key Worlds) */}
+            <div className="text-left">
+              <h4 className="text-xs font-black tracking-[0.2em] text-[#f6c94f] uppercase mb-5 flex items-center gap-2">
+                <span className="h-1 w-3 rounded-full bg-[#f6c94f]" />
+                Sayyoralar
+              </h4>
+              <ul className="space-y-3.5 text-xs sm:text-sm font-bold text-slate-300/75">
+                <li>
+                  <button onClick={() => (window as any).openCosmicUniverse?.('earth')} className="hover:text-[#38bdf8] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>🌍</span> <span>Yer (AI Tutor)</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => (window as any).openCosmicUniverse?.('uran')} className="hover:text-[#38bdf8] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>💎</span> <span>Uran (Ingliz tili)</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => (window as any).openCosmicUniverse?.('saturn')} className="hover:text-[#38bdf8] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>🪐</span> <span>Saturn (Matematika)</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => (window as any).openCosmicUniverse?.('venera')} className="hover:text-[#38bdf8] transition-colors duration-200 flex items-center gap-1.5">
+                    <span>👑</span> <span>Venera (Virtual do'kon)</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Rasmiy Tarmoqlar (Connected Social Links) */}
+            <div className="text-left">
+              <h4 className="text-xs font-black tracking-[0.2em] text-white uppercase mb-5 flex items-center gap-2">
+                <span className="h-1 w-3 rounded-full bg-[#ec4899]" />
+                Rasmiy Tarmoqlar
+              </h4>
+              <p className="text-xs text-slate-400 font-medium mb-4">
+                Kichik Alloma yangiliklari va darslarini ijtimoiy tarmoqlarda kuzatib boring:
+              </p>
+              <div className="space-y-2.5">
+                {/* YouTube Link */}
+                <a
+                  href="https://www.youtube.com/@kichikalloma"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3 p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-[#ff0000]/15 hover:border-[#ff0000]/40 transition-all duration-300 shadow-sm"
+                >
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#ff0000]/20 text-[#ff0000] group-hover:scale-110 transition-transform">
+                    <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.388.555A3.002 3.002 0 0 0 .502 6.163C0 8.04 0 12 0 12s0 3.96.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.48 20.5 12 20.5 12 20.5s7.52 0 9.388-.555a3.002 3.002 0 0 0 2.11-2.108C24 15.96 24 12 24 12s0-3.96-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-white group-hover:text-[#ff4d4d] transition-colors">YouTube</div>
+                    <div className="text-[10px] font-bold text-slate-400">@kichikalloma</div>
+                  </div>
+                  <span className="ml-auto text-xs text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all">↗</span>
+                </a>
+
+                {/* Telegram Link */}
+                <a
+                  href="https://t.me/kichikalloma"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3 p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-[#0088cc]/15 hover:border-[#0088cc]/40 transition-all duration-300 shadow-sm"
+                >
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0088cc]/20 text-[#0088cc] group-hover:scale-110 transition-transform">
+                    <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.6 1.48-1.52 2.72-2.58 3.99-3.85.57-.57 1.15-1.33 1.15-1.33 0 0-.08.08-.22.22-.52.52-1.48 1.15-2.23 1.65l-2.23 1.47c-.55.37-1.05.55-1.5.53-.49-.02-.96-.29-1.33-.41-.45-.15-.81-.23-.78-.49.02-.14.21-.29.58-.45 2.27-.99 3.79-1.65 4.56-1.97 4.35-1.8 5.25-2.12 5.84-2.13.13 0 .42.03.61.19.16.13.21.32.22.46-.01.1-.01.21-.02.32z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-white group-hover:text-[#38bdf8] transition-colors">Telegram</div>
+                    <div className="text-[10px] font-bold text-slate-400">@kichikalloma</div>
+                  </div>
+                  <span className="ml-auto text-xs text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all">↗</span>
+                </a>
+
+                {/* Instagram Link */}
+                <a
+                  href="https://instagram.com/kichikalloma"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3 p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-[#e1306c]/15 hover:border-[#e1306c]/40 transition-all duration-300 shadow-sm"
+                >
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#e1306c]/20 text-[#e1306c] group-hover:scale-110 transition-transform">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-white group-hover:text-[#f472b6] transition-colors">Instagram</div>
+                    <div className="text-[10px] font-bold text-slate-400">@kichikalloma</div>
+                  </div>
+                  <span className="ml-auto text-xs text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all">↗</span>
+                </a>
               </div>
             </div>
+
           </div>
 
-          <div className="pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold text-white/40">
-            <span>&copy; 2026 Kichik Alloma. {t.footer.rights}</span>
+          {/* Bottom Copyright & Back to Top */}
+          <div className="pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2">
+              <span>&copy; 2026 Kichik Alloma. Barcha huquqlar himoyalangan.</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="text-[#34d399] font-bold">100% Bolalar uchun xavfsiz AI 🛡️</span>
+            </div>
+            
+            <button
+              type="button"
+              onClick={() => scrollToSection("bosh")}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.06] border border-white/10 hover:bg-white/[0.12] hover:text-[#f6c94f] transition-all text-xs font-bold text-white self-start sm:self-auto"
+            >
+              <span>Yuqoriga qaytish</span>
+              <span>🚀</span>
+            </button>
           </div>
         </div>
       </footer>
-      </SectionDepthWrapper>
+    </SectionDepthWrapper>
+
+      {/* Advantage Detail Modal Dialog */}
+      {activeAdvantageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in"
+          onClick={() => setActiveAdvantageModal(null)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-[36px] border border-white/20 bg-gradient-to-br from-[#1c0e42] via-[#12082e] to-[#0a041c] p-8 shadow-[0_25px_80px_rgba(108,69,221,0.5)] text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{activeAdvantageModal.icon}</span>
+                <div>
+                  <span className="text-xs font-black uppercase tracking-wider text-[#38bdf8]">{activeAdvantageModal.badge}</span>
+                  <h3 className="text-xl font-black text-white">{activeAdvantageModal.title}</h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveAdvantageModal(null)}
+                className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20 text-white font-bold transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4 text-sm font-medium text-slate-200/90 leading-relaxed">
+              <p className="text-base font-bold text-[#f6c94f]">{activeAdvantageModal.desc}</p>
+              <p>{activeAdvantageModal.fullInfo}</p>
+            </div>
+
+            <div className="mt-8 flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setActiveAdvantageModal(null)}
+                className="rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-xs font-black text-white hover:bg-white/20 transition"
+              >
+                Yopish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveAdvantageModal(null);
+                  handleTry();
+                }}
+                className="rounded-xl bg-gradient-to-r from-[#f6c94f] to-[#fbbf24] px-5 py-2.5 text-xs font-black text-[#1c1033] shadow-md hover:shadow-lg transition"
+              >
+                Sayohatni Boshlash →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Planet Skill Profile Modal (Only for Earth) */}
       <PlanetModal

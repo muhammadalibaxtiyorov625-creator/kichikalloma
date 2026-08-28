@@ -315,6 +315,33 @@ async function fetchPlanets() {
   }
 }
 
+
+// Helper to map planet name or id to 3D shape key
+function getPlanet3DShapeKey(planet) {
+  if (!planet) return 'logo';
+  const name = ((planet.title || planet.name || '') + '').toLowerCase();
+  if (name.includes('merkur') || name.includes('mercury')) return 'mercury';
+  if (name.includes('vener') || name.includes('venus')) return 'venus';
+  if (name.includes('yer') || name.includes('earth') || name.includes('zamin')) return 'earth';
+  if (name.includes('mars')) return 'mars';
+  if (name.includes('yupiter') || name.includes('jupiter')) return 'jupiter';
+  if (name.includes('saturn')) return 'saturn';
+  if (name.includes('uran')) return 'uran';
+  if (name.includes('neptun') || name.includes('neptune')) return 'neptune';
+  
+  const idMap = { 1: 'earth', 2: 'mars', 3: 'jupiter', 4: 'saturn', 5: 'uran', 6: 'neptune', 7: 'venus', 8: 'mercury' };
+  return idMap[planet.id] || 'saturn';
+}
+
+function open3DPlanetExperience(planetId) {
+  const planet = planetsList.find(p => p.id === planetId) || { id: planetId, title: 'Sayyora' };
+  const shapeKey = getPlanet3DShapeKey(planet);
+  if (window.openCosmicUniverse) {
+    window.openCosmicUniverse(shapeKey);
+  }
+}
+window.open3DPlanetExperience = open3DPlanetExperience;
+
 function renderPlanets() {
   syncAllCounts();
   const container = document.getElementById('planets-grid');
@@ -340,14 +367,18 @@ function renderPlanets() {
     const cleanImg = normalizeImageUrl(item.image);
     const fallbackSvg = getPlanetFallback(planetTitle);
 
+    const shapeKey = getPlanet3DShapeKey(item);
     return `
-    <div class="planet-card">
+    <div class="planet-card" onclick="open3DPlanetExperience(${item.id})" style="cursor: pointer; position: relative;">
       <div class="planet-image-container">
         <img src="${escapeHtml(cleanImg)}" 
              alt="${escapeHtml(planetTitle)}" 
              class="planet-img" 
              loading="lazy"
              onerror="this.onerror=null; this.src='${fallbackSvg}';">
+        <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); border: 1px solid rgba(250,204,21,0.4); color: #facc15; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+          <i class="bi bi-stars"></i> 3D Particle
+        </div>
       </div>
 
       <div class="planet-content">
@@ -360,8 +391,10 @@ function renderPlanets() {
 
         <p class="planet-card-desc">${escapeHtml(item.description || '')}</p>
 
-        <div class="planet-footer">
-          <span class="amenity-date"><i class="bi bi-clock"></i> ID: #${item.id}</span>
+        <div class="planet-footer" onclick="event.stopPropagation()">
+          <button class="btn btn-sm btn-yellow" onclick="open3DPlanetExperience(${item.id})" style="font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="bi bi-stars"></i> 3D Ko'rish
+          </button>
           <div class="amenity-actions">
             <button class="action-btn-sm" title="Tahrirlash" onclick="openPlanetModal(${item.id})">
               <i class="bi bi-pencil-fill"></i>

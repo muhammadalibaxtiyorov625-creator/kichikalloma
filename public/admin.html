@@ -15,6 +15,8 @@
   
   <!-- Custom Style -->
   <link rel="stylesheet" href="/css/style.css?v=20260828_v23_modal_active_fix">
+  <!-- 3D Cosmic Particle Styles -->
+  <link rel="stylesheet" href="/css/cosmic-3d.css?v=20260828_v1">
 </head>
 <body>
   <div class="app-layout">
@@ -1066,6 +1068,60 @@
     </div>
   </div>
 
+  
+  <!-- =========================================================================
+       3D COSMIC PARTICLE UNIVERSE MODAL (Three.js WebGL Engine)
+       ========================================================================= -->
+    <!-- =========================================================================
+       3D COSMIC PARTICLE UNIVERSE MODAL (Three.js WebGL Engine - Video Style)
+       ========================================================================= -->
+    <!-- KICHIK ALLOMA 3D COSMIC MODAL -->
+    <!-- KICHIK ALLOMA 3D COSMIC MODAL (Cinematic Video Experience) -->
+  <div id="cosmic-3d-modal">
+    <div id="cosmic-3d-canvas-container"></div>
+    <div id="cosmic-ambient-glow" class="cosmic-ambient-glow"></div>
+
+    <!-- Close Button -->
+    <button type="button" class="cosmic-close-btn" onclick="closeCosmicUniverse()" title="Yopish (Esc)">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- Vertical Step Indicators (Left Side) -->
+    <div id="cosmic-steps-indicator" class="cosmic-steps-indicator"></div>
+
+    <!-- Editorial Text HUD (Left) -->
+    <div class="cosmic-editorial-hud">
+      <div id="cosmic-text-block" class="cosmic-text-block">
+        <div id="cosmic-slide-badge" class="cosmic-slide-badge">01 / 06 • SAYYORA</div>
+        <h1 id="cosmic-slide-title" class="cosmic-slide-title">KICHIK ALLOMA</h1>
+        <div id="cosmic-slide-subtitle" class="cosmic-slide-subtitle">8 Sayyorali Rivojlanish Ekotizimi</div>
+        <p id="cosmic-slide-desc" class="cosmic-slide-desc">
+          Bolajonlar uchun interaktiv kosmik ta'lim platformasi.
+        </p>
+        <div id="cosmic-items-grid" class="cosmic-items-grid"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Controls -->
+    <div class="cosmic-bottom-nav">
+      <button type="button" class="cosmic-nav-arrow" onclick="prevCosmicSlide()" title="Oldingi (↑)">
+        <i class="bi bi-chevron-up"></i>
+      </button>
+      <div id="cosmic-scroll-status" class="cosmic-scroll-status">
+        <span>↓ Mishka skrolli bilan o'tkazing</span>
+      </div>
+      <button type="button" class="cosmic-nav-arrow" onclick="nextCosmicSlide()" title="Keyingi (↓)">
+        <i class="bi bi-chevron-down"></i>
+      </button>
+    </div>
+  </div>
+
+        <!-- Voice Narration Bar -->
+        
+      </div>
+
+      
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="toast">
     <i class="bi bi-check-circle-fill toast-icon" id="toast-icon"></i>
@@ -1073,6 +1129,9 @@
   </div>
 
   <!-- App Script -->
+    <!-- Three.js & 3D Cosmic Particle Engine -->
+  <script src="/js/three.min.js"></script>
+  <script src="/js/cosmic-3d.js?v=20260828_v1"></script>
   <script src="/js/app.js?v=20260828_v23_modal_active_fix"></script>
 </body>
 </html>
