@@ -283,18 +283,13 @@ def init_db():
             ("Alloma AI yordamchisi qanday ishlaydi va uning ovozli muloqot xususiyati bormi?", "Alloma AI — Google Gemini ilg'or sun'iy intellekt texnologiyasi asosida yaratilgan pedagogik yordamchidir. Bola unga mikrofon orqali ovozli savollar berishi, darslar haqida so'rashi, ertaklar eshitishi yoki yangi bilimlarni xavfsiz va tushunarli tilda o'rganishi mumkin.", "active", 2),
             ("Uran sayyorasida ingliz tilini qanday o'rganish mumkin (So'zlar, talaffuz va testlar)?", "Uran sayyorasi bolalarning chet tilini o'rganishi uchun mo'ljallangan bo'lib, 10 ta asosiy mavzu (Mevalar, Hayvonlar, Ranglar, Maktab, Oila va h.k.), har bir so'zning sof audio talaffuzi, rasmlar, transkripsiya va 4 ta variantli interaktiv test savollarini o'z ichiga oladi.", "active", 3),
             ("Ota-onalar farzandining ta'lim jarayonini qanday nazorat qiladi (Ota-onalar burchagi)?", "Maxsus himoyalangan 'Ota-onalar burchagi' orqali bolaning qaysi sayyoralarni o'rganganligi, kunlik sarflagan vaqti, test natijalari, so'z boyligi o'sishi va muvaffaqiyat hisobotlarini real vaqtda kuzatib borish mumkin.", "active", 4),
-            ("Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?", "Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.", "active", 5),
-            ("Bolalar uchun xavfsizlik qanday ta'minlangan (Safe Kids & Reklamasiz muhit)?", "Kichik Alloma platformasida bolalar uchun 100% xavfsiz raqamli muhit kafolatlanadi. Ilovada hech qanday begona reklamalar, tashqi havolalar yoki bolalar ruhiyatiga zid kontentlar mavjud emas. AI javoblari ham qat'iy pedagogik filtrdan o'tkaziladi.", "active", 6),
-            ("4 xonali PIN-kod nima uchun kerak va uni qanday o'zgartirish mumkin?", "4 xonali maxfiy PIN-kod ota-onalar sozlamalarini va to'lov ma'lumotlarini bolalardan himoyalash uchun xizmat qiladi. Ota-onalar bu kodni istalgan vaqtda profil sozlamalaridan xavfsiz tarzda o'zgartirishlari mumkin.", "active", 7),
-            ("Obuna bo'lish qanday amalga oshiriladi va to'lov turlari qaysilar?", "Obuna bo'lish Click, Payme, Uzum Bank va xalqaro bank kartalari orqali xavfsiz amalga oshiriladi. Oylik, yarim yillik va yillik qulay ta'rif rejalari mavjud.", "active", 8),
-            ("Bir nechta farzand uchun bitta hisobdan foydalanish mumkinmi?", "Ha, bitta ota-ona hisobi ostida bir nechta farzand profilini yaratish mumkin. Har bir farzandning o'z yoshiga mos darajasi, yulduzlari va shaxsiy o'rganish tarixi alohida saqlanadi.", "active", 9),
-            ("Qanday qurilmalarda ishlaydi (Android / iOS / Planshet / Web)?", "Kichik Alloma ilovasi barcha Android telefon va planshetlarida, Apple iPhone va iPad qurilmalarida, shuningdek veb-brauzer orqali kompyuterlarda ham qulay ishlaydi.", "active", 10)
+            ("Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?", "Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.", "active", 5)
         ]
         cursor.executemany(
             "INSERT INTO faqs (name, description, status, order_num) VALUES (?, ?, ?, ?)",
             initial_faqs
         )
-        print("Boshlang'ich 10 ta FAQ savollari bazaga muvaffaqiyatli kiritildi.")
+        print("Boshlang'ich 5 ta FAQ savollari bazaga muvaffaqiyatli kiritildi.")
 
     # 12. Uran / Nutq va Til Sayyorasi — Kategoriyalar jadvali (Uran Categories)
     cursor.execute("""

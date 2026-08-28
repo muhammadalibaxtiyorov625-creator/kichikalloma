@@ -5,7 +5,46 @@ let amenitiesList = [];
 let teamsList = [];
 let galleryList = [];
 let messagesList = [];
-let faqsList = [];
+let currentOpenCatId = null;
+let currentOpenCatName = '';
+let currentCatDetailData = null;
+let faqsList = [
+  {
+    id: 1,
+    name: "Kichik Alloma platformasi nima va u kimlar uchun mo'ljallangan?",
+    description: "Kichik Alloma — 3 yoshdan 11 yoshgacha bo'lgan bolalarning aqliy, mantiqiy, nutqiy va ijodiy salohiyatini rivojlantiruvchi interaktiv ta'lim platformasidir. Platforma bolalarga sayyoralar bo'ylab qiziqarli o'yinlar, ertaklar, so'z boyligi va sun'iy intellekt orqali ta'lim beradi.",
+    status: "active",
+    order_num: 1
+  },
+  {
+    id: 2,
+    name: "Alloma AI yordamchisi qanday ishlaydi va uning ovozli muloqot xususiyati bormi?",
+    description: "Alloma AI — Google Gemini ilg'or sun'iy intellekt texnologiyasi asosida yaratilgan pedagogik yordamchidir. Bola unga mikrofon orqali ovozli savollar berishi, darslar haqida so'rashi, ertaklar eshitishi yoki yangi bilimlarni xavfsiz va tushunarli tilda o'rganishi mumkin.",
+    status: "active",
+    order_num: 2
+  },
+  {
+    id: 3,
+    name: "Uran sayyorasida ingliz tilini qanday o'rganish mumkin (So'zlar, talaffuz va testlar)?",
+    description: "Uran sayyorasi bolalarning chet tilini o'rganishi uchun mo'ljallangan bo'lib, 10 ta asosiy mavzu (Mevalar, Hayvonlar, Ranglar, Maktab, Oila va h.k.), har bir so'zning sof audio talaffuzi, rasmlar, transkripsiya va 4 ta variantli interaktiv test savollarini o'z ichiga oladi.",
+    status: "active",
+    order_num: 3
+  },
+  {
+    id: 4,
+    name: "Ota-onalar farzandining ta'lim jarayonini qanday nazorat qiladi (Ota-onalar burchagi)?",
+    description: "Maxsus himoyalangan 'Ota-onalar burchagi' orqali bolaning qaysi sayyoralarni o'rganganligi, kunlik sarflagan vaqti, test natijalari, so'z boyligi o'sishi va muvaffaqiyat hisobotlarini real vaqtda kuzatib borish mumkin.",
+    status: "active",
+    order_num: 4
+  },
+  {
+    id: 5,
+    name: "Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?",
+    description: "Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.",
+    status: "active",
+    order_num: 5
+  }
+];
 let uranCategoriesList = [];
 let uranWordsList = [];
 let currentUranView = 'words';
@@ -59,7 +98,7 @@ function switchTab(tabId) {
     'teams': { title: 'Bizning Jamoa (Teams)', subtitle: 'Jamoa a\'zolari: Ismi, familiyasi, yo\'nalishi va rasmlarini boshqarish' },
     'gallery': { title: 'Galereya (Gallery)', subtitle: 'Platforma fotosuratlari va rasmlarini boshqarish' },
     'messages': { title: 'Kelgan Xabarlar', subtitle: 'Mijozlar tomonidan yuborilgan so\'rov va murojaatlar' },
-    'faqs': { title: 'Ko\'p So\'raladigan Savollar (FAQ)', subtitle: 'Mobil ilova va vebsayt uchun tez-tez beriladigan savol-javoblarni boshqarish' },
+    'faqs': { title: 'Ko\'p So\'raladigan Savollar (FAQ)', subtitle: `Mobil ilova va vebsayt uchun tez-tez beriladigan savol-javoblarni boshqarish` },
     'uran': { title: 'Uran / Nutq va Til Sayyorasi (So\'zlar va Testlar)', subtitle: 'Mobil ilova uchun inglizcha-o\'zbekcha lug\'at kategoriyalari, so\'zlar va 4 ta variantli testlar' },
     'ai': { title: 'Alloma AI Ta\'lim Yordamchisi', subtitle: 'Google Gemini 3.6 Flash asosidagi ta\'limiy va pedagogik AI' }
   };
@@ -1981,153 +2020,15 @@ async function fetchUranWords() {
     syncAllCounts();
   } catch (err) {
     console.error("fetchUranWords error:", err);
-    const container = document.getElementById('uran-words-list-container');
-    if (container) {
-      container.innerHTML = `<div class="empty-state">Ingliz tili so'zlarini yuklashda xatolik yuz berdi.</div>`;
-    }
   }
 }
 
 function populateUranCategoryDropdowns() {
-  // 1. Toolbar filter select
-  const filterSelect = document.getElementById('uran-category-filter-select');
-  if (filterSelect) {
-    const curVal = filterSelect.value || 'all';
-    filterSelect.innerHTML = `<option value="all">🌐 Barcha Mavzular (${uranCategoriesList.length} ta)</option>` +
-      uranCategoriesList.map(c => `<option value="${c.id}">${c.name} (${c.name_en || ''})</option>`).join('');
-    filterSelect.value = curVal;
-  }
-
-  // 2. Modal category select
   const modalSelect = document.getElementById('uran-word-category-select');
   if (modalSelect) {
     modalSelect.innerHTML = `<option value="" disabled selected>-- Mavzuni tanlang --</option>` +
       uranCategoriesList.map(c => `<option value="${c.id}">${c.name} (${c.name_en || ''})</option>`).join('');
   }
-}
-
-function setUranView(mode) {
-  currentUranView = mode;
-  const wordsBtn = document.getElementById('uran-view-words-btn');
-  const catsBtn = document.getElementById('uran-view-cats-btn');
-  const wordsContainer = document.getElementById('uran-words-list-container');
-  const catsContainer = document.getElementById('uran-categories-grid');
-
-  if (mode === 'words') {
-    if (wordsBtn) wordsBtn.classList.add('active');
-    if (catsBtn) catsBtn.classList.remove('active');
-    if (wordsContainer) wordsContainer.style.display = 'grid';
-    if (catsContainer) catsContainer.style.display = 'none';
-    renderUranWords();
-  } else {
-    if (catsBtn) catsBtn.classList.add('active');
-    if (wordsBtn) wordsBtn.classList.remove('active');
-    if (wordsContainer) wordsContainer.style.display = 'none';
-    if (catsContainer) catsContainer.style.display = 'grid';
-    renderUranCategories();
-  }
-}
-
-function filterUranWords() {
-  if (currentUranView === 'words') {
-    renderUranWords();
-  } else {
-    renderUranCategories();
-  }
-}
-
-function renderUranWords() {
-  const container = document.getElementById('uran-words-list-container');
-  if (!container) return;
-
-  const searchInput = document.getElementById('uran-search-input');
-  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
-  const filterSelect = document.getElementById('uran-category-filter-select');
-  const selectedCat = filterSelect ? filterSelect.value : 'all';
-
-  let filtered = uranWordsList;
-
-  if (selectedCat !== 'all') {
-    const catId = parseInt(selectedCat, 10);
-    filtered = filtered.filter(w => w.category_id === catId);
-  }
-
-  if (query) {
-    filtered = filtered.filter(w =>
-      (w.word_en && w.word_en.toLowerCase().includes(query)) ||
-      (w.word_uz && w.word_uz.toLowerCase().includes(query)) ||
-      (w.word_ru && w.word_ru.toLowerCase().includes(query)) ||
-      (w.example_sentence && w.example_sentence.toLowerCase().includes(query)) ||
-      (w.example_translation && w.example_translation.toLowerCase().includes(query))
-    );
-  }
-
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
-        <i class="bi bi-translate" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 12px;"></i>
-        <h4>Hech qanday inglizcha so'z topilmadi</h4>
-        <p style="color: var(--text-secondary); margin-bottom: 16px;">Yangi so'z qo'shish uchun yuqoridagi tugmani bosing.</p>
-        <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
-          <i class="bi bi-plus-circle-fill"></i> Yangi So'z Qo'shish
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  const categoryMap = {};
-  uranCategoriesList.forEach(c => { categoryMap[c.id] = c.name; });
-
-  container.innerHTML = filtered.map(w => {
-    const catName = categoryMap[w.category_id] || `Mavzu #${w.category_id}`;
-    const safeWordEn = escapeHtml(w.word_en || '');
-    return `
-      <div class="card item-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #6366f1; padding: 18px; background: rgba(30, 41, 59, 0.6);">
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
-            <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 700;">
-              📁 ${escapeHtml(catName)}
-            </span>
-            <span style="font-size: 11px; color: var(--text-muted);">ID: ${w.id}</span>
-          </div>
-
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <div style="display: flex; align-items: baseline; gap: 8px;">
-              <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0;">${safeWordEn}</h3>
-              <span style="font-size: 13px; color: #94a3b8; font-style: italic;">${escapeHtml(w.transcription || '')}</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-secondary" onclick="playWordAudio('${safeWordEn}')" title="Talaffuzni eshitish" style="padding: 4px 8px; border-radius: 6px;">
-              <i class="bi bi-volume-up-fill text-yellow"></i>
-            </button>
-          </div>
-
-          <div style="margin-bottom: 12px; line-height: 1.4;">
-            <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #38bdf8;">
-              🇺🇿 ${escapeHtml(w.word_uz || '')}
-            </p>
-            ${w.word_ru ? `<p style="margin: 0; font-size: 13px; color: #94a3b8;">🇷🇺 ${escapeHtml(w.word_ru)}</p>` : ''}
-          </div>
-
-          ${w.example_sentence ? `
-            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 14px; font-size: 12px;">
-              <p style="margin: 0 0 4px 0; color: #e2e8f0; font-style: italic;">"${escapeHtml(w.example_sentence)}"</p>
-              ${w.example_translation ? `<p style="margin: 0; color: #94a3b8;">— ${escapeHtml(w.example_translation)}</p>` : ''}
-            </div>
-          ` : ''}
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 6px;">
-          <button class="action-btn-sm" title="Tahrirlash" onclick="openUranWordModal(${w.category_id}, '', ${w.id})">
-            <i class="bi bi-pencil-fill"></i>
-          </button>
-          <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteUranWord(${w.id}, '${safeWordEn}')">
-            <i class="bi bi-trash-fill"></i>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
 }
 
 function renderUranCategories() {
@@ -2144,30 +2045,30 @@ function renderUranCategories() {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:40px; text-align:center;"><i class="bi bi-translate" style="font-size:3rem; color:var(--text-muted);"></i><p>Qidiruv bo'yicha mavzular topilmadi</p></div>`;
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:40px; text-align:center;"><i class="bi bi-translate" style="font-size:3rem; color:var(--text-muted); display:block; margin-bottom:12px;"></i><h4>Qidiruv bo'yicha mavzular topilmadi</h4></div>`;
     return;
   }
 
   container.innerHTML = filtered.map(cat => `
-    <div class="card item-card" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;" onclick="if (!event.target.closest('button')) openUranCategoryWordsModal(${cat.id})">
+    <div class="card item-card" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;" onclick="openUranCategoryDetail(${cat.id})">
       <div>
         <div class="card-image-box" style="background: rgba(15, 23, 42, 0.6); height: 130px; display: flex; align-items: center; justify-content: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-          <img src="${cat.image || '/images/categories/fruits.svg'}" alt="${cat.name}" style="max-height: 85px; max-width: 85px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));" onerror="this.src='/images/categories/fruits.svg'">
+          <img src="${cat.image || '/images/categories/fruits.svg'}" alt="${escapeHtml(cat.name)}" style="max-height: 85px; max-width: 85px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));" onerror="this.src='/images/categories/fruits.svg'">
         </div>
         <div class="card-content" style="padding: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
-            <h4 style="font-size: 16px; font-weight: 800; color: #fff; margin: 0;">${cat.name}</h4>
+            <h4 style="font-size: 16px; font-weight: 800; color: #fff; margin: 0;">${escapeHtml(cat.name)}</h4>
             <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; white-space: nowrap;">
               ${cat.words_count || 0} ta so'z
             </span>
           </div>
-          <p style="font-size: 12px; color: #38bdf8; font-weight: 700; margin: 0 0 6px 0;">${cat.name_en || ''}</p>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0 0 14px 0;">${cat.description || ''}</p>
+          <p style="font-size: 12px; color: #38bdf8; font-weight: 700; margin: 0 0 6px 0;">${escapeHtml(cat.name_en || '')}</p>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0 0 14px 0;">${escapeHtml(cat.description || '')}</p>
         </div>
       </div>
       
-      <div style="padding: 0 16px 16px 16px; display: flex; gap: 8px;">
-        <button class="btn btn-yellow" style="flex: 1; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="openUranCategoryWordsModal(${cat.id})">
+      <div style="padding: 0 16px 16px 16px; display: flex; gap: 8px;" onclick="event.stopPropagation()">
+        <button class="btn btn-yellow" style="flex: 1; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="openUranCategoryDetail(${cat.id})">
           <i class="bi bi-book-half"></i> So'zlar & Test
         </button>
         <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px; display: flex; align-items: center; gap: 5px;" onclick="openUranWordModal(${cat.id}, '${escapeHtml(cat.name)}')">
@@ -2178,120 +2079,164 @@ function renderUranCategories() {
   `).join('');
 }
 
-async function openUranCategoryWordsModal(catId) {
-  const modal = document.getElementById('uran-words-modal');
-  const container = document.getElementById('uran-words-container');
-  const title = document.getElementById('uran-modal-title');
-  const subtitle = document.getElementById('uran-modal-subtitle');
+// ------------------------------------------------------------------------------
+// DRILL-DOWN CATEGORY DETAIL VIEW
+// ------------------------------------------------------------------------------
 
-  if (!modal || !container) return;
+async function openUranCategoryDetail(catId) {
+  currentOpenCatId = catId;
+  const mainView = document.getElementById('uran-main-view');
+  const detailView = document.getElementById('uran-detail-view');
+  const grid = document.getElementById('uran-detail-words-grid');
 
-  modal.classList.add('active');
-  modal.setAttribute('data-current-cat-id', catId);
-  container.innerHTML = '<div class="loading-state">Mavzu so\'zlari va test savollari yuklanmoqda...</div>';
+  if (mainView) mainView.style.display = 'none';
+  if (detailView) detailView.style.display = 'block';
+
+  const cat = uranCategoriesList.find(c => c.id === catId) || { id: catId, name: `Mavzu #${catId}` };
+  currentOpenCatName = cat.name || '';
+
+  const titleEl = document.getElementById('uran-detail-title');
+  const subEl = document.getElementById('uran-detail-subtitle');
+  const descEl = document.getElementById('uran-detail-desc');
+  const badgeEl = document.getElementById('uran-detail-badge');
+  const imgEl = document.getElementById('uran-detail-img');
+  const searchInput = document.getElementById('uran-detail-search');
+
+  if (titleEl) titleEl.innerText = cat.name || '';
+  if (subEl) subEl.innerText = cat.name_en || '';
+  if (descEl) descEl.innerText = cat.description || '';
+  if (badgeEl) badgeEl.innerText = `${cat.words_count || 0} ta so'z`;
+  if (imgEl) imgEl.src = cat.image || '/images/categories/fruits.svg';
+  if (searchInput) searchInput.value = '';
+
+  if (grid) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; padding: 30px; text-align: center; color: var(--text-secondary);"><span class="spinner-border spinner-border-sm" style="margin-right: 8px;"></span> Mavzu so'zlari yuklanmoqda...</div>`;
+  }
 
   try {
     const res = await fetch(`/mobile/planets/uran/category/${catId}`);
-    if (!res.ok) throw new Error("Ma'lumotlarni yuklab bo'lmadi");
-    const data = await res.json();
-
-    if (title) {
-      title.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <i class="bi bi-translate text-yellow"></i> ${data.name} 
-            <span style="color: #818cf8; font-size: 15px; font-weight: 600;">(${data.name_en || ''})</span>
-          </div>
-          <button class="btn btn-yellow btn-sm" onclick="openUranWordModal(${catId}, '${escapeHtml(data.name)}')" style="font-size: 12px; padding: 6px 14px;">
-            <i class="bi bi-plus-circle-fill"></i> + Shu Mavzuga So'z Qo'shish
-          </button>
-        </div>
-      `;
+    if (!res.ok) throw new Error("Mavzu ma'lumotlarini olishda xatolik");
+    currentCatDetailData = await res.json();
+    
+    if (badgeEl) badgeEl.innerText = `${currentCatDetailData.words_count || (currentCatDetailData.words || []).length} ta so'z`;
+    renderUranDetailWords();
+  } catch (err) {
+    console.error("openUranCategoryDetail error:", err);
+    if (grid) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><i class="bi bi-exclamation-triangle text-danger"></i><p>${err.message}</p></div>`;
     }
-    if (subtitle) subtitle.innerText = `Jami: ${data.words_count} ta so'z va 4 ta variantli test savollari`;
+  }
+}
 
-    const wordsHtml = (data.words || []).length > 0 ? (data.words || []).map((w, idx) => `
-      <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-        <div style="flex: 1;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-            <span style="font-size: 11px; background: rgba(99,102,241,0.2); color: #818cf8; font-weight: 700; padding: 2px 6px; border-radius: 4px;">#${idx + 1}</span>
-            <strong style="font-size: 16px; color: #fff; font-weight: 800;">${escapeHtml(w.word_en)}</strong>
-            <span style="color: #94a3b8; font-size: 13px; font-style: italic;">${escapeHtml(w.transcription || '')}</span>
-            <button type="button" class="btn btn-sm btn-secondary" onclick="playWordAudio('${escapeHtml(w.word_en)}')" title="Talaffuzni eshitish" style="padding: 2px 8px; font-size: 12px; border-radius: 6px;">
+function closeUranCategoryDetail() {
+  currentOpenCatId = null;
+  currentOpenCatName = '';
+  currentCatDetailData = null;
+  const mainView = document.getElementById('uran-main-view');
+  const detailView = document.getElementById('uran-detail-view');
+  if (detailView) detailView.style.display = 'none';
+  if (mainView) mainView.style.display = 'block';
+  renderUranCategories();
+}
+
+function filterUranDetailWords() {
+  renderUranDetailWords();
+}
+
+function renderUranDetailWords() {
+  const grid = document.getElementById('uran-detail-words-grid');
+  if (!grid || !currentCatDetailData) return;
+
+  const searchInput = document.getElementById('uran-detail-search');
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+  let words = currentCatDetailData.words || [];
+  if (query) {
+    words = words.filter(w =>
+      (w.word_en && w.word_en.toLowerCase().includes(query)) ||
+      (w.word_uz && w.word_uz.toLowerCase().includes(query)) ||
+      (w.word_ru && w.word_ru.toLowerCase().includes(query)) ||
+      (w.example_sentence && w.example_sentence.toLowerCase().includes(query)) ||
+      (w.example_translation && w.example_translation.toLowerCase().includes(query))
+    );
+  }
+
+  if (words.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
+        <i class="bi bi-translate" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 12px;"></i>
+        <h4>${query ? "Qidiruv bo'yicha so'z topilmadi" : "Ushbu mavzuda hozircha so'zlar yo'q"}</h4>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">Yangi so'z qo'shish uchun quyidagi tugmani bosing.</p>
+        <button class="btn btn-yellow" onclick="openUranWordModal(${currentOpenCatId}, '${escapeHtml(currentOpenCatName)}')">
+          <i class="bi bi-plus-circle-fill"></i> + Shu Mavzuga So'z Qo'shish
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = words.map((w, idx) => {
+    const safeWordEn = escapeHtml(w.word_en || '');
+    return `
+      <div class="card item-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #6366f1; padding: 18px; background: rgba(30, 41, 59, 0.7); border-radius: 12px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+              #${idx + 1}
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted);">ID: ${w.id}</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+              <h3 style="font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0;">${safeWordEn}</h3>
+              <span style="font-size: 13px; color: #94a3b8; font-style: italic;">${escapeHtml(w.transcription || '')}</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="playWordAudio('${safeWordEn}')" title="Talaffuzni eshitish" style="padding: 4px 8px; border-radius: 6px;">
               <i class="bi bi-volume-up-fill text-yellow"></i>
             </button>
-            <span style="color: #64748b;">&rarr;</span>
-            <span style="color: #38bdf8; font-weight: 800; font-size: 15px;">🇺🇿 ${escapeHtml(w.word_uz)}</span>
-            ${w.word_ru ? `<span style="color: #94a3b8; font-size: 13px;">(🇷🇺 ${escapeHtml(w.word_ru)})</span>` : ''}
           </div>
-          ${w.example_sentence ? `<p style="font-size: 12px; color: #cbd5e1; margin: 4px 0 0 0;"><em>"${escapeHtml(w.example_sentence)}"</em> ${w.example_translation ? `— <span style="color:#94a3b8;">${escapeHtml(w.example_translation)}</span>` : ''}</p>` : ''}
+
+          <div style="margin-bottom: 12px; line-height: 1.4;">
+            <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: #38bdf8;">
+              🇺🇿 ${escapeHtml(w.word_uz || '')}
+            </p>
+            ${w.word_ru ? `<p style="margin: 0; font-size: 13px; color: #94a3b8;">🇷🇺 ${escapeHtml(w.word_ru)}</p>` : ''}
+          </div>
+
+          ${w.example_sentence ? `
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 14px; font-size: 12px;">
+              <p style="margin: 0 0 4px 0; color: #e2e8f0; font-style: italic;">"${escapeHtml(w.example_sentence)}"</p>
+              ${w.example_translation ? `<p style="margin: 0; color: #94a3b8;">— ${escapeHtml(w.example_translation)}</p>` : ''}
+            </div>
+          ` : ''}
         </div>
 
-        <div style="display: flex; gap: 6px; align-items: center;">
-          <button class="action-btn-sm" title="Tahrirlash" onclick="openUranWordModal(${catId}, '${escapeHtml(data.name)}', ${w.id})">
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 6px;">
+          <button class="action-btn-sm" title="Tahrirlash" onclick="openUranWordModal(${currentOpenCatId}, '${escapeHtml(currentOpenCatName)}', ${w.id})">
             <i class="bi bi-pencil-fill"></i>
           </button>
-          <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteUranWord(${w.id}, '${escapeHtml(w.word_en)}', ${catId})">
+          <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteUranWord(${w.id}, '${safeWordEn}', ${currentOpenCatId})">
             <i class="bi bi-trash-fill"></i>
           </button>
         </div>
       </div>
-    `).join('') : `
-      <div style="text-align: center; padding: 24px; color: var(--text-muted);">
-        <i class="bi bi-info-circle" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
-        Bu mavzuda hozircha so'zlar yo'q. "+ Shu Mavzuga So'z Qo'shish" tugmasini bosing!
-      </div>
     `;
+  }).join('');
+}
 
-    const testsHtml = (data.tests || []).map(q => `
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
-          <strong style="color: #fff; font-size: 14px;">#${q.id}. Inglizcha so'z: <span style="color: #38bdf8;">${escapeHtml(q.word_en)}</span></strong>
-          <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 700; font-size: 11px;">To'g'ri: ${escapeHtml(q.correct_answer)}</span>
-        </div>
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 8px 0;">${escapeHtml(q.prompt)}</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          ${q.options.map(opt => `
-            <div style="background: ${opt === q.correct_answer ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.6)'}; border: 1px solid ${opt === q.correct_answer ? '#10b981' : 'rgba(255,255,255,0.06)'}; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: ${opt === q.correct_answer ? '700' : '500'}; color: ${opt === q.correct_answer ? '#34d399' : '#cbd5e1'};">
-              ${opt === q.correct_answer ? '✅ ' : '⚪ '} ${escapeHtml(opt)}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
+// ------------------------------------------------------------------------------
+// MODALS AND ACTIONS
+// ------------------------------------------------------------------------------
 
-    container.innerHTML = `
-      <div style="margin-bottom: 24px;">
-        <h4 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <i class="bi bi-card-text text-yellow"></i> 1. Mavzudagi Inglizcha So'zlar (${data.words_count} ta)
-        </h4>
-        <div style="max-height: 320px; overflow-y: auto; padding-right: 6px;">
-          ${wordsHtml}
-        </div>
-      </div>
-
-      <div>
-        <h4 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <i class="bi bi-question-circle text-yellow"></i> 2. 4-Variantli Test Savollari (Bolalar uchun)
-        </h4>
-        <div style="max-height: 280px; overflow-y: auto; padding-right: 6px;">
-          ${testsHtml}
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle text-danger"></i><p>${err.message}</p></div>`;
-  }
+async function openUranCategoryWordsModal(catId) {
+  openUranCategoryDetail(catId);
 }
 
 function closeUranModal() {
   const modal = document.getElementById('uran-words-modal');
   if (modal) modal.classList.remove('active');
 }
-
-// ==============================================================================
-// URAN SO'Z QO'SHISH / TAHRIRLASH MODALI
-// ==============================================================================
 
 function openUranWordModal(categoryId = null, categoryName = null, wordId = null) {
   const modal = document.getElementById('uran-word-modal');
@@ -2308,7 +2253,7 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
   }
 
   if (wordId) {
-    const item = uranWordsList.find(w => w.id === wordId);
+    const item = uranWordsList.find(w => w.id === wordId) || (currentCatDetailData && currentCatDetailData.words ? currentCatDetailData.words.find(w => w.id === wordId) : null);
     if (item) {
       if (catSelect) catSelect.value = item.category_id;
       if (document.getElementById('uran-word-en')) document.getElementById('uran-word-en').value = item.word_en || '';
@@ -2317,17 +2262,17 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
       if (document.getElementById('uran-word-transcription')) document.getElementById('uran-word-transcription').value = item.transcription || '';
       if (document.getElementById('uran-word-example')) document.getElementById('uran-word-example').value = item.example_sentence || '';
       if (document.getElementById('uran-word-example-uz')) document.getElementById('uran-word-example-uz').value = item.example_translation || '';
-      if (titleEl) titleEl.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> So\'zni Tahrirlash';
+      if (titleEl) titleEl.innerHTML = `<i class="bi bi-pencil-square text-yellow"></i> So'zni Tahrirlash`;
     }
   } else {
     if (categoryId && catSelect) {
       catSelect.value = categoryId;
     }
-    if (titleEl) titleEl.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> Yangi Inglizcha So\'z Qo\'shish';
+    if (titleEl) titleEl.innerHTML = `<i class="bi bi-plus-circle text-yellow"></i> Yangi Inglizcha So'z Qo'shish`;
   }
 
   if (catLabel) {
-    catLabel.innerText = categoryName ? `Mavzu: ${categoryName}` : 'Inglizcha so\'z va uning o\'zbekcha tarjimasini kiriting';
+    catLabel.innerText = categoryName ? `Mavzu: ${categoryName}` : `Inglizcha so'z va uning o'zbekcha tarjimasini kiriting`;
   }
 
   if (modal) modal.classList.add('active');
@@ -2342,7 +2287,7 @@ async function handleSaveUranWord(event) {
   event.preventDefault();
   const wordId = document.getElementById('uran-word-id') ? document.getElementById('uran-word-id').value : '';
   const catSelect = document.getElementById('uran-word-category-select');
-  const categoryId = catSelect ? catSelect.value : (document.getElementById('uran-word-category-id') ? document.getElementById('uran-word-category-id').value : 1);
+  const categoryId = catSelect ? catSelect.value : (currentOpenCatId || 1);
   const word_en = document.getElementById('uran-word-en').value.trim();
   const word_uz = document.getElementById('uran-word-uz').value.trim();
   const word_ru = document.getElementById('uran-word-ru').value.trim();
@@ -2398,11 +2343,8 @@ async function handleSaveUranWord(event) {
     
     await Promise.all([fetchUranWords(), fetchUranCategories()]);
 
-    // Agar mavzu oynasi ochiq bo'lsa, uni ham darhol yangilaymiz!
-    const wordsModal = document.getElementById('uran-words-modal');
-    if (wordsModal && wordsModal.classList.contains('active')) {
-      const curCatId = wordsModal.getAttribute('data-current-cat-id') || categoryId;
-      openUranCategoryWordsModal(curCatId);
+    if (currentOpenCatId) {
+      await openUranCategoryDetail(currentOpenCatId);
     }
   } catch (err) {
     showToast(err.message || "Xatolik yuz berdi!", "error");
@@ -2421,11 +2363,8 @@ async function handleDeleteUranWord(id, wordName = '', categoryId = null) {
     
     await Promise.all([fetchUranWords(), fetchUranCategories()]);
 
-    // Agar mavzu oynasi ochiq bo'lsa, uni ham darhol yangilaymiz!
-    const wordsModal = document.getElementById('uran-words-modal');
-    if (wordsModal && wordsModal.classList.contains('active')) {
-      const curCatId = wordsModal.getAttribute('data-current-cat-id') || categoryId;
-      if (curCatId) openUranCategoryWordsModal(curCatId);
+    if (currentOpenCatId) {
+      await openUranCategoryDetail(currentOpenCatId);
     }
   } catch (err) {
     showToast(err.message || "O'chirishda xatolik yuz berdi", "error");
@@ -2486,17 +2425,19 @@ async function handleAiSuggestWord() {
 }
 
 function playWordAudio(word) {
-  if (!word || !word.trim()) return;
+  if (!word) return;
+  if (!('speechSynthesis' in window)) {
+    showToast("Brauzeringiz ovozli talaffuzni qo'llab-quvvatlamaydi", "warning");
+    return;
+  }
   try {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(word.trim());
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
   } catch (e) {
-    console.error("Audio playback error:", e);
+    console.error("Audio error:", e);
   }
 }
-

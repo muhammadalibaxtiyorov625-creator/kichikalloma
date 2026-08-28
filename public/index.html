@@ -314,57 +314,104 @@
 
         <!-- 6.4 INGLIZ TILI (URAN SAYYORASI — MAVZULAR, SO'ZLAR & TESTLAR) TAB -->
         <section id="tab-uran" class="tab-content">
-          <!-- Statistics Cards -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
-            <div class="card" style="padding: 16px 20px; border-left: 4px solid #6366f1; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
-              <div>
-                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Jami Inglizcha So'zlar</p>
-                <h3 id="stat-uran-words-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">105 ta</h3>
+          
+          <!-- ASOSIY KO'RINISH: KATEGORIYALAR GRIDI -->
+          <div id="uran-main-view">
+            <!-- Statistics Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+              <div class="card" style="padding: 16px 20px; border-left: 4px solid #6366f1; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
+                <div>
+                  <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Jami Inglizcha So'zlar</p>
+                  <h3 id="stat-uran-words-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">106 ta</h3>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); color: #818cf8; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                  <i class="bi bi-translate"></i>
+                </div>
               </div>
-              <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); color: #818cf8; display: flex; align-items: center; justify-content: center; font-size: 22px;">
-                <i class="bi bi-translate"></i>
+
+              <div class="card" style="padding: 16px 20px; border-left: 4px solid #3b82f6; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
+                <div>
+                  <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Lug'at Mavzulari</p>
+                  <h3 id="stat-uran-cats-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">10 ta</h3>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                  <i class="bi bi-folder-fill"></i>
+                </div>
+              </div>
+
+              <div class="card" style="padding: 16px 20px; border-left: 4px solid #10b981; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
+                <div>
+                  <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">4-Variantli Test Savollari</p>
+                  <h3 id="stat-uran-tests-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">106 ta</h3>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, 0.2); color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                  <i class="bi bi-patch-question-fill"></i>
+                </div>
               </div>
             </div>
 
-            <div class="card" style="padding: 16px 20px; border-left: 4px solid #3b82f6; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
-              <div>
-                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Lug'at Mavzulari</p>
-                <h3 id="stat-uran-cats-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">10 ta</h3>
+            <!-- Section Toolbar -->
+            <div class="section-toolbar" style="flex-wrap: wrap; gap: 12px; align-items: center;">
+              <div class="search-box" style="flex: 1; min-width: 240px;">
+                <i class="bi bi-search"></i>
+                <input type="text" id="uran-cat-search" placeholder="Mavzu yoki so'z bo'yicha qidiruv..." oninput="renderUranCategories()">
               </div>
-              <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 22px;">
-                <i class="bi bi-folder-fill"></i>
+
+              <div class="toolbar-actions">
+                <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
+                  <i class="bi bi-plus-circle-fill"></i> + Yangi Inglizcha So'z Qo'shish
+                </button>
               </div>
             </div>
 
-            <div class="card" style="padding: 16px 20px; border-left: 4px solid #10b981; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.7);">
-              <div>
-                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">4-Variantli Test Savollari</p>
-                <h3 id="stat-uran-tests-total" style="font-size: 24px; font-weight: 800; color: #fff; margin: 0;">105 ta</h3>
-              </div>
-              <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, 0.2); color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 22px;">
-                <i class="bi bi-patch-question-fill"></i>
-              </div>
+            <!-- Mavzular / Kategoriyalar Ko'rinishi (Categories Grid) -->
+            <div id="uran-categories-grid" class="cards-grid">
             </div>
           </div>
 
-          <!-- Section Toolbar -->
-          <div class="section-toolbar" style="flex-wrap: wrap; gap: 12px; align-items: center;">
-            <div class="search-box" style="flex: 1; min-width: 240px;">
-              <i class="bi bi-search"></i>
-              <input type="text" id="uran-cat-search" placeholder="Mavzu yoki so'z bo'yicha qidiruv..." oninput="renderUranCategories()">
-            </div>
-
-            <div class="toolbar-actions">
-              <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
-                <i class="bi bi-plus-circle-fill"></i> Yangi Inglizcha So'z Qo'shish
+          <!-- ICHKI KO'RINISH: TANLANGAN KATEGORIYA SO'ZLARI (DRILL-DOWN DETAIL VIEW) -->
+          <div id="uran-detail-view" style="display: none;">
+            <!-- Back Navigation Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <button class="btn btn-secondary" onclick="closeUranCategoryDetail()" style="display: flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 18px; border-radius: 10px; font-size: 14px;">
+                <i class="bi bi-arrow-left"></i> <span>← Barcha Mavzularga Qaytish</span>
+              </button>
+              
+              <button id="uran-detail-add-btn" class="btn btn-yellow" onclick="openUranWordModal(currentOpenCatId, currentOpenCatName)" style="padding: 10px 18px; font-weight: 700; border-radius: 10px; font-size: 14px;">
+                <i class="bi bi-plus-circle-fill"></i> + Shu Mavzuga So'z Qo'shish
               </button>
             </div>
+
+            <!-- Selected Category Hero Header -->
+            <div class="card" style="padding: 20px; margin-bottom: 20px; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border-left: 4px solid #eab308; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+              <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div style="width: 70px; height: 70px; border-radius: 16px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; padding: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                  <img id="uran-detail-img" src="/images/categories/fruits.svg" alt="" style="max-height: 54px; max-width: 54px; object-fit: contain;">
+                </div>
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px;">
+                    <h2 id="uran-detail-title" style="font-size: 1.45rem; font-weight: 800; color: #fff; margin: 0;">Meva va Sabzavotlar</h2>
+                    <span id="uran-detail-badge" class="badge" style="background: rgba(234,179,8,0.2); color: #eab308; font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 700;">14 ta so'z</span>
+                  </div>
+                  <p id="uran-detail-subtitle" style="font-size: 14px; color: #38bdf8; font-weight: 700; margin: 0 0 4px 0;">Fruits & Vegetables</p>
+                  <p id="uran-detail-desc" style="font-size: 13px; color: var(--text-secondary); margin: 0;">Meva va sabzavotlarning inglizcha va o'zbekcha nomlarini o'rganamiz</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detail Search Toolbar -->
+            <div class="section-toolbar" style="margin-bottom: 18px; align-items: center;">
+              <div class="search-box" style="flex: 1;">
+                <i class="bi bi-search"></i>
+                <input type="text" id="uran-detail-search" placeholder="Shu mavzu ichidan so'z qidirish (inglizcha, o'zbekcha, misol)..." oninput="filterUranDetailWords()">
+              </div>
+            </div>
+
+            <!-- Words Grid inside Category -->
+            <div id="uran-detail-words-grid" class="cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;">
+            </div>
           </div>
 
-          <!-- Mavzular / Kategoriyalar Ko'rinishi (Categories Grid) -->
-          <div id="uran-categories-grid" class="cards-grid">
-            <div class="loading-state">Uran kategoriyalari yuklanmoqda...</div>
-          </div>
         </section>
 
         <!-- 6.5 FAQ (KO'P SO'RALADIGAN SAVOLLAR) TAB -->
@@ -376,13 +423,12 @@
             </div>
             <div class="toolbar-actions">
               <button class="btn btn-yellow" onclick="openFaqModal()">
-                <i class="bi bi-plus-circle-fill"></i> Yangi FAQ Savol Qo'shish
+                <i class="bi bi-plus-circle-fill"></i> + Yangi FAQ Savol Qo'shish
               </button>
             </div>
           </div>
 
           <div id="faqs-grid" class="cards-grid faq-cards-grid">
-            <div class="loading-state">FAQ savollari yuklanmoqda...</div>
           </div>
         </section>
 
@@ -925,6 +971,6 @@
   </div>
 
   <!-- App Script -->
-  <script src="/js/app.js?v=20260828_v18_final_categories_and_faqs"></script>
+  <script src="/js/app.js?v=20260828_v19_drilldown_and_5faqs"></script>
 </body>
 </html>
