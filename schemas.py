@@ -494,3 +494,15 @@ class UranQuizSubmitResponse(BaseModel):
     stars_earned: int
     congratulation: str
 
+class UranAiSuggestRequest(BaseModel):
+    word_en: str = Field(..., example="Pineapple", description="Inglizcha so'z")
+
+class UranAiSuggestResponse(BaseModel):
+    word_en: str
+    word_uz: str
+    word_ru: str
+    transcription: str
+    example_sentence: str
+    example_translation: str
+
+

@@ -64,7 +64,8 @@ from schemas import (
     UranCategoryBase, UranCategoryCreate, UranCategoryUpdate, UranCategoryResponse,
     UranWordBase, UranWordCreate, UranWordUpdate, UranWordResponse,
     UranQuizOption, UranCategoryDetailResponse,
-    UranQuizSubmitRequest, UranQuizSubmitResponse
+    UranQuizSubmitRequest, UranQuizSubmitResponse,
+    UranAiSuggestRequest, UranAiSuggestResponse
 )
 
 # Gemini AI Konfiguratsiyasi
@@ -2560,6 +2561,50 @@ def admin_delete_uran_word(word_id: int):
     conn.commit()
     conn.close()
     return {"success": True, "message": "So'z muvaffaqiyatli o'chirildi", "id": word_id}
+
+
+@app.post("/api/website/uran/ai-suggest", response_model=UranAiSuggestResponse, tags=["Website & Admin API"], summary="Admin: AI orqali so'z tarjimasi va misolini avtomatik to'ldirish")
+def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
+    word = payload.word_en.strip()
+    if not word:
+        raise HTTPException(status_code=400, detail="Inglizcha so'z kiritilmadi!")
+
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        prompt = (
+            f"You are an English-Uzbek educational vocabulary assistant for children.\n"
+            f"Given the English word: '{word}', provide:\n"
+            f"1. word_uz: accurate, clean Uzbek translation (single clear word, e.g. Olma)\n"
+            f"2. word_ru: accurate Russian translation\n"
+            f"3. transcription: standard IPA transcription in brackets, e.g. [ˈæp.əl]\n"
+            f"4. example_sentence: a simple, fun, educational English sentence for kids containing this word.\n"
+            f"5. example_translation: Uzbek translation of that example sentence.\n\n"
+            f"Respond ONLY with a valid JSON object without markdown fences:\n"
+            f'{{"word_en": "{word}", "word_uz": "...", "word_ru": "...", "transcription": "...", "example_sentence": "...", "example_translation": "..."}}'
+        )
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```[a-zA-Z]*\n", "", text)
+            text = re.sub(r"\n```$", "", text).strip()
+        data = json.loads(text)
+        return {
+            "word_en": word,
+            "word_uz": data.get("word_uz", "").strip(),
+            "word_ru": data.get("word_ru", "").strip(),
+            "transcription": data.get("transcription", "").strip(),
+            "example_sentence": data.get("example_sentence", "").strip(),
+            "example_translation": data.get("example_translation", "").strip()
+        }
+    except Exception as e:
+        return {
+            "word_en": word,
+            "word_uz": "",
+            "word_ru": "",
+            "transcription": f"[{word.lower()}]",
+            "example_sentence": f"This is an {word}.",
+            "example_translation": f"Bu {word}."
+        }
 
 
 # 8. MOBIL SAYYORALAR RO'YXATI (/mobile/planets/ va /mobile/planets)

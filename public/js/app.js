@@ -7,6 +7,8 @@ let galleryList = [];
 let messagesList = [];
 let faqsList = [];
 let uranCategoriesList = [];
+let uranWordsList = [];
+let currentUranView = 'words';
 let messageFilter = 'all';
 
 // Initialize
@@ -128,7 +130,8 @@ async function loadAllData() {
     fetchGallery(),
     fetchMessages(),
     fetchFaqs(),
-    fetchUranCategories()
+    fetchUranCategories(),
+    fetchUranWords()
   ]);
   syncAllCounts();
   renderDashboard();
@@ -166,9 +169,18 @@ function syncAllCounts() {
   if (faqsBadge) faqsBadge.innerText = faqsList.length;
   if (faqsStat) faqsStat.innerText = faqsList.length;
 
-  // Uran Kategoriyalari
-  const uranBadge = document.getElementById('uran-count-badge');
-  if (uranBadge) uranBadge.innerText = uranCategoriesList.length;
+  // Uran / Ingliz Tili
+  const uranBadge = document.getElementById('uran-count-badge') || document.getElementById('uran-words-count-badge');
+  if (uranBadge) uranBadge.innerText = uranWordsList.length;
+
+  const statUranWords = document.getElementById('stat-uran-words-total');
+  if (statUranWords) statUranWords.innerText = `${uranWordsList.length} ta`;
+
+  const statUranCats = document.getElementById('stat-uran-cats-total');
+  if (statUranCats) statUranCats.innerText = `${uranCategoriesList.length} ta`;
+
+  const statUranTests = document.getElementById('stat-uran-tests-total');
+  if (statUranTests) statUranTests.innerText = `${uranWordsList.length} ta`;
 
   // Xabarlar
   const messagesStat = document.getElementById('stat-total-messages');
@@ -1937,7 +1949,7 @@ async function handleToggleFaqStatus(id) {
 }
 
 // ==============================================================================
-// URAN (NUTQ VA TIL) KATEGORIYALARI VA SO'ZLARI BOSHQARUVI
+// INGLIZ TILI (URAN SAYYORASI — SO'ZLAR, KATEGORIYALAR VA TESTLAR BOSHQARUVI)
 // ==============================================================================
 
 async function fetchUranCategories() {
@@ -1945,6 +1957,7 @@ async function fetchUranCategories() {
     const res = await fetch('/api/website/uran/categories');
     if (!res.ok) throw new Error("Uran kategoriyalarini yuklashda xatolik");
     uranCategoriesList = await res.json();
+    populateUranCategoryDropdowns();
     renderUranCategories();
     syncAllCounts();
   } catch (err) {
@@ -1952,11 +1965,169 @@ async function fetchUranCategories() {
   }
 }
 
+async function fetchUranWords() {
+  try {
+    const res = await fetch('/api/website/uran/words');
+    if (!res.ok) throw new Error("Ingliz tili so'zlarini yuklashda xatolik");
+    uranWordsList = await res.json();
+    renderUranWords();
+    syncAllCounts();
+  } catch (err) {
+    console.error("fetchUranWords error:", err);
+    const container = document.getElementById('uran-words-list-container');
+    if (container) {
+      container.innerHTML = `<div class="empty-state">Ingliz tili so'zlarini yuklashda xatolik yuz berdi.</div>`;
+    }
+  }
+}
+
+function populateUranCategoryDropdowns() {
+  // 1. Toolbar filter select
+  const filterSelect = document.getElementById('uran-category-filter-select');
+  if (filterSelect) {
+    const curVal = filterSelect.value || 'all';
+    filterSelect.innerHTML = `<option value="all">🌐 Barcha Mavzular (${uranCategoriesList.length} ta)</option>` +
+      uranCategoriesList.map(c => `<option value="${c.id}">${c.name} (${c.name_en || ''})</option>`).join('');
+    filterSelect.value = curVal;
+  }
+
+  // 2. Modal category select
+  const modalSelect = document.getElementById('uran-word-category-select');
+  if (modalSelect) {
+    modalSelect.innerHTML = `<option value="" disabled selected>-- Mavzuni tanlang --</option>` +
+      uranCategoriesList.map(c => `<option value="${c.id}">${c.name} (${c.name_en || ''})</option>`).join('');
+  }
+}
+
+function setUranView(mode) {
+  currentUranView = mode;
+  const wordsBtn = document.getElementById('uran-view-words-btn');
+  const catsBtn = document.getElementById('uran-view-cats-btn');
+  const wordsContainer = document.getElementById('uran-words-list-container');
+  const catsContainer = document.getElementById('uran-categories-grid');
+
+  if (mode === 'words') {
+    if (wordsBtn) wordsBtn.classList.add('active');
+    if (catsBtn) catsBtn.classList.remove('active');
+    if (wordsContainer) wordsContainer.style.display = 'grid';
+    if (catsContainer) catsContainer.style.display = 'none';
+    renderUranWords();
+  } else {
+    if (catsBtn) catsBtn.classList.add('active');
+    if (wordsBtn) wordsBtn.classList.remove('active');
+    if (wordsContainer) wordsContainer.style.display = 'none';
+    if (catsContainer) catsContainer.style.display = 'grid';
+    renderUranCategories();
+  }
+}
+
+function filterUranWords() {
+  if (currentUranView === 'words') {
+    renderUranWords();
+  } else {
+    renderUranCategories();
+  }
+}
+
+function renderUranWords() {
+  const container = document.getElementById('uran-words-list-container');
+  if (!container) return;
+
+  const searchInput = document.getElementById('uran-search-input');
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const filterSelect = document.getElementById('uran-category-filter-select');
+  const selectedCat = filterSelect ? filterSelect.value : 'all';
+
+  let filtered = uranWordsList;
+
+  if (selectedCat !== 'all') {
+    const catId = parseInt(selectedCat, 10);
+    filtered = filtered.filter(w => w.category_id === catId);
+  }
+
+  if (query) {
+    filtered = filtered.filter(w =>
+      (w.word_en && w.word_en.toLowerCase().includes(query)) ||
+      (w.word_uz && w.word_uz.toLowerCase().includes(query)) ||
+      (w.word_ru && w.word_ru.toLowerCase().includes(query)) ||
+      (w.example_sentence && w.example_sentence.toLowerCase().includes(query)) ||
+      (w.example_translation && w.example_translation.toLowerCase().includes(query))
+    );
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
+        <i class="bi bi-translate" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 12px;"></i>
+        <h4>Hech qanday inglizcha so'z topilmadi</h4>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">Yangi so'z qo'shish uchun yuqoridagi tugmani bosing.</p>
+        <button class="btn btn-yellow" onclick="openUranWordModal(null, null)">
+          <i class="bi bi-plus-circle-fill"></i> Yangi So'z Qo'shish
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const categoryMap = {};
+  uranCategoriesList.forEach(c => { categoryMap[c.id] = c.name; });
+
+  container.innerHTML = filtered.map(w => {
+    const catName = categoryMap[w.category_id] || `Mavzu #${w.category_id}`;
+    const safeWordEn = escapeHtml(w.word_en || '');
+    return `
+      <div class="card item-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #6366f1; padding: 18px; background: rgba(30, 41, 59, 0.6);">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+            <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+              📁 ${escapeHtml(catName)}
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted);">ID: ${w.id}</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0;">${safeWordEn}</h3>
+              <span style="font-size: 13px; color: #94a3b8; font-style: italic;">${escapeHtml(w.transcription || '')}</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="playWordAudio('${safeWordEn}')" title="Talaffuzni eshitish" style="padding: 4px 8px; border-radius: 6px;">
+              <i class="bi bi-volume-up-fill text-yellow"></i>
+            </button>
+          </div>
+
+          <div style="margin-bottom: 12px; line-height: 1.4;">
+            <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #38bdf8;">
+              🇺🇿 ${escapeHtml(w.word_uz || '')}
+            </p>
+            ${w.word_ru ? `<p style="margin: 0; font-size: 13px; color: #94a3b8;">🇷🇺 ${escapeHtml(w.word_ru)}</p>` : ''}
+          </div>
+
+          ${w.example_sentence ? `
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 14px; font-size: 12px;">
+              <p style="margin: 0 0 4px 0; color: #e2e8f0; font-style: italic;">"${escapeHtml(w.example_sentence)}"</p>
+              ${w.example_translation ? `<p style="margin: 0; color: #94a3b8;">— ${escapeHtml(w.example_translation)}</p>` : ''}
+            </div>
+          ` : ''}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 6px;">
+          <button class="action-btn-sm" title="Tahrirlash" onclick="openUranWordModal(${w.category_id}, '', ${w.id})">
+            <i class="bi bi-pencil-fill"></i>
+          </button>
+          <button class="action-btn-sm delete-btn" title="O'chirish" onclick="handleDeleteUranWord(${w.id}, '${safeWordEn}')">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderUranCategories() {
   const container = document.getElementById('uran-categories-grid');
   if (!container) return;
 
-  const searchInput = document.getElementById('uran-cat-search');
+  const searchInput = document.getElementById('uran-search-input') || document.getElementById('uran-cat-search');
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
   const filtered = uranCategoriesList.filter(c => {
@@ -2028,6 +2199,9 @@ async function openUranCategoryWordsModal(catId) {
           </div>
           ${w.example_sentence ? `<p style="font-size:12px; color:#475569; margin:4px 0 0 0;"><em>"${w.example_sentence}"</em> — ${w.example_translation || ''}</p>` : ''}
         </div>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="playWordAudio('${escapeHtml(w.word_en)}')" title="Talaffuzni eshitish" style="padding:4px 8px;">
+          <i class="bi bi-volume-up-fill text-yellow"></i>
+        </button>
       </div>
     `).join('');
 
@@ -2081,24 +2255,44 @@ function closeUranModal() {
 // URAN SO'Z QO'SHISH / TAHRIRLASH MODALI
 // ==============================================================================
 
-function openUranWordModal(categoryId, categoryName, wordId = null) {
+function openUranWordModal(categoryId = null, categoryName = null, wordId = null) {
   const modal = document.getElementById('uran-word-modal');
   const form = document.getElementById('uran-word-form');
   const catLabel = document.getElementById('uran-word-modal-cat');
   const titleEl = document.getElementById('uran-word-modal-title');
+  const catSelect = document.getElementById('uran-word-category-select');
 
-  form.reset();
-  document.getElementById('uran-word-category-id').value = categoryId;
-  document.getElementById('uran-word-id').value = wordId || '';
+  if (form) form.reset();
+  populateUranCategoryDropdowns();
 
-  if (catLabel) catLabel.innerText = `Kategoriya: ${categoryName}`;
-  if (titleEl) {
-    titleEl.innerHTML = wordId
-      ? '<i class="bi bi-pencil-square text-yellow"></i> So\'zni Tahrirlash'
-      : '<i class="bi bi-plus-circle text-yellow"></i> Yangi So\'z Qo\'shish';
+  if (document.getElementById('uran-word-id')) {
+    document.getElementById('uran-word-id').value = wordId || '';
   }
 
-  modal.classList.add('active');
+  if (wordId) {
+    const item = uranWordsList.find(w => w.id === wordId);
+    if (item) {
+      if (catSelect) catSelect.value = item.category_id;
+      if (document.getElementById('uran-word-en')) document.getElementById('uran-word-en').value = item.word_en || '';
+      if (document.getElementById('uran-word-uz')) document.getElementById('uran-word-uz').value = item.word_uz || '';
+      if (document.getElementById('uran-word-ru')) document.getElementById('uran-word-ru').value = item.word_ru || '';
+      if (document.getElementById('uran-word-transcription')) document.getElementById('uran-word-transcription').value = item.transcription || '';
+      if (document.getElementById('uran-word-example')) document.getElementById('uran-word-example').value = item.example_sentence || '';
+      if (document.getElementById('uran-word-example-uz')) document.getElementById('uran-word-example-uz').value = item.example_translation || '';
+      if (titleEl) titleEl.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> So\'zni Tahrirlash';
+    }
+  } else {
+    if (categoryId && catSelect) {
+      catSelect.value = categoryId;
+    }
+    if (titleEl) titleEl.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> Yangi Inglizcha So\'z Qo\'shish';
+  }
+
+  if (catLabel) {
+    catLabel.innerText = categoryName ? `Mavzu: ${categoryName}` : 'Inglizcha so\'z va uning o\'zbekcha tarjimasini kiriting';
+  }
+
+  if (modal) modal.classList.add('active');
 }
 
 function closeUranWordModal() {
@@ -2108,8 +2302,9 @@ function closeUranWordModal() {
 
 async function handleSaveUranWord(event) {
   event.preventDefault();
-  const wordId = document.getElementById('uran-word-id').value;
-  const categoryId = document.getElementById('uran-word-category-id').value;
+  const wordId = document.getElementById('uran-word-id') ? document.getElementById('uran-word-id').value : '';
+  const catSelect = document.getElementById('uran-word-category-select');
+  const categoryId = catSelect ? catSelect.value : (document.getElementById('uran-word-category-id') ? document.getElementById('uran-word-category-id').value : 1);
   const word_en = document.getElementById('uran-word-en').value.trim();
   const word_uz = document.getElementById('uran-word-uz').value.trim();
   const word_ru = document.getElementById('uran-word-ru').value.trim();
@@ -2117,14 +2312,20 @@ async function handleSaveUranWord(event) {
   const example_sentence = document.getElementById('uran-word-example').value.trim();
   const example_translation = document.getElementById('uran-word-example-uz').value.trim();
 
+  if (!categoryId) {
+    showToast("Iltimos, so'z tegishli bo'lgan mavzuni (kategoriyani) tanlang!", "error");
+    return;
+  }
+
   if (!word_en || !word_uz) {
     showToast("Inglizcha va O'zbekcha so'zlarni kiriting!", "error");
     return;
   }
 
   const payload = {
-    category_id: parseInt(categoryId),
-    word_en, word_uz, word_ru: word_ru || null,
+    category_id: parseInt(categoryId, 10),
+    word_en, word_uz,
+    word_ru: word_ru || null,
     transcription: transcription || null,
     example_sentence: example_sentence || null,
     example_translation: example_translation || null
@@ -2156,10 +2357,92 @@ async function handleSaveUranWord(event) {
 
     showToast(wordId ? "So'z muvaffaqiyatli yangilandi!" : `"${word_en} → ${word_uz}" so'zi muvaffaqiyatli qo'shildi! ✅`, "success");
     closeUranWordModal();
-    await fetchUranCategories();
+    await Promise.all([fetchUranWords(), fetchUranCategories()]);
   } catch (err) {
     showToast(err.message || "Xatolik yuz berdi!", "error");
   } finally {
     if (saveBtn) saveBtn.disabled = false;
   }
 }
+
+async function handleDeleteUranWord(id, wordName = '') {
+  if (!confirm(`Haqiqatan ham "${wordName || '#' + id}" so'zini o'chirmoqchimisiz?`)) return;
+
+  try {
+    const res = await fetch(`/api/website/uran/words/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error("So'zni o'chirishda xatolik");
+    showToast("So'z muvaffaqiyatli o'chirildi!", "success");
+    await Promise.all([fetchUranWords(), fetchUranCategories()]);
+  } catch (err) {
+    showToast(err.message || "O'chirishda xatolik yuz berdi", "error");
+  }
+}
+
+async function handleAiSuggestWord() {
+  const wordEnInput = document.getElementById('uran-word-en');
+  const word = wordEnInput ? wordEnInput.value.trim() : '';
+
+  if (!word) {
+    showToast("Avval inglizcha so'zni yozing, keyin AI tugmasini bosing!", "warning");
+    if (wordEnInput) wordEnInput.focus();
+    return;
+  }
+
+  const aiBtn = document.getElementById('ai-suggest-btn');
+  if (aiBtn) {
+    aiBtn.disabled = true;
+    aiBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Qidirilmoqda...';
+  }
+
+  try {
+    const res = await fetch('/api/website/uran/ai-suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word_en: word })
+    });
+
+    if (!res.ok) throw new Error("AI tarjima xizmatida xatolik");
+    const data = await res.json();
+
+    if (data.word_uz && document.getElementById('uran-word-uz')) {
+      document.getElementById('uran-word-uz').value = data.word_uz;
+    }
+    if (data.word_ru && document.getElementById('uran-word-ru')) {
+      document.getElementById('uran-word-ru').value = data.word_ru;
+    }
+    if (data.transcription && document.getElementById('uran-word-transcription')) {
+      document.getElementById('uran-word-transcription').value = data.transcription;
+    }
+    if (data.example_sentence && document.getElementById('uran-word-example')) {
+      document.getElementById('uran-word-example').value = data.example_sentence;
+    }
+    if (data.example_translation && document.getElementById('uran-word-example-uz')) {
+      document.getElementById('uran-word-example-uz').value = data.example_translation;
+    }
+
+    showToast(`"${word}" so'zining tarjimasi va misollari avtomatik to'ldirildi! ✨`, "success");
+  } catch (err) {
+    showToast(err.message || "AI dan ma'lumot olishda xatolik", "error");
+  } finally {
+    if (aiBtn) {
+      aiBtn.disabled = false;
+      aiBtn.innerHTML = '<i class="bi bi-stars"></i> AI Tarjima';
+    }
+  }
+}
+
+function playWordAudio(word) {
+  if (!word || !word.trim()) return;
+  try {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(word.trim());
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch (e) {
+    console.error("Audio playback error:", e);
+  }
+}
+
