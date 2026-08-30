@@ -359,11 +359,15 @@ AUDIO_CACHE_DIR = os.path.join(PUBLIC_DIR, "audio_cache")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
 
-# Asosiy Web Sayt (React Landing Page) dist papkasi
-WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website", "dist", "public")
-if not os.path.exists(WEBSITE_PUBLIC_DIR):
+# Asosiy Web Sayt papkasi (Static HTML/CSS/JS yoki React Landing Page dist)
+WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website")
+if os.path.exists(os.path.join(BASE_DIR, "website", "dist", "public")):
+    WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website", "dist", "public")
+elif os.path.exists(os.path.join(BASE_DIR, "website", "client")):
     WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website", "client")
 
+if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "img")):
+    app.mount("/img", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "img")), name="website_img")
 if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "assets")):
     app.mount("/assets", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "assets")), name="website_assets")
 if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "planets")):
@@ -813,16 +817,29 @@ def serve_admin_panel():
 @app.get("/sitemap.xml", include_in_schema=False)
 def serve_sitemap(request: Request):
     """Google va Yandex uchun XML Sitemap"""
+    website_sitemap = os.path.join(WEBSITE_PUBLIC_DIR, "sitemap.xml")
+    if os.path.isfile(website_sitemap):
+        return FileResponse(website_sitemap, media_type="application/xml; charset=utf-8")
+    
+    public_sitemap = os.path.join(PUBLIC_DIR, "sitemap.xml")
+    if os.path.isfile(public_sitemap):
+        return FileResponse(public_sitemap, media_type="application/xml; charset=utf-8")
+
     from datetime import datetime
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
    <url>
       <loc>https://kichikalloma.uz/</loc>
       <lastmod>{today}</lastmod>
       <changefreq>weekly</changefreq>
       <priority>1.0</priority>
+      <image:image>
+        <image:loc>https://kichikalloma.uz/img/hero.jpg</image:loc>
+        <image:title>Kichik Alloma — Kosmik ta'lim ekotizimi</image:title>
+      </image:image>
    </url>
 </urlset>"""
 
@@ -832,6 +849,14 @@ def serve_sitemap(request: Request):
 @app.get("/robots.txt", include_in_schema=False)
 def serve_robots(request: Request):
     """SEO robots.txt — barcha qidiruvchilar uchun"""
+    website_robots = os.path.join(WEBSITE_PUBLIC_DIR, "robots.txt")
+    if os.path.isfile(website_robots):
+        return FileResponse(website_robots, media_type="text/plain; charset=utf-8")
+
+    public_robots = os.path.join(PUBLIC_DIR, "robots.txt")
+    if os.path.isfile(public_robots):
+        return FileResponse(public_robots, media_type="text/plain; charset=utf-8")
+
     content = """User-agent: *
 Allow: /
 Disallow: /admin
@@ -3855,7 +3880,7 @@ async def admin_ai_chat(req: AiChatRequest, request: Request):
 @app.get("/{full_path:path}", include_in_schema=False)
 def serve_spa_or_static(full_path: str, request: Request):
     # API, docs, swagger, statik montajlar bo'lsa o'tkazib yuborish
-    if any(full_path.startswith(prefix) for prefix in ["api", "mobile", "docs", "openapi.json", "css", "js", "images", "assets", "audio_cache", "planets"]):
+    if any(full_path.startswith(prefix) for prefix in ["api", "mobile", "docs", "openapi.json", "css", "js", "images", "img", "assets", "audio_cache", "planets"]):
         raise HTTPException(status_code=404, detail="Topilmadi")
 
     # Agar admin subdomen bo'lsa -> Admin panel
