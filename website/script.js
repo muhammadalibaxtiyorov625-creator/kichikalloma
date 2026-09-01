@@ -472,21 +472,51 @@ if (kaTeamMarquee) {
     updateVideoScaleAndPlay();
 })();
 
-/* ============ Forma ============ */
+/* ============ Forma (Backend /api/messages API ulanishi) ============ */
 var kaForm = kaOne('#waitlistForm');
 var kaSubmit = kaOne('#submitBtn');
 if (kaForm && kaSubmit) {
     kaForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (!kaForm.reportValidity()) return;
+
+        var nameInput = kaOne('#fname');
+        var phoneInput = kaOne('#fphone');
+        var messageInput = kaOne('#fmessage');
+
+        var payload = {
+            name: nameInput ? nameInput.value.trim() : '',
+            phone: phoneInput ? phoneInput.value.trim() : '',
+            message: messageInput ? messageInput.value.trim() : ''
+        };
+
+        var origBtnText = kaSubmit.innerHTML;
         kaSubmit.disabled = true;
         kaSubmit.innerHTML = 'Yuborilmoqda…';
-        setTimeout(function () {
-            kaForm.reset();
+
+        fetch('/api/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
             kaSubmit.disabled = false;
-            kaSubmit.innerHTML = 'Yuborish <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
-            kaShowToast("Rahmat! Tez orada siz bilan bog'lanamiz.");
-        }, 900);
+            kaSubmit.innerHTML = origBtnText;
+            if (data.error) {
+                kaShowToast("Xatolik: " + data.error);
+            } else {
+                kaForm.reset();
+                kaShowToast("Rahmat! Xabaringiz muvaffaqiyatli yuborildi. Tez orada bog'lanamiz.");
+            }
+        })
+        .catch(function (err) {
+            kaSubmit.disabled = false;
+            kaSubmit.innerHTML = origBtnText;
+            kaShowToast("Tarmoqda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
+        });
     });
 }
 
