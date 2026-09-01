@@ -820,10 +820,7 @@ section {
 
 /* Desktop Ekranlar Uchun Sticky Scroll Animatsiyasi */
 @media (min-width: 992px) {
-    .cosmos {
-        height: 400vh;
-        padding: 0;
-    }
+    
 
     .cosmos-sticky-container {
         position: sticky;
@@ -979,20 +976,16 @@ section {
 /* ============ 4. QANDAY ISHLAYDI — PEDAGOGIK YONDASHUV ============ */
 .section-sticky {
     position: relative;
-    height: 600vh;
+    padding: 40px 0 80px;
     background: #ffffff;
 }
 
 .section-sticky .sticky-container {
-    position: sticky;
-    top: 0;
-    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 80px;
-    gap: 80px;
-    overflow: hidden;
+    padding: 20px 40px;
+    gap: 60px;
 }
 
 /* Desktop - Cardlar chap */
@@ -1137,17 +1130,15 @@ section {
 }
 
 @media (max-width: 991px) {
-    .section-sticky {
-        height: 400vh;
-    }
+    .section-sticky { height: auto; min-height: auto; }
 
     .section-sticky .sticky-container {
-        flex-direction: column;
-        padding: 0 20px;
-        gap: 0;
-        align-items: center;
-        justify-content: center;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 40px;
+    gap: 60px;
+}
 
     .cards-wrapper,
     .image-wrapper {
@@ -2166,20 +2157,16 @@ footer {
 /* ============ PEDAGOGY SCROLL STICKY SECTION ============ */
 .section-sticky {
     position: relative;
-    height: 600vh;
+    padding: 40px 0 80px;
     background: #ffffff;
 }
 
 .section-sticky .sticky-container {
-    position: sticky;
-    top: 0;
-    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 80px;
-    gap: 80px;
-    overflow: hidden;
+    padding: 20px 40px;
+    gap: 60px;
 }
 
 /* Chap tomon - Cardlar konteyneri */
@@ -2328,19 +2315,15 @@ footer {
 
 /* Responsive #qanday section */
 @media (max-width: 991px) {
-    .section-sticky {
-        height: 400vh;
-        /* 4 qadam × 100vh */
-    }
+    .section-sticky { height: auto; min-height: auto; }
 
     .section-sticky .sticky-container {
-        flex-direction: column;
-        padding: 0 20px;
-        gap: 0;
-        align-items: center;
-        justify-content: center;
-        padding-bottom: 240px;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 40px;
+    gap: 60px;
+}
 
     .cards-wrapper,
     .image-wrapper {
@@ -2513,3 +2496,701 @@ footer {
 }
 
 /* Yordamchi css tugadi */
+
+/* ==========================================================================
+   3D POP-OUT PLANET CAROUSEL (VIDEODAGIDEK 100% ANIQ DIZAYN)
+   ========================================================================== */
+
+
+/* ================= BEAUTIFUL NAV BUTTONS ================= */
+.cosmos-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    gap: 20px;
+}
+
+.cosmos-nav-controls {
+    display: none; /* Grid mode: nav buttons hidden */
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cosmos-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    border: 2px solid rgba(18, 22, 43, 0.12);
+    background: #ffffff;
+    color: #12162B;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 16px rgba(18, 22, 43, 0.07);
+    letter-spacing: 0.1px;
+    user-select: none;
+}
+
+.cosmos-nav-btn:hover {
+    background: #FAB003;
+    color: #ffffff;
+    border-color: #FAB003;
+    box-shadow: 0 8px 24px rgba(250, 176, 3, 0.35);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.cosmos-nav-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+
+/* Grid mode: hide carousel footer controls */
+.planet-carousel-footer {
+    display: none;
+}
+
+.cosmos-nav-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.cosmos-nav-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   3. KOINOT: CENTERED 3D FAN STACK & IN-PLACE SPREADING (ZERO EMPTY SPACE)
+   ========================================================================== */
+.cosmos {
+    background: #FFFDF7;
+    color: var(--ink, #12162B);
+    position: relative;
+    padding: 40px 0 55px;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: hidden;
+}
+
+.cosmos-sticky-container {
+    width: 100%;
+    position: relative;
+    height: auto !important;
+}
+
+.cosmos-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.cosmos-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cosmos-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(18, 22, 43, 0.14);
+    background: #ffffff;
+    color: #12162B;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 14px rgba(18, 22, 43, 0.08);
+    user-select: none;
+}
+
+.cosmos-nav-btn:hover {
+    background: #FAB003;
+    color: #ffffff;
+    border-color: #FAB003;
+    box-shadow: 0 8px 24px rgba(250, 176, 3, 0.35);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.cosmos-nav-btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.cosmos-nav-btn.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* ================= 3D STAGE (PERFECTLY CENTERED) ================= */
+.planet-cards-stage {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    padding: 85px 0 25px;
+    height: 490px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1400px;
+    overflow: visible;
+    touch-action: pan-y;
+}
+
+.planet-carousel-track {
+    position: relative;
+    width: 300px;
+    height: 380px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 3D POP-OUT CARD IN FAN STACK */
+.planet-3d-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 295px;
+    height: 380px;
+    border-radius: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 26px 24px 24px;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    user-select: none;
+    opacity: 1 !important;
+    text-decoration: none;
+    will-change: transform, opacity, box-shadow;
+    transform-origin: bottom center;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s ease,
+                filter 0.3s ease;
+}
+
+.planet-3d-card:hover {
+    filter: brightness(1.08) saturate(1.1);
+}
+
+.planet-3d-card.is-active {
+    box-shadow: 0 32px 65px -12px rgba(0, 0, 0, 0.48), 0 0 0 2.5px rgba(255, 255, 255, 0.9);
+}
+
+/* 3D POPPING OUT PLANET IMAGE */
+.planet-pop-img-wrap {
+    position: absolute;
+    top: -75px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.planet-pop-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.4));
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: planetFanFloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes planetFanFloat {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-7px) rotate(2deg); }
+}
+
+/* CARD CONTENT & TYPOGRAPHY */
+.planet-card-content {
+    position: relative;
+    z-index: 5;
+    color: #ffffff;
+    pointer-events: none;
+}
+
+.planet-pop-title {
+    font-family: 'Unbounded', 'Manrope', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 5px;
+    line-height: 1.15;
+    letter-spacing: -0.4px;
+}
+
+.planet-pop-skill {
+    display: block;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.98);
+    margin-bottom: 8px;
+}
+
+.planet-pop-desc {
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 0 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.planet-pop-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+/* ================= 8 RICH VIBRANT GRADIENTS ================= */
+.card-mercury {
+    background: linear-gradient(155deg, #8b5cf6 0%, #6d28d9 100%);
+    box-shadow: 0 24px 50px -10px rgba(139, 92, 246, 0.55);
+}
+.card-venus {
+    background: linear-gradient(155deg, #ec4899 0%, #db2777 100%);
+    box-shadow: 0 24px 50px -10px rgba(236, 72, 153, 0.55);
+}
+.card-earth {
+    background: linear-gradient(155deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 24px 50px -10px rgba(2, 132, 199, 0.55);
+}
+.card-mars {
+    background: linear-gradient(155deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 24px 50px -10px rgba(239, 68, 68, 0.55);
+}
+.card-jupiter {
+    background: linear-gradient(155deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 24px 50px -10px rgba(249, 115, 22, 0.55);
+}
+.card-saturn {
+    background: linear-gradient(155deg, #eab308 0%, #ca8a04 100%);
+    box-shadow: 0 24px 50px -10px rgba(234, 179, 8, 0.55);
+}
+.card-uranus {
+    background: linear-gradient(155deg, #e91e8c 0%, #c2185b 100%);
+    box-shadow: 0 24px 50px -10px rgba(233, 30, 140, 0.55);
+}
+.card-neptune {
+    background: linear-gradient(155deg, #3b82f6 0%, #1d4ed8 100%);
+    box-shadow: 0 24px 50px -10px rgba(59, 130, 246, 0.55);
+}
+
+/* ================= FOOTER DOTS & COUNTER BADGE ================= */
+.planet-carousel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 15px;
+    padding: 0 8px;
+}
+
+.planet-indicator-dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.planet-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(18, 22, 43, 0.16);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+
+.planet-dot:hover {
+    background: rgba(18, 22, 43, 0.45);
+    transform: scale(1.2);
+}
+
+.planet-dot.active {
+    width: 34px;
+    height: 9px;
+    border-radius: 6px;
+    background: #12162B;
+    box-shadow: 0 3px 10px rgba(18, 22, 43, 0.25);
+}
+
+.planet-counter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1.5px solid rgba(18, 22, 43, 0.1);
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-family: 'Manrope', sans-serif;
+    box-shadow: 0 4px 14px rgba(18, 22, 43, 0.06);
+}
+
+.planet-counter-num {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--primary, #FAB003);
+}
+
+.planet-counter-name {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #12162B;
+}
+
+/* ================= MOBILE OPTIMIZATION ================= */
+@media (max-width: 768px) {
+    .cosmos-header-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+        margin-bottom: 15px;
+    }
+    .planet-cards-stage {
+        height: 420px;
+        padding: 70px 0 20px;
+    }
+    .planet-carousel-track {
+        width: 260px;
+        height: 330px;
+    }
+    .planet-3d-card {
+        width: 260px;
+        height: 330px;
+        padding: 20px 18px 18px;
+        border-radius: 26px;
+    }
+    .planet-pop-img-wrap {
+        width: 165px;
+        height: 165px;
+        top: -60px;
+    }
+    .planet-pop-title {
+        font-size: 22px;
+    }
+    .planet-pop-skill {
+        font-size: 13px;
+    }
+    .planet-pop-desc {
+        font-size: 11.5px;
+    }
+}
+
+
+
+
+/* ==========================================================================
+   DISNEY-STYLE PLANET DETAIL MODAL (100% BULLETPROOF & HIGH VISIBILITY)
+   ========================================================================== */
+.planet-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(10, 14, 28, 0.85) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    z-index: 9999999 !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.planet-modal-backdrop.active {
+    display: flex !important;
+    opacity: 1 !important;
+}
+
+.planet-modal-dialog {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 960px !important;
+    min-height: 480px !important;
+    border-radius: 44px !important;
+    background: linear-gradient(145deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.6), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset !important;
+    overflow: visible !important;
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+
+.planet-modal-backdrop.active .planet-modal-dialog {
+    transform: scale(1) translateY(0) !important;
+    opacity: 1 !important;
+}
+
+/* Close Button (Top Right) */
+.planet-modal-close {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: none !important;
+    color: #12162B !important;
+    padding: 10px 22px !important;
+    border-radius: 999px !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+    transition: all 0.25s ease !important;
+    z-index: 100 !important;
+}
+
+.planet-modal-close:hover {
+    background: #ffffff !important;
+    transform: scale(1.06) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35) !important;
+}
+
+.planet-modal-body {
+    display: flex !important;
+    align-items: center !important;
+    padding: 40px 50px 45px 30px !important;
+    gap: 40px !important;
+    min-height: 480px !important;
+    position: relative !important;
+}
+
+.planet-modal-hero {
+    flex: 0 0 340px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.planet-modal-img-wrap {
+    width: 320px !important;
+    height: 320px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.planet-modal-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.45)) !important;
+    animation: planetModalFloat 4s ease-in-out infinite alternate !important;
+}
+
+@keyframes planetModalFloat {
+    0% { transform: translateY(0) scale(1) rotate(0deg); }
+    100% { transform: translateY(-10px) scale(1.03) rotate(2deg); }
+}
+
+.planet-modal-info {
+    flex: 1 !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.planet-modal-top-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+    margin-bottom: 16px !important;
+}
+
+.planet-modal-title {
+    font-family: 'Unbounded', 'Manrope', sans-serif !important;
+    font-size: 42px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 0 6px !important;
+    line-height: 1.1 !important;
+    letter-spacing: -1px !important;
+}
+
+.planet-modal-category {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 16px !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    margin: 0 !important;
+}
+
+.planet-modal-badge {
+    background: rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    padding: 8px 18px !important;
+    border-radius: 999px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    color: #ffffff !important;
+    white-space: nowrap !important;
+}
+
+.planet-modal-desc {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 15.5px !important;
+    line-height: 1.6 !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+    margin: 0 0 26px !important;
+    max-width: 520px !important;
+}
+
+.planet-modal-clips-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
+    padding-top: 20px !important;
+}
+
+.planet-clips-heading {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    margin: 0 0 14px !important;
+}
+
+.planet-clips-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 14px !important;
+}
+
+.planet-clip-card {
+    background: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    border-radius: 20px !important;
+    padding: 18px 16px 16px !important;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    cursor: default !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+}
+
+.planet-clip-card:hover {
+    background: rgba(255, 255, 255, 0.28) !important;
+    transform: translateY(-4px) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.planet-clip-icon {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
+    display: block !important;
+}
+
+.planet-clip-title {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin: 0 0 3px !important;
+    line-height: 1.3 !important;
+}
+
+.planet-clip-sub {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 11.5px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+}
+
+/* MODAL PLANET COLOR GRADIENTS */
+.planet-modal-dialog.modal-mercury { background: linear-gradient(145deg, #8b5cf6 0%, #6d28d9 100%) !important; }
+.planet-modal-dialog.modal-venus   { background: linear-gradient(145deg, #ec4899 0%, #db2777 100%) !important; }
+.planet-modal-dialog.modal-earth   { background: linear-gradient(145deg, #0284c7 0%, #0369a1 100%) !important; }
+.planet-modal-dialog.modal-mars    { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%) !important; }
+.planet-modal-dialog.modal-jupiter { background: linear-gradient(145deg, #f97316 0%, #ea580c 100%) !important; }
+.planet-modal-dialog.modal-saturn  { background: linear-gradient(145deg, #eab308 0%, #ca8a04 100%) !important; }
+.planet-modal-dialog.modal-uranus  { background: linear-gradient(145deg, #e91e8c 0%, #c2185b 100%) !important; }
+.planet-modal-dialog.modal-neptune { background: linear-gradient(145deg, #3b82f6 0%, #1d4ed8 100%) !important; }
+
+/* RESPONSIVE MODAL */
+@media (max-width: 991px) {
+    .planet-modal-dialog {
+        border-radius: 32px !important;
+        max-width: 95% !important;
+        margin: 20px auto !important;
+        min-height: auto !important;
+    }
+    .planet-modal-body {
+        flex-direction: column !important;
+        padding: 60px 24px 30px !important;
+        gap: 20px !important;
+        text-align: center !important;
+    }
+    .planet-modal-hero {
+        flex: none !important;
+    }
+    .planet-modal-img-wrap {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    .planet-modal-top-row {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+    .planet-modal-title {
+        font-size: 28px !important;
+    }
+    .planet-modal-desc {
+        font-size: 14px !important;
+        margin-bottom: 20px !important;
+    }
+    .planet-clips-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}

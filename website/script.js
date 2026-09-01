@@ -652,10 +652,8 @@ if (yearEl) {
             var r = ini.r * (1 - ep);
             var s = ini.s + (1 - ini.s) * ep;
 
-            var opacity = 0.95 + 0.05 * Math.min(1, p * 3);
-
             card.style.transform = 'translate(' + x + 'px, ' + y + 'px) rotate(' + r + 'deg) scale(' + s + ')';
-            card.style.opacity = opacity;
+            card.style.opacity = 1;
             card.style.zIndex = Math.round(ep * 10) + 1;
 
             if (isFullyOpened) {
@@ -962,3 +960,380 @@ function openCosmicUniverse(planetKey) {
         }
     }
 }
+
+
+
+
+
+
+
+/* ==========================================================================
+   PLANET MODAL CONTROLLER (100% RELIABLE & INSTANT OPENING)
+   ========================================================================== */
+var PLANET_DETAIL_DATA = {
+    mercury: {
+        title: "Merkuriy",
+        category: "Sayyora: <strong>Kelajak kasblari va Ijodkorlik</strong>",
+        badge: "Kasblar Olamiga Sayohat",
+        img: "img/planet_professions.png",
+        modalClass: "modal-mercury",
+        description: "Merkuriy — bolalarga 100 dan ortiq zamonaviy va kelajak kasblarini interaktiv o'yinlar orqali tanishtiruvchi ijodiy sayyora. Kichkintoy o'z qiziqishlarini kashf etadi, dizayner, muhandis, dasturchi va olim rollarida o'zini sinab ko'radi.",
+        clipsHeading: "KASBLAR BO'YICHA IMKONIYATLAR",
+        clips: [
+            { icon: "🎨", title: "Rassom & Dizayner", sub: "Ranglar, shakllar va kompozitsiya" },
+            { icon: "🚀", title: "Kosmik Muhandis", sub: "Raketa va robotlarni loyihalash" },
+            { icon: "🔬", title: "Kichik Tadqiqotchi", sub: "Tabiat va fizika qonuniyatlari" }
+        ]
+    },
+    venera: {
+        title: "Venera",
+        category: "Sayyora: <strong>Virtual do'kon va Moliyaviy savodxonlik</strong>",
+        badge: "Gold Coin Do'koni",
+        img: "img/venera.png",
+        modalClass: "modal-venus",
+        description: "Venera — barcha sayyoralarda bilim olib, mashq bajarib ishlab topilgan Gold Coin'lar sarflanadigan xavfsiz virtual do'kon. Bola o'z mehnati bilan topgan tangalarini to'g'ri rejalashtirishni va virtual avatarni bezashni o'rganadi.",
+        clipsHeading: "DO'KON IMKONIYATLARI",
+        clips: [
+            { icon: "👨‍🚀", title: "Avatar kiyimlari", sub: "Skafandr, sehrgar va olim liboslari" },
+            { icon: "🛋️", title: "Kosmik xona dizayni", sub: "Mebel, chiroqlar va shaxsiy burchak" },
+            { icon: "🛡️", title: "100% Xavfsiz tizim", sub: "Real pul yo'q, faqat bilim evaziga" }
+        ]
+    },
+    earth: {
+        title: "Yer",
+        category: "Sayyora: <strong>Kognitiv ta'lim va Sokratik AI</strong>",
+        badge: "AI-Ustoz va Fikr Mashqlari",
+        img: "img/earth.png",
+        modalClass: "modal-earth",
+        description: "Yer sayyorasida sun'iy intellekt bolaga tayyor javobni aytib bermaydi, balki savollar berish orqali uni mustaqil xulosa chiqarishga yo'naltiradi. Bu kognitiv moslashuvchanlik va tanqidiy fikrlashni rivojlantiradi.",
+        clipsHeading: "KOGNITIV IMKONIYATLAR",
+        clips: [
+            { icon: "🧠", title: "Sokratik AI Suhbat", sub: "Savollar orqali mustaqil yechim topish" },
+            { icon: "📚", title: "Interaktiv Kitoblar", sub: "Audio-vizual hikoyalar va ertaklar" },
+            { icon: "🧩", title: "Mantiqiy Sinovlar", sub: "Bosqichma-bosqich chuqurlashuvchi testlar" }
+        ]
+    },
+    mars: {
+        title: "Mars",
+        category: "Sayyora: <strong>Jismoniy faollik va Salomatlik</strong>",
+        badge: "Harakat va Sport Olam",
+        img: "img/mars.png",
+        modalClass: "modal-mars",
+        description: "Mars — ekrandan uzilib, real hayotda harakat qilishga undovchi dinamik sayyora. Kamera orqali mashqlar to'g'riligi tekshiriladi, bola sakraydi, yuguradi va kunlik jismoniy normani o'yin tarzida bajaradi.",
+        clipsHeading: "HARAKATLI MASHQLAR",
+        clips: [
+            { icon: "🤸", title: "Ertalabki Gimnastika", sub: "Qiziqarli qahramonlar bilan badantarbiya" },
+            { icon: "⚽", title: "Kosmik Chaqqonlik", sub: "Reaksiya va koordinatsiyani oshirish" },
+            { icon: "⏱️", title: "Ko'z va Qomat Mashqi", sub: "Ekran charchog'ini yenguvchi tanaffuslar" }
+        ]
+    },
+    jupiter: {
+        title: "Yupiter",
+        category: "Sayyora: <strong>O'z-o'zini boshqarish va Rejalashtirish</strong>",
+        badge: "Kunlik Reja & Intizom",
+        img: "img/planet_schedule.png",
+        modalClass: "modal-jupiter",
+        description: "Yupiter sayyorasi orqali bolalar vaqtni to'g'ri boshqarishni, kunlik vazifalarni ketma-ketlikda bajarishni va o'z maqsadlariga yetishish intizomini shakllantiradilar.",
+        clipsHeading: "VAQT BOSHQARUVI",
+        clips: [
+            { icon: "📅", title: "Kunlik Jadval", sub: "Tongdan kechgacha tartibli reja tuzish" },
+            { icon: "⏳", title: "Pomodoro Taymer", sub: "25 daqiqa dars va 5 daqiqa tanaffus" },
+            { icon: "🏆", title: "Yutuqlar Doskasi", sub: "Har bir bajarilgan vazifa uchun rag'bat" }
+        ]
+    },
+    saturn: {
+        title: "Saturn",
+        category: "Sayyora: <strong>Matematika va Mantiqiy fikrlash</strong>",
+        badge: "Raqamlar & Mantiq",
+        img: "img/saturn.png",
+        modalClass: "modal-saturn",
+        description: "Saturn — raqamlar, fazoviy tasavvur va mantiqiy jumboqlar sayyorasi. Qiziqarli vizual matematik o'yinlar orqali bolalar hisoblashni zavq bilan o'rganadilar.",
+        clipsHeading: "MATEMATIK SINOVLAR",
+        clips: [
+            { icon: "🔢", title: "Vizual Arifmetika", sub: "Qo'shish, ayirish va ko'paytirish o'yinlari" },
+            { icon: "📐", title: "Fazoviy Geometriya", sub: "3D shakllar va fazoviy tasavvur" },
+            { icon: "🧩", title: "Rubik va Jumboqlar", sub: "Algoritmik va mantiqiy masalalar" }
+        ]
+    },
+    uran: {
+        title: "Uran",
+        category: "Sayyora: <strong>Ingliz tili va Chet tillari</strong>",
+        badge: "Speaking & Leksika",
+        img: "img/uran.png",
+        modalClass: "modal-uranus",
+        description: "Uran sayyorasida bola ingliz tilini quruq yodlash emas, balki qahramonlar bilan jonli ovozli suhbat qurish orqali to'g'ri talaffuz va boy so'z boyligi bilan o'rganadi.",
+        clipsHeading: "TIL O'RGANISH",
+        clips: [
+            { icon: "🎙️", title: "AI Speaking Coach", sub: "Jonli ovozli muloqot va talaffuz tahlili" },
+            { icon: "🔤", title: "Vizual Lug'at", sub: "1500+ rasmli va ovozli yangi so'zlar" },
+            { icon: "🎧", title: "Native Storytelling", sub: "Xorijiy qahramonlar hikoyalari" }
+        ]
+    },
+    neptun: {
+        title: "Neptun",
+        category: "Sayyora: <strong>Emotsional savodxonlik va Psixologiya</strong>",
+        badge: "Hissiyotlar & Hamdardlik",
+        img: "img/neptun.png",
+        modalClass: "modal-neptune",
+        description: "Neptun — bolaning ichki dunyosi, hissiyotlari va empatiyasini rivojlantiruvchi sayyora. Qahramonlar yordamida g'azab, qo'rquv va quvonchni to'g'ri ifodalash o'rgatiladi.",
+        clipsHeading: "EMOTSIONAL RIVOJLANISH",
+        clips: [
+            { icon: "❤️", title: "Hissiyotlar Kundaligi", sub: "Bugun o'zingni qanday his qilyapsan?" },
+            { icon: "🧘", title: "Tinchlanish Nafas Mashqi", sub: "Stress va charchoqni ketkazuvchi nafas" },
+            { icon: "🤝", title: "Empatiya Hikoyalari", sub: "Do'stlik, mehr va hamjihatlik saboqlari" }
+        ]
+    }
+};
+
+function openPlanetDetail(planetKey) {
+    var data = PLANET_DETAIL_DATA[planetKey];
+    if (!data) return;
+
+    var backdrop = document.getElementById('planet-detail-modal');
+    var dialog = document.getElementById('planet-modal-dialog');
+    if (!backdrop || !dialog) return;
+
+    // Reset classes
+    dialog.className = 'planet-modal-dialog ' + (data.modalClass || '');
+
+    var imgEl = document.getElementById('planetModalImg');
+    var titleEl = document.getElementById('planetModalTitle');
+    var catEl = document.getElementById('planetModalCategory');
+    var badgeEl = document.getElementById('planetModalBadge');
+    var descEl = document.getElementById('planetModalDesc');
+    var clipsHeadingEl = document.getElementById('planetClipsHeading');
+    var clipsContainer = document.getElementById('planetModalClips');
+
+    if (imgEl) {
+        imgEl.src = data.img;
+        imgEl.alt = data.title;
+    }
+    if (titleEl) titleEl.textContent = data.title;
+    if (catEl) catEl.innerHTML = data.category;
+    if (badgeEl) badgeEl.textContent = data.badge;
+    if (descEl) descEl.textContent = data.description;
+    if (clipsHeadingEl) clipsHeadingEl.textContent = data.clipsHeading;
+
+    if (clipsContainer && data.clips) {
+        clipsContainer.innerHTML = data.clips.map(function(clip) {
+            return '<div class="planet-clip-card">' +
+                '<span class="planet-clip-icon">' + clip.icon + '</span>' +
+                '<h5 class="planet-clip-title">' + clip.title + '</h5>' +
+                '<p class="planet-clip-sub">' + clip.sub + '</p>' +
+            '</div>';
+        }).join('');
+    }
+
+    backdrop.style.display = 'flex';
+    requestAnimationFrame(function() {
+        backdrop.classList.add('active');
+    });
+    document.body.style.overflow = 'hidden';
+}
+
+function closePlanetDetail() {
+    var backdrop = document.getElementById('planet-detail-modal');
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        setTimeout(function() {
+            backdrop.style.display = 'none';
+        }, 300);
+    }
+    document.body.style.overflow = '';
+}
+
+function handlePlanetModalBackdrop(e) {
+    if (e.target && (e.target.id === 'planet-detail-modal' || e.target.classList.contains('planet-modal-backdrop'))) {
+        closePlanetDetail();
+    }
+}
+
+// Global window assignments
+window.openPlanetDetail = openPlanetDetail;
+window.closePlanetDetail = closePlanetDetail;
+window.handlePlanetModalBackdrop = handlePlanetModalBackdrop;
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePlanetDetail();
+});
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   PERFECTLY CENTERED 3D FAN STACK CONTROLLER (INSTANT CLICK & ZERO GAP)
+   - O'rtada markazlashgan holda turadi
+   - Kartaning ustiga bossangiz 100% ishonchli Disney modal ochiladi
+   - Oldingi / Keyingi tugmalari va nuqtalar orqali silliq aylanadi
+   ========================================================================== */
+(function initCenteredFanStack() {
+    var stage = document.getElementById('planetCardsStage');
+    var track = document.getElementById('planetCarouselTrack');
+    var prevBtn = document.getElementById('planetPrevBtn');
+    var nextBtn = document.getElementById('planetNextBtn');
+    var dotsContainer = document.getElementById('planetIndicatorDots');
+    var counterNum = document.querySelector('.planet-counter-num');
+    var counterName = document.getElementById('planetActiveName');
+
+    if (!track) return;
+
+    var cards = Array.from(track.querySelectorAll('.planet-3d-card'));
+    var totalCards = cards.length;
+    var activeIndex = 0; // 0..7
+    var isDragging = false;
+    var startX = 0;
+    var dragMoved = 0;
+
+    var PLANET_NAMES = [
+        "Merkuriy", "Venera", "Yer", "Mars", 
+        "Yupiter", "Saturn", "Uran", "Neptun"
+    ];
+
+    // Indikator nuqtalar
+    if (dotsContainer) {
+        dotsContainer.innerHTML = cards.map(function(_, i) {
+            return '<div class="planet-dot ' + (i === 0 ? 'active' : '') + '" data-index="' + i + '"></div>';
+        }).join('');
+
+        dotsContainer.querySelectorAll('.planet-dot').forEach(function(dot) {
+            dot.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var idx = parseInt(this.getAttribute('data-index'), 10);
+                setActivePlanet(idx);
+            });
+        });
+    }
+
+    // Direct card click — Bosganda to'g'ridan-to'g'ri aktiv qiladi va modalni ochadi!
+    cards.forEach(function(card, i) {
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (dragMoved > 15) return;
+            var planet = this.getAttribute('data-planet');
+            setActivePlanet(i);
+            if (planet && typeof openPlanetDetail === 'function') {
+                openPlanetDetail(planet);
+            }
+        });
+    });
+
+    function setActivePlanet(newIndex) {
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= totalCards) newIndex = totalCards - 1;
+        activeIndex = newIndex;
+        updateDeck();
+    }
+
+    function updateDeck() {
+        // O'rtaga o'tish uchun mukammal markaziy hisob-kitob
+        // Butun dasta kengligi ~175px bo'lgani uchun uni to'g'ri o'rtaga joylashtirish
+        var centerOffset = 50;
+
+        cards.forEach(function(card, i) {
+            var rel = (i - activeIndex + totalCards) % totalCards;
+
+            if (rel === 0) {
+                // ACTIVE FRONT CARD: Markazda, to'g'ri, eng katta va yorqin
+                card.style.transform = 'translate3d(' + centerOffset + 'px, 0, 0) rotate(0deg) scale(1)';
+                card.style.zIndex = '20';
+                card.style.opacity = '1';
+                card.classList.add('is-active');
+            } else {
+                // CARDS BEHIND: Chapga qarab qiya dasta (media_1788290592952.png kabi)
+                var shiftX = centerOffset - (rel * 26); // -26px chapga
+                var shiftY = rel * 4.5;                 // ozgina pastga
+                var rot = -rel * 2.8;                   // -2.8deg chapga qiya
+                var sc = 1 - rel * 0.018;               // biroz kichrayish
+
+                card.style.transform = 'translate3d(' + shiftX + 'px, ' + shiftY + 'px, 0) rotate(' + rot + 'deg) scale(' + sc + ')';
+                card.style.zIndex = '' + (20 - rel);
+                card.style.opacity = '1';
+                card.classList.remove('is-active');
+            }
+        });
+
+        // Update Dots & Counter Badge
+        if (dotsContainer) {
+            var dots = dotsContainer.querySelectorAll('.planet-dot');
+            dots.forEach(function(dot, idx) {
+                dot.classList.toggle('active', idx === activeIndex);
+            });
+        }
+
+        if (counterNum) counterNum.textContent = (activeIndex + 1) + ' / ' + totalCards;
+        if (counterName) counterName.textContent = PLANET_NAMES[activeIndex] || '';
+
+        if (prevBtn) prevBtn.classList.toggle('disabled', activeIndex === 0);
+        if (nextBtn) nextBtn.classList.toggle('disabled', activeIndex >= totalCards - 1);
+    }
+
+    // Oldingi / Keyingi tugmalari
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (activeIndex > 0) setActivePlanet(activeIndex - 1);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (activeIndex < totalCards - 1) setActivePlanet(activeIndex + 1);
+        });
+    }
+
+    // Touch & Mouse Drag
+    if (stage) {
+        stage.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX;
+            dragMoved = 0;
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            dragMoved = Math.abs(e.clientX - startX);
+        });
+
+        window.addEventListener('mouseup', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            var diff = e.clientX - startX;
+            if (diff < -40 && activeIndex < totalCards - 1) {
+                setActivePlanet(activeIndex + 1);
+            } else if (diff > 40 && activeIndex > 0) {
+                setActivePlanet(activeIndex - 1);
+            }
+        });
+
+        stage.addEventListener('touchstart', function(e) {
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            dragMoved = 0;
+        }, { passive: true });
+
+        stage.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            dragMoved = Math.abs(e.touches[0].clientX - startX);
+        }, { passive: true });
+
+        stage.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            var diff = e.changedTouches[0].clientX - startX;
+            if (diff < -35 && activeIndex < totalCards - 1) {
+                setActivePlanet(activeIndex + 1);
+            } else if (diff > 35 && activeIndex > 0) {
+                setActivePlanet(activeIndex - 1);
+            }
+        }, { passive: true });
+    }
+
+    updateDeck();
+})();
