@@ -40,6 +40,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/600.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/700.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/cosmic-3d.css">
 </head>
 
 
@@ -207,7 +208,7 @@
                     <div class="planet-card-stack" id="planetCardStack">
 
                         <!-- 1. Merkuriy -->
-                        <div class="planet-card-item" data-planet="merkuriy">
+                        <div class="planet-card-item" data-planet="merkuriy" onclick="openCosmicUniverse('mercury')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="mercury_desc">Kelajak kasblarini kashf etish va maqsad qo'yish.</p>
                             </div>
@@ -225,7 +226,7 @@
                         </div>
 
                         <!-- 2. Venera -->
-                        <div class="planet-card-item" data-planet="venera">
+                        <div class="planet-card-item" data-planet="venera" onclick="openCosmicUniverse('venera')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="venus_desc">O'z mehnati bilan topgan tangalarini to'g'ri sarflash.</p>
                             </div>
@@ -243,7 +244,7 @@
                         </div>
 
                         <!-- 3. Yer -->
-                        <div class="planet-card-item" data-planet="yer">
+                        <div class="planet-card-item" data-planet="yer" onclick="openCosmicUniverse('earth')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="earth_desc">Sokratik AI-ustoz bilan mustaqil fikrlashni o'rganish.</p>
                             </div>
@@ -261,7 +262,7 @@
                         </div>
 
                         <!-- 4. Mars -->
-                        <div class="planet-card-item" data-planet="mars">
+                        <div class="planet-card-item" data-planet="mars" onclick="openCosmicUniverse('mars')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="mars_desc">Ekrandan uzilib, real tana harakatlarini bajarish.</p>
                             </div>
@@ -279,7 +280,7 @@
                         </div>
 
                         <!-- 5. Yupiter -->
-                        <div class="planet-card-item" data-planet="yupiter">
+                        <div class="planet-card-item" data-planet="yupiter" onclick="openCosmicUniverse('jupiter')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="jupiter_desc">Kunlik reja tuzish va vaqtni to'g'ri taqsimlash.</p>
                             </div>
@@ -297,7 +298,7 @@
                         </div>
 
                         <!-- 6. Saturn -->
-                        <div class="planet-card-item" data-planet="saturn">
+                        <div class="planet-card-item" data-planet="saturn" onclick="openCosmicUniverse('saturn')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="saturn_desc">Mantiqiy fikrlashni kuchaytiruvchi bosqichli masalalar.</p>
                             </div>
@@ -315,7 +316,7 @@
                         </div>
 
                         <!-- 7. Uran -->
-                        <div class="planet-card-item" data-planet="uran">
+                        <div class="planet-card-item" data-planet="uran" onclick="openCosmicUniverse('uran')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="uranus_desc">Faol so'z boyligi va to'g'ri talaffuz amaliyoti.</p>
                             </div>
@@ -333,7 +334,7 @@
                         </div>
 
                         <!-- 8. Neptun -->
-                        <div class="planet-card-item" data-planet="neptun">
+                        <div class="planet-card-item" data-planet="neptun" onclick="openCosmicUniverse('neptune')" style="cursor:pointer;">
                             <div class="planet-card-back">
                                 <p class="planet-card-desc" data-i18n="neptune_desc">Kichkintoyning o'z hissiyotlarini tushunishi va boshqarishi.
                                 </p>
@@ -680,7 +681,41 @@
 
     <div id="toast" role="status"> <span id="toastMsg"></span></div>
 
-    <script src="script.js"></script>
+    
+    <!-- ========== COSMIC 3D MODAL ========== -->
+    <div id="cosmic-3d-modal">
+        <div id="cosmic-3d-canvas-container"></div>
+        <div class="cosmic-ambient-glow" id="cosmic-ambient-glow"></div>
+
+        <button class="cosmic-close-btn" onclick="Cosmic3D.close()" aria-label="Yopish">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <div class="cosmic-nav-btn-left" onclick="Cosmic3D.prevSlide()" aria-label="Oldingi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div class="cosmic-nav-btn-right" onclick="Cosmic3D.nextSlide()" aria-label="Keyingi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div class="cosmic-text-block" id="cosmic-text-block">
+            <div class="cosmic-slide-badge" id="cosmic-slide-badge"></div>
+            <h2 class="cosmic-slide-title" id="cosmic-slide-title"></h2>
+            <p class="cosmic-slide-subtitle" id="cosmic-slide-subtitle"></p>
+            <p class="cosmic-slide-desc" id="cosmic-slide-desc"></p>
+            <div class="cosmic-items-grid" id="cosmic-items-grid"></div>
+        </div>
+
+        <div class="cosmic-steps-indicator" id="cosmic-steps-indicator"></div>
+        <div class="cosmic-scroll-status" id="cosmic-scroll-status">
+            <span>1 / 6 • Skroll qiling</span>
+        </div>
+    </div>
+    <!-- ========== END COSMIC 3D MODAL ========== -->
+
+    <script src="js/three.min.js"></script>
+    <script src="js/cosmic-3d.js"></script>
+<script src="script.js"></script>
 </body>
 
 </html>

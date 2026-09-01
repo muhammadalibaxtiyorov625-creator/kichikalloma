@@ -949,3 +949,16 @@ if (yearEl) {
     } catch (e) { }
     setLanguage(savedLang);
 })();
+
+
+/* ============ Cosmic 3D Universe Integration ============ */
+function openCosmicUniverse(planetKey) {
+    if (window.Cosmic3D && typeof window.Cosmic3D.open === 'function') {
+        window.Cosmic3D.open(planetKey);
+    } else {
+        // Fallback: try openUniverse
+        if (typeof openUniverse === 'function') {
+            openUniverse(planetKey);
+        }
+    }
+}

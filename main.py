@@ -359,7 +359,7 @@ AUDIO_CACHE_DIR = os.path.join(PUBLIC_DIR, "audio_cache")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
 
-# Asosiy Web Sayt papkasi (Static HTML/CSS/JS yoki React Landing Page dist)
+# Asosiy Web Sayt papkasi (Static HTML/CSS/JS)
 WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website")
 if os.path.exists(os.path.join(BASE_DIR, "website", "dist", "public")):
     WEBSITE_PUBLIC_DIR = os.path.join(BASE_DIR, "website", "dist", "public")
@@ -372,11 +372,18 @@ if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "assets")):
     app.mount("/assets", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "assets")), name="website_assets")
 if os.path.exists(os.path.join(WEBSITE_PUBLIC_DIR, "planets")):
     app.mount("/planets", StaticFiles(directory=os.path.join(WEBSITE_PUBLIC_DIR, "planets")), name="website_planets")
+if os.path.exists(os.path.join(BASE_DIR, "website", "video")):
+    app.mount("/video", StaticFiles(directory=os.path.join(BASE_DIR, "website", "video")), name="website_video")
 
-if os.path.exists(os.path.join(PUBLIC_DIR, "css")):
-    app.mount("/css", StaticFiles(directory=os.path.join(PUBLIC_DIR, "css")), name="css")
-if os.path.exists(os.path.join(PUBLIC_DIR, "js")):
+# JS/CSS: website/js and website/css take priority for new static site
+if os.path.exists(os.path.join(BASE_DIR, "website", "js")):
+    app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "website", "js")), name="js")
+elif os.path.exists(os.path.join(PUBLIC_DIR, "js")):
     app.mount("/js", StaticFiles(directory=os.path.join(PUBLIC_DIR, "js")), name="js")
+if os.path.exists(os.path.join(BASE_DIR, "website", "css")):
+    app.mount("/css", StaticFiles(directory=os.path.join(BASE_DIR, "website", "css")), name="css")
+elif os.path.exists(os.path.join(PUBLIC_DIR, "css")):
+    app.mount("/css", StaticFiles(directory=os.path.join(PUBLIC_DIR, "css")), name="css")
 if os.path.exists(os.path.join(PUBLIC_DIR, "images")):
     app.mount("/images", StaticFiles(directory=os.path.join(PUBLIC_DIR, "images")), name="images")
 if os.path.exists(AUDIO_CACHE_DIR):
