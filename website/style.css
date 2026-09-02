@@ -708,7 +708,7 @@ section {
 .planet-cards-container {
     position: relative;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 .planet-card-stack {
@@ -716,112 +716,190 @@ section {
     width: 100%;
 }
 
+/* Tashqi konteyner: Sayyora 30px tepaga surilgani va 110px bo'lgani hisobga olingan */
 .planet-card-item {
     position: relative;
+    width: 260px;
+    height: 215px;
+    pointer-events: none;
+    overflow: visible;
+}
+
+/* Sayyora rasmi konteyneri (110px, top: -30px ga ko'tarilgan) */
+.planet-card-img-wrap {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
     pointer-events: none;
 }
 
-/* Desktop uchun pastki qatlam (Subtitle pastda ko'rinadi) */
-.planet-card-back {
+.planet-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Rangli Card */
+.planet-card-front {
     position: absolute;
-    inset: 0;
-    background: var(--cream);
-    border: 1px solid var(--line);
-    border-radius: 20px;
+    top: 30px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 22px;
+    padding: 55px 16px 14px 16px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 14px 16px;
-    z-index: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 2;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* GRADIENT RANGLAR (To'g'rilangan Violet, Magenta va Cyan ranglar) */
+/* Merkuriy — Orange */
+.planet-card-item[data-planet="merkuriy"] .planet-card-front {
+    background: linear-gradient(30deg, #d35400 0%, #d35400 60%, #ff9f43 100%);
+}
+
+/* Venera — Violet */
+.planet-card-item[data-planet="venera"] .planet-card-front {
+    background: linear-gradient(30deg, #512da8 0%, #512da8 60%, #8e44ad 100%);
+}
+
+/* Yer — Emerald Green */
+.planet-card-item[data-planet="yer"] .planet-card-front {
+    background: linear-gradient(30deg, #0a6b52 0%, #0a6b52 60%, #10ac84 100%);
+}
+
+/* Mars — Red */
+.planet-card-item[data-planet="mars"] .planet-card-front {
+    background: linear-gradient(30deg, #a82323 0%, #a82323 60%, #ee5253 100%);
+}
+
+/* Yupiter — Dark Cyan */
+.planet-card-item[data-planet="yupiter"] .planet-card-front {
+    background: linear-gradient(30deg, #004d40 0%, #004d40 60%, #00838f 100%);
+}
+
+/* Saturn — Yellow/Gold */
+.planet-card-item[data-planet="saturn"] .planet-card-front {
+    background: linear-gradient(30deg, #a48300 0%, #a48300 60%, #f8dd72 100%);
+}
+
+/* Uran — Deep Magenta */
+.planet-card-item[data-planet="uran"] .planet-card-front {
+    background: linear-gradient(30deg, #6a1b9a 0%, #6a1b9a 60%, #b378d8 100%);
+}
+
+/* Neptun — Blue */
+.planet-card-item[data-planet="neptun"] .planet-card-front {
+    background: linear-gradient(30deg, #1a237e 0%, #1a237e 60%, #3f51b5 100%);
+}
+
+.planet-card-body {
+    width: 100%;
+    text-align: left;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.planet-card-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.planet-card-skill {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .planet-card-desc {
     font-size: 12px;
     line-height: 1.35;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
     margin: 0;
-    font-weight: 600;
-    text-align: center;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
 }
 
-/* Desktop mobil subtitle-ni yashiradi */
-.planet-card-desc-mobile {
-    display: none;
-}
-
-/* Ustki qatlam */
-.planet-card-front {
-    position: absolute;
-    inset: 0;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 16px;
-    box-shadow: 0 8px 24px rgba(18, 22, 43, 0.08);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    z-index: 2;
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
-}
-
-/* Rasmlar 100px */
-.planet-card-img-wrap {
-    width: 100px;
-    height: 100px;
+/* Page Navigation Chevron Buttons Controls */
+.planet-nav-controls {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    gap: 16px;
+    margin-top: 30px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    position: relative;
+    z-index: 10;
 }
 
-.planet-card-img {
-    width: 100px;
-    height: 100px;
+.planet-nav-controls.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.planet-nav-btn {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    object-fit: cover;
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    background: #ffffff;
+    border: 2px solid var(--line);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(18, 22, 43, 0.08);
+    transition: all 0.25s ease;
 }
 
-.planet-card-info {
-    flex: 1;
-    text-align: left;
+.planet-nav-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+    transform: scale(1.08);
 }
 
-/* Title fonti 20px */
-.planet-card-title {
-    font-size: 20px;
+.planet-page-indicator {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
     font-weight: 700;
     color: var(--ink);
-    margin: 2px 0;
-    font-family: 'Unbounded', sans-serif;
-    line-height: 1.25;
-}
-
-/* Badge ichidagi matn markazlashtirildi */
-.planet-card-skill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 4px 12px;
-    border: 1.5px solid var(--primary);
+    background: #ffffff;
+    padding: 8px 18px;
     border-radius: 999px;
-    margin-top: 4px;
+    border: 1.5px solid var(--line);
 }
 
-/* Desktop Ekranlar Uchun Sticky Scroll Animatsiyasi */
+/* Desktop Sticky Scroll Animatsiyasi */
 @media (min-width: 992px) {
     .cosmos {
-        height: 400vh;
+        height: 350vh;
         padding: 0;
     }
 
@@ -833,7 +911,7 @@ section {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 60px 0;
+        padding: 40px 0;
     }
 
     .cosmos-sticky-container .container {
@@ -845,20 +923,17 @@ section {
     }
 
     .planet-cards-container {
-        height: 260px;
+        height: 215px;
         perspective: 1200px;
         overflow: visible;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 40px;
     }
 
-    /* Stack o'lchami: 4 * 300 + 3 * 24 = 1272px */
     .planet-card-stack {
-        width: 1272px;
-        height: 364px;
-        /* 2 * 170 + 1 * 24 */
+        width: 1120px;
+        height: 215px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -866,63 +941,57 @@ section {
         will-change: transform;
     }
 
-    /* Eni 300px */
     .planet-card-item {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 300px;
-        height: 170px;
-        margin: -85px 0 0 -150px;
+        margin: -107px 0 0 -130px;
         will-change: transform, opacity;
         transform-origin: center center;
     }
 
-    /* HOVER EFFECTLARI (Desktop) */
     .planet-card-item.opened {
         pointer-events: auto;
     }
 
     .planet-card-item.opened:hover .planet-card-front {
-        transform: translateY(-50px);
-        border-color: var(--primary);
-        box-shadow: 0 16px 36px rgba(250, 176, 3, 0.2);
-    }
-
-    .planet-card-item.opened:hover .planet-card-desc {
-        opacity: 1;
-        transform: translateY(0);
+        transform: translateY(-8px);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
     }
 
     .planet-card-item.opened:hover .planet-card-img {
-        transform: scale(1.08) rotate(-4deg);
+        transform: scale(1.1) rotate(-4deg);
     }
 }
 
-/* Mobil va Planshet rejimida moslashuvchanlik */
+/* MOBIL DIZAYN: 8 Ta Card ketma-ket, bir ustunda, animatsiyasiz */
 @media (max-width: 991px) {
     .cosmos {
-        padding: 60px 0;
+        padding: 50px 0;
     }
 
     .planet-cards-container {
         overflow: visible;
         height: auto;
+        margin-top: 30px;
     }
 
     .planet-card-stack {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
         width: 100%;
         height: auto;
         padding: 10px 0;
     }
 
     .planet-card-item {
-        position: relative;
-        width: 100%;
-        height: auto;
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 320px;
+        height: 215px !important;
         margin: 0 !important;
         transform: none !important;
         opacity: 1 !important;
@@ -931,48 +1000,8 @@ section {
         pointer-events: auto;
     }
 
-    .planet-card-back {
-        display: none;
-    }
-
-    .planet-card-front {
-        position: relative;
-        inset: auto;
-        height: 100%;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 24px 20px;
-        gap: 12px;
-    }
-
-    .planet-card-info {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-    }
-
-    .planet-card-desc-mobile {
-        display: block;
-        font-size: 13px;
-        line-height: 1.45;
-        color: var(--muted);
-        margin-top: 10px;
-        font-weight: 500;
-    }
-
-    /* Mobil Hover/Active rejim */
-    .planet-card-item:hover .planet-card-front,
-    .planet-card-item:active .planet-card-front {
-        transform: none;
-        border-color: var(--primary);
-        box-shadow: 0 12px 32px rgba(250, 176, 3, 0.25);
-    }
-
-    .planet-card-item:hover .planet-card-img {
-        transform: scale(1.05);
+    .planet-nav-controls {
+        display: none !important;
     }
 }
 

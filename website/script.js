@@ -539,40 +539,41 @@ if (yearEl) {
 (function initPlanetCardsAnimation() {
     var section = kaOne('.cosmos');
     var stack = kaOne('#planetCardStack');
+    var navControls = kaOne('#planetNavControls');
+    var prevBtn = kaOne('#planetPrevBtn');
+    var nextBtn = kaOne('#planetNextBtn');
+    var pageIndicator = kaOne('#planetPageIndicator');
+
     if (!section || !stack) return;
 
     var cards = kaAll('.planet-card-item', stack);
     if (cards.length === 0) return;
 
+    var currentPage = 0; // 0 = 1-sahifa (1-4 sayyora), 1 = 2-sahifa (5-8 sayyora)
+
     var COLS = 4;
-    var ROWS = 2;
-    var CARD_W = 300;
-    var CARD_H = 170;
-    var GAP_X = 24;
-    var GAP_Y = 24;
+    var CARD_W = 260;
+    var CARD_H = 215;
+    var GAP_X = 26;
 
     function getFinalPositions() {
         var positions = [];
         var totalW = COLS * CARD_W + (COLS - 1) * GAP_X;
-        var totalH = ROWS * CARD_H + (ROWS - 1) * GAP_Y;
         var startX = -totalW / 2 + CARD_W / 2;
-        var startY = -totalH / 2 + CARD_H / 2;
-        for (var r = 0; r < ROWS; r++) {
-            for (var c = 0; c < COLS; c++) {
-                positions.push({ x: startX + c * (CARD_W + GAP_X), y: startY + r * (CARD_H + GAP_Y) });
-            }
+        for (var c = 0; c < COLS; c++) {
+            positions.push({ x: startX + c * (CARD_W + GAP_X), y: 0 });
         }
         return positions;
     }
     var finals = getFinalPositions();
 
-    var initials = cards.map(function (_, i) {
-        var offset = i - 3.5;
+    var initials = [0, 1, 2, 3].map(function (i) {
+        var offset = i - 1.5;
         return {
-            x: offset * 6,
-            y: offset * 4,
-            r: offset * 1.2,
-            s: 1 - Math.abs(offset) * 0.015
+            x: offset * 8,
+            y: offset * 5,
+            r: offset * 2.2,
+            s: 1 - Math.abs(offset) * 0.02
         };
     });
 
@@ -589,6 +590,7 @@ if (yearEl) {
     function render() {
         if (window.innerWidth < 992) {
             cards.forEach(function (card) {
+                card.style.display = 'block';
                 card.style.transform = '';
                 card.style.opacity = '';
                 card.style.zIndex = '';
@@ -600,13 +602,28 @@ if (yearEl) {
 
         var p = getProgress();
         var ep = ease(p);
-
         var isFullyOpened = p >= 0.70;
 
-        cards.forEach(function (card, i) {
+        // Chevron knopkalari 0.8 scroll qismida paydo bo'ladi
+        if (p >= 0.80) {
+            if (navControls) navControls.classList.add('visible');
+        } else {
+            if (navControls) navControls.classList.remove('visible');
+        }
+
+        var startIdx = currentPage * 4;
+        var endIdx = startIdx + 4;
+
+        cards.forEach(function (card, index) {
+            if (index < startIdx || index >= endIdx) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            var i = index - startIdx;
             var ini = initials[i];
             var fin = finals[i];
-            if (!ini || !fin) return;
 
             var x = ini.x + (fin.x - ini.x) * ep;
             var y = ini.y + (fin.y - ini.y) * ep;
@@ -632,17 +649,35 @@ if (yearEl) {
     function scaleStage() {
         if (window.innerWidth < 992) return;
 
-        var gridW = COLS * CARD_W + (COLS - 1) * GAP_X; // 1272
-        var gridH = ROWS * CARD_H + (ROWS - 1) * GAP_Y; // 364
+        var gridW = COLS * CARD_W + (COLS - 1) * GAP_X; // 1118
+        var gridH = CARD_H; // 215
 
         var parentW = stack.parentElement.clientWidth;
-        var parentH = window.innerHeight - 160;
+        var parentH = window.innerHeight - 200;
 
         var scaleW = parentW / gridW;
         var scaleH = parentH / gridH;
 
         var scale = Math.min(1, scaleW, scaleH);
         stack.style.transform = 'scale(' + scale + ')';
+    }
+
+    function switchPlanetPage(page) {
+        currentPage = page;
+        if (pageIndicator) pageIndicator.textContent = (currentPage + 1) + ' / 2';
+        render();
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            switchPlanetPage(currentPage === 0 ? 1 : 0);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            switchPlanetPage(currentPage === 0 ? 1 : 0);
+        });
     }
 
     window.addEventListener('scroll', render, { passive: true });
