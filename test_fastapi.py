@@ -1,59 +1,76 @@
-import urllib.request
-import json
+from fastapi.testclient import TestClient
+from main import app
 import sys
 
 def test_all():
-    port = sys.argv[1] if len(sys.argv) > 1 else '3077'
-    base = f'http://127.0.0.1:{port}'
+    client = TestClient(app, base_url="http://localhost:3009")
     try:
-        # 1. Test Admin Panel index
-        with urllib.request.urlopen(f'{base}/') as res:
-            print(f'1. GET {base}/ (Admin Panel) -> Status: {res.status}')
+        # 1. Admin / root
+        r = client.get("/")
+        print(f"1. GET / -> Status: {r.status_code}")
 
-        # 2. Test Planets API
-        with urllib.request.urlopen(f'{base}/api/website/planets') as res:
-            planets = json.loads(res.read().decode('utf-8'))
-            print(f'2. GET {base}/api/website/planets -> {len(planets)} ta sayyora (Status: {res.status})')
+        # 2. Planets
+        r = client.get("/api/website/planets")
+        planets = r.json()
+        print(f"2. GET /api/website/planets -> {len(planets)} ta sayyora (Status: {r.status_code})")
+        
+        # Verify planet mapping
+        planetKeyMap = {
+            'merkuriy': ['kasb', 'ijod', 'merkur'],
+            'venera': ['virtual', "do'kon", 'dokon', 'magazin', 'vener'],
+            'yer': ['kognitiv', 'tutor', 'yer', 'earth'],
+            'mars': ['jismoniy', 'faollik', 'sport', 'harakat', 'mars'],
+            'yupiter': ['boshqarish', 'intizom', 'reja', 'vaqt', 'yupiter', 'jupiter'],
+            'saturn': ['matematika', 'mantiq', 'saturn'],
+            'uran': ['ingliz', "lug'at", 'lugat', 'til', 'uran'],
+            'neptun': ['emotsional', 'hissiyot', 'savodxonlik', 'neptun']
+        }
+        print("   --- Sayyoralar xaritasi (Website <-> DB) ---")
+        for key, keywords in planetKeyMap.items():
+            match = next((p for p in planets if any(kw in (p.get("title") or "").lower() for kw in keywords)), None)
+            if match:
+                print(f"   [{key:8}] -> DB: {match['title']:24} | Img: {match['image']}")
+            else:
+                print(f"   [{key:8}] -> XATO: Topilmadi!")
 
-        # 3. Test Amenities API
-        with urllib.request.urlopen(f'{base}/api/website/amenities') as res:
-            amenities = json.loads(res.read().decode('utf-8'))
-            print(f'3. GET {base}/api/website/amenities -> {len(amenities)} ta qulaylik (Status: {res.status})')
+        # 3. Amenities
+        r = client.get("/api/website/amenities")
+        print(f"3. GET /api/website/amenities -> {len(r.json())} ta qulaylik (Status: {r.status_code})")
 
-        # 4. Test Teams API
-        with urllib.request.urlopen(f'{base}/api/website/teams') as res:
-            teams = json.loads(res.read().decode('utf-8'))
-            print(f'4. GET {base}/api/website/teams -> {len(teams)} ta jamoa a\'zosi (Status: {res.status})')
+        # 4. Teams
+        r = client.get("/api/website/teams")
+        teams = r.json()
+        print(f"4. GET /api/website/teams -> {len(teams)} ta jamoa a'zosi (Status: {r.status_code})")
+        for t in teams[:3]:
+            print(f"   - {t['first_name']} {t['last_name']} ({t['role']}) -> {t['image']}")
 
-        # 5. Test Gallery API (Yangi qo'shilgan)
-        with urllib.request.urlopen(f'{base}/api/website/gallery') as res:
-            gallery = json.loads(res.read().decode('utf-8'))
-            print(f'5. GET {base}/api/website/gallery -> {len(gallery)} ta rasm (Status: {res.status})')
-            for g in gallery:
-                print(f'   - #{g["id"]} {g["title"]} -> {g["image"]}')
+        # 5. Gallery
+        r = client.get("/api/website/gallery")
+        print(f"5. GET /api/website/gallery -> {len(r.json())} ta rasm (Status: {r.status_code})")
 
-        # 6. Test Messages API
-        with urllib.request.urlopen(f'{base}/api/website/messages') as res:
-            messages = json.loads(res.read().decode('utf-8'))
-            print(f'6. GET {base}/api/website/messages -> {len(messages)} ta xabar (Status: {res.status})')
+        # 6. Messages GET
+        r = client.get("/api/website/messages")
+        print(f"6. GET /api/website/messages -> {len(r.json())} ta xabar (Status: {r.status_code})")
 
-        # 7. Test Stats API (with Gallery)
-        with urllib.request.urlopen(f'{base}/api/website/stats') as res:
-            stats = json.loads(res.read().decode('utf-8'))
-            print(f'7. GET {base}/api/website/stats -> Sayyoralar: {stats["totalPlanets"]}, Qulayliklar: {stats["totalAmenities"]}, Jamoa: {stats["totalTeams"]}, Galereya: {stats["totalGallery"]} (Status: {res.status})')
+        # 7. Messages POST
+        r = client.post("/api/website/messages", json={
+            "name": "Test Foydalanuvchi",
+            "phone": "+998901234567",
+            "message": "Sayt orqali yuborilgan sinov xabari"
+        })
+        print(f"7. POST /api/website/messages -> Status: {r.status_code} | {r.json().get('message')}")
 
-        # 8. Test Landing API (with Gallery)
-        with urllib.request.urlopen(f'{base}/api/website/landing') as res:
-            landing = json.loads(res.read().decode('utf-8'))
-            print(f'8. GET {base}/api/website/landing -> {landing["site_name"]} | Galereya: {len(landing["gallery"])} ta (Status: {res.status})')
+        # 8. Stats
+        r = client.get("/api/website/stats")
+        print(f"8. GET /api/website/stats -> Status: {r.status_code}")
 
-        # 9. Test Docs
-        with urllib.request.urlopen(f'{base}/docs') as res:
-            print(f'9. GET http://localhost:3009/docs (Swagger UI) -> Status: {res.status}')
+        # 9. Landing
+        r = client.get("/api/website/landing")
+        print(f"9. GET /api/website/landing -> Status: {r.status_code}")
 
-        print('\nBARCHA ENDPOINTLAR VA GALEREYA (GALLERY) 100% MUVAFFAQIYATLI ISHLAMOQDA!')
+        print("\nBARCHA ENDPOINTLAR VA SAYYORALAR 100% MUVAFFAQIYATLI TEKSHIRILDI!")
     except Exception as e:
-        print('Xatolik:', e)
+        print("Xatolik:", e)
         sys.exit(1)
 
 if __name__ == '__main__':

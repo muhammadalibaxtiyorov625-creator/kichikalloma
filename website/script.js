@@ -1,6 +1,15 @@
 /* ============ Yordamchi ============ */
 var kaAll = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
 var kaOne = function (sel, ctx) { return (ctx || document).querySelector(sel); };
+var kaFixImgUrl = function (url, fallback) {
+    if (!url) return fallback || '';
+    try {
+        var u = new URL(url, window.location.origin);
+        return u.pathname;
+    } catch (e) {
+        return url;
+    }
+};
 
 /* ============ Navbar scroll ============ */
 var kaNavPill = kaOne('#navPill');
@@ -554,24 +563,12 @@ if (yearEl) {
         .then(function (teams) {
             if (!Array.isArray(teams) || teams.length === 0) return;
 
-            // API http://host/images/... qaytarsa, relative /images/... ga aylantiramiz
-            function fixImgUrl(url) {
-                if (!url) return 'img/team1.jpg';
-                // Absolyut URL dan faqat path qismini olamiz
-                try {
-                    var u = new URL(url);
-                    return u.pathname; // -> /images/uploads/xxx.jpg
-                } catch (e) {
-                    return url; // allaqachon relative
-                }
-            }
-
             // Cheksiz silliq marquee uchun ikki marta takrorlaymiz
             var list = teams.concat(teams);
             var html = list.map(function (m) {
                 var name = ((m.first_name || '') + ' ' + (m.last_name || '')).trim();
                 var role = m.role || '';
-                var img  = fixImgUrl(m.image);
+                var img  = kaFixImgUrl(m.image, 'img/team1.jpg');
                 return '<div class="team-card">' +
                     '<div class="team-img-wrap">' +
                         '<img src="' + img + '" alt="' + name + '" class="team-img" ' +
@@ -591,9 +588,8 @@ if (yearEl) {
         });
 })();
 
-/* ============ BACKEND: Sayyoralar tavsifini yangilash (/api/website/planets) ============
-   HTML ni o'zgartirmasdan, mavjud .planet-card-item[data-planet] elementlarining
-   .planet-card-desc matnini bazadan olingan ma'lumot bilan yangilaydi.
+/* ============ BACKEND: Sayyoralar ma'lumotlarini yuklash (/api/website/planets) ============
+   Mavjud sayyora kartalari va modalini API dan olingan haqiqiy 3D rasm va tavsiflar bilan yangilaydi.
 ============================================================================ */
 (function loadPlanetsFromApi() {
     fetch('/api/website/planets')
@@ -604,20 +600,58 @@ if (yearEl) {
         .then(function (planets) {
             if (!Array.isArray(planets) || planets.length === 0) return;
 
-            // data-planet atributiidan sayyora nomi olinib, API dan mos yozuv topiladi
+            // Sayyora kaliti (data-planet) bilan API nomlari o'rtasidagi lug'at
+            var planetKeyMap = {
+                merkuriy: ['kasb', 'ijod', 'merkur'],
+                venera: ['virtual', "do'kon", 'dokon', 'magazin', 'vener'],
+                yer: ['kognitiv', 'tutor', 'yer', 'earth'],
+                mars: ['jismoniy', 'faollik', 'sport', 'harakat', 'mars'],
+                yupiter: ['boshqarish', 'intizom', 'reja', 'vaqt', 'yupiter', 'jupiter'],
+                saturn: ['matematika', 'mantiq', 'saturn'],
+                uran: ['ingliz', "lug'at", 'lugat', 'til', 'uran'],
+                neptun: ['emotsional', 'hissiyot', 'savodxonlik', 'neptun']
+            };
+
             var cards = kaAll('.planet-card-item[data-planet]');
             cards.forEach(function (card) {
                 var key = (card.getAttribute('data-planet') || '').toLowerCase();
+                var keywords = planetKeyMap[key] || [key];
+
                 var match = planets.find(function (p) {
-                    return (p.title || '').toLowerCase().indexOf(key) !== -1 ||
-                           key.indexOf((p.title || '').toLowerCase()) !== -1;
+                    var title = (p.title || '').toLowerCase();
+                    return keywords.some(function (kw) { return title.indexOf(kw) !== -1; });
                 });
                 if (!match) return;
 
-                // Faqat tavsif (desc) matnini yangilaydi — boshqa hech narsa o'zgarmaydi
+                // 1. Rasmni backend 3D rasmiga yangilash
+                var imgEl = kaOne('.planet-card-img', card);
+                if (imgEl && match.image) {
+                    imgEl.src = kaFixImgUrl(match.image, imgEl.src);
+                }
+
+                // 2. Yo'nalish / Sarlavha (Skill) matnini yangilash
+                var skillEl = kaOne('.planet-card-skill', card);
+                if (skillEl && match.title) {
+                    skillEl.textContent = match.title;
+                }
+
+                // 3. Tavsifni yangilash
                 var descEl = kaOne('.planet-card-desc', card);
                 if (descEl && match.description) {
                     descEl.textContent = match.description;
+                }
+
+                // 4. Modal ma'lumotini yangilash
+                if (window.planetData && window.planetData[key]) {
+                    if (match.image) {
+                        window.planetData[key].img = kaFixImgUrl(match.image, window.planetData[key].img);
+                    }
+                    if (match.title) {
+                        window.planetData[key].subtitle = match.title;
+                    }
+                    if (match.description) {
+                        window.planetData[key].desc = match.description;
+                    }
                 }
             });
         })
@@ -661,7 +695,7 @@ if (yearEl) {
 
     if (!overlay || !modalCard || !closeBtn) return;
 
-    var planetData = {
+    window.planetData = window.planetData || {
         merkuriy: {
             title: "Merkuriy",
             subtitle: "Sayyora: Kelajak kasblari va Qiziqishlar",
@@ -769,7 +803,7 @@ if (yearEl) {
     };
 
     function openPlanetModal(key) {
-        var data = planetData[key];
+        var data = (window.planetData || planetData)[key];
         if (!data) return;
 
         if (modalImg) modalImg.src = data.img;
