@@ -40,7 +40,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/600.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/700.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/cosmic-3d.css">
 </head>
 
 
@@ -137,7 +136,8 @@
         <div class="container hero-inner">
             <span class="badge reveal in"><i></i><span data-i18n="hero_badge">Kosmik ta'lim ekotizimi</span></span>
 
-            <h1 data-i18n-html="hero_title">Farzandingizning ekran vaqtini uning <span class="hl">kelajagi uchun sarmoyaga</span> aylantiring.</h1>
+            <h1 data-i18n-html="hero_title">Farzandingizning ekran vaqtini uning <span class="hl">kelajagi uchun
+                    sarmoyaga</span> aylantiring.</h1>
 
             <p class="hero-sub" data-i18n="hero_sub">Kichik Alloma — sun'iy intellekt yordamida
                 bolalarni mustaqil fikrlashga, intizomga va o'z hissiyotlarini boshqarishga o'rgatuvchi yagona kosmik
@@ -185,166 +185,182 @@
                 <span>Kichik alloma</span>
                 <span>Kichik alloma</span>
                 <span>Kichik alloma</span>
-                <span>Kichik alloma</span>
-
             </div>
         </div>
     </header>
 
-            <!-- ================= 3. KOINOT / 8 TA SAYYORA (STACK-TO-CAROUSEL 3D EXPANSION) ================= -->
+    <!-- ================= 3. KOINOT / 8 TA SAYYORA ================= -->
     <section class="cosmos" id="sayyoralar">
         <div class="cosmos-sticky-container">
             <div class="starfield" data-stars="90"></div>
             <div class="cosmos-glow"></div>
             <div class="container">
-                <div class="cosmos-header-row">
-                    <div class="sec-head reveal in">
-                        <span class="sec-badge" data-i18n="planets_badge">Kosmik ekotizim</span>
-                        <h2 data-i18n="planets_title">Hayot uchun kerakli 8 ta eng muhim ko'nikma.</h2>
-                        <p data-i18n="planets_sub">Har bir sayyora ularning yashirin salohiyatini ochishga yordam beradi</p>
-                    </div>
-
-                    <!-- Prev & Next navigation buttons (Exact as in image: < Prev, Next >) -->
-                    <div class="cosmos-nav-controls" id="cosmosNavControls">
-                        <button class="cosmos-nav-btn" id="planetPrevBtn" aria-label="Oldingi sayyora">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                            <span>Oldingi</span>
-                        </button>
-                        <button class="cosmos-nav-btn" id="planetNextBtn" aria-label="Keyingi sayyora">
-                            <span>Keyingi</span>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                        </button>
-                    </div>
+                <div class="sec-head reveal">
+                    <span class="sec-badge" data-i18n="planets_badge">Kosmik ekotizim</span>
+                    <h2 data-i18n="planets_title">Hayot uchun kerakli 8 ta eng muhim ko'nikma.</h2>
+                    <p data-i18n="planets_sub">Har bir sayyora ularning yashirin salohiyatini ochishga yordam beradi</p>
                 </div>
 
-                <!-- 3D Pop-out Planet Stack & Carousel Stage -->
-                <div class="planet-cards-stage" id="planetCardsStage">
-                    <div class="planet-carousel-track" id="planetCarouselTrack">
+                <!-- Sayyora kartalari -->
+                <div class="planet-cards-container reveal" id="planetCardsContainer">
+                    <div class="planet-card-stack" id="planetCardStack">
 
                         <!-- 1. Merkuriy -->
-                        <div class="planet-3d-card card-mercury" data-index="0" data-planet="mercury" onclick="openPlanetDetail('mercury')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/planet_professions.png" alt="Merkuriy" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="merkuriy">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/merkuriy.png" alt="Merkuriy" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="mercury_title">Merkuriy</h3>
-                                <span class="planet-pop-skill" data-i18n="mercury_skill">Kasblar</span>
-                                <p class="planet-pop-desc" data-i18n="mercury_desc">Kelajak kasblarini kashf etish va maqsad qo'yish.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="mercury_title">Merkuriy</h4>
+                                    <div class="planet-card-skill" data-i18n="mercury_skill">Kasblar</div>
+                                    <p class="planet-card-desc" data-i18n="mercury_desc">Kelajak kasblarini kashf etish va maqsad qo'yish.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 2. Venera -->
-                        <div class="planet-3d-card card-venus" data-index="1" data-planet="venera" onclick="openPlanetDetail('venera')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/venera.png" alt="Venera" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="venera">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/venera.png" alt="Venera" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="venus_title">Venera</h3>
-                                <span class="planet-pop-skill" data-i18n="venus_skill">Virtual do'kon</span>
-                                <p class="planet-pop-desc" data-i18n="venus_desc">O'z mehnati bilan topgan tangalarini to'g'ri sarflash.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="venus_title">Venera</h4>
+                                    <div class="planet-card-skill" data-i18n="venus_skill">Virtual do'kon</div>
+                                    <p class="planet-card-desc" data-i18n="venus_desc">O'z mehnati bilan topgan tangalarini to'g'ri sarflash.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 3. Yer -->
-                        <div class="planet-3d-card card-earth" data-index="2" data-planet="earth" onclick="openPlanetDetail('earth')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/earth.png" alt="Yer" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="yer">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/earth.png" alt="Yer" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="earth_title">Yer</h3>
-                                <span class="planet-pop-skill" data-i18n="earth_skill">Kognitiv ta'lim</span>
-                                <p class="planet-pop-desc" data-i18n="earth_desc">Sokratik AI-ustoz bilan mustaqil fikrlashni o'rganish.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="earth_title">Yer</h4>
+                                    <div class="planet-card-skill" data-i18n="earth_skill">Kognitiv ta'lim</div>
+                                    <p class="planet-card-desc" data-i18n="earth_desc">Sokratik AI-ustoz bilan mustaqil fikrlashni o'rganish.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 4. Mars -->
-                        <div class="planet-3d-card card-mars" data-index="3" data-planet="mars" onclick="openPlanetDetail('mars')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/mars.png" alt="Mars" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="mars">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/mars.png" alt="Mars" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="mars_title">Mars</h3>
-                                <span class="planet-pop-skill" data-i18n="mars_skill">Jismoniy faollik</span>
-                                <p class="planet-pop-desc" data-i18n="mars_desc">Ekrandan uzilib, real tana harakatlarini bajarish.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="mars_title">Mars</h4>
+                                    <div class="planet-card-skill" data-i18n="mars_skill">Jismoniy faollik</div>
+                                    <p class="planet-card-desc" data-i18n="mars_desc">Ekrandan uzilib, real tana harakatlarini bajarish.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 5. Yupiter -->
-                        <div class="planet-3d-card card-jupiter" data-index="4" data-planet="jupiter" onclick="openPlanetDetail('jupiter')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/planet_schedule.png" alt="Yupiter" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="yupiter">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/jupiter.png" alt="Yupiter" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="jupiter_title">Yupiter</h3>
-                                <span class="planet-pop-skill" data-i18n="jupiter_skill">O'z-o'zini boshqarish</span>
-                                <p class="planet-pop-desc" data-i18n="jupiter_desc">Kunlik reja tuzish va vaqtni to'g'ri taqsimlash.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="jupiter_title">Yupiter</h4>
+                                    <div class="planet-card-skill" data-i18n="jupiter_skill">O'z-o'zini boshqarish</div>
+                                    <p class="planet-card-desc" data-i18n="jupiter_desc">Kunlik reja tuzish va vaqtni to'g'ri taqsimlash.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 6. Saturn -->
-                        <div class="planet-3d-card card-saturn" data-index="5" data-planet="saturn" onclick="openPlanetDetail('saturn')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/saturn.png" alt="Saturn" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="saturn">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/saturn.png" alt="Saturn" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="saturn_title">Saturn</h3>
-                                <span class="planet-pop-skill" data-i18n="saturn_skill">Matematika</span>
-                                <p class="planet-pop-desc" data-i18n="saturn_desc">Mantiqiy fikrlashni kuchaytiruvchi bosqichli masalalar.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="saturn_title">Saturn</h4>
+                                    <div class="planet-card-skill" data-i18n="saturn_skill">Matematika</div>
+                                    <p class="planet-card-desc" data-i18n="saturn_desc">Mantiqiy fikrlashni kuchaytiruvchi bosqichli masalalar.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 7. Uran -->
-                        <div class="planet-3d-card card-uranus" data-index="6" data-planet="uran" onclick="openPlanetDetail('uran')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/uran.png" alt="Uran" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="uran">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/uran.png" alt="Uran" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="uranus_title">Uran</h3>
-                                <span class="planet-pop-skill" data-i18n="uranus_skill">Ingliz tili</span>
-                                <p class="planet-pop-desc" data-i18n="uranus_desc">Faol so'z boyligi va to'g'ri talaffuz amaliyoti.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="uranus_title">Uran</h4>
+                                    <div class="planet-card-skill" data-i18n="uranus_skill">Ingliz tili</div>
+                                    <p class="planet-card-desc" data-i18n="uranus_desc">Faol so'z boyligi va to'g'ri talaffuz amaliyoti.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 8. Neptun -->
-                        <div class="planet-3d-card card-neptune" data-index="7" data-planet="neptun" onclick="openPlanetDetail('neptun')">
-                            <div class="planet-pop-img-wrap">
-                                <img src="img/neptun.png" alt="Neptun" class="planet-pop-img">
+                        <div class="planet-card-item" data-planet="neptun">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/neptun.png" alt="Neptun" class="planet-card-img">
                             </div>
-                            <div class="planet-card-content">
-                                <h3 class="planet-pop-title" data-i18n="neptune_title">Neptun</h3>
-                                <span class="planet-pop-skill" data-i18n="neptune_skill">Emotsional savodxonlik</span>
-                                <p class="planet-pop-desc" data-i18n="neptune_desc">Kichkintoyning o'z hislarini tushunishi va boshqarishi.</p>
-                                <div class="planet-pop-badge">
-                                    <span>3D Olam</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title" data-i18n="neptune_title">Neptun</h4>
+                                    <div class="planet-card-skill" data-i18n="neptune_skill">Emotsional savodxonlik</div>
+                                    <p class="planet-card-desc" data-i18n="neptune_desc">Kichkintoyning o'z hissiyotlarini tushunishi va boshqarishi.</p>
+                                    <div class="planet-card-btn">
+                                        <span>Ochish</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -352,84 +368,164 @@
                     </div>
                 </div>
 
-                <!-- Footer Pagination Dots & Counter -->
-                <div class="planet-carousel-footer" id="planetCarouselFooter">
-                    <div class="planet-indicator-dots" id="planetIndicatorDots"></div>
-                    <div class="planet-counter-badge" id="planetCounterBadge">
-                        <span class="planet-counter-num">1 / 8</span>
-                        <span class="planet-counter-name" id="planetActiveName">Merkuriy</span>
-                    </div>
+                <!-- Chevron Tugmalari Navigation -->
+                <div class="planet-nav-controls visible" id="planetNavControls">
+                    <button class="planet-nav-btn" id="planetPrevBtn" aria-label="Oldingi sayyoralar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <button class="planet-nav-btn" id="planetNextBtn" aria-label="Keyingi sayyoralar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+                    </button>
                 </div>
+
             </div>
         </div>
     </section>
 
-<!-- ================= 4. QANDAY ISHLAYDI (PEDAGOGIK YONDASHUV - KARUSEL) ================= -->
-    <div class="container" style="padding-top: 100px; margin-bottom: -40px; position: relative; z-index: 10;">
-        <div class="sec-head reveal">
-            <span class="sec-badge" data-i18n="how_badge">Pedagogik yondashuv</span>
-            <h2 data-i18n="how_title">Qiziqishdan amaliy natijagacha 4 qadam.</h2>
-        </div>
-    </div>
-
+    <!-- ================= 4. QANDAY ISHLAYDI (PEDAGOGIK YONDASHUV) ================= -->
     <section class="section-sticky" id="qanday">
         <div class="sticky-container">
-            <!-- Chap: Cardlar (desktop uchun) -->
-            <div class="cards-wrapper">
-                <div class="cards-inner" id="cardsInner">
-                    <div class="card" data-index="0">
-                        <div class="card-number">01</div>
-                        <div class="card-content">
-                            <div class="card-title" data-i18n="how_step1_title">Maqsadli sayohat</div>
-                            <div class="card-subtitle" data-i18n="how_step1_desc">Bola Quyosh tizimidagi o'zi kashf etmoqchi bo'lgan qobiliyat
-                                sayyorasini tanlaydi.</div>
+            <div class="sticky-head sec-head">
+                <span class="sec-badge" data-i18n="how_badge">Pedagogik yondashuv</span>
+                <h2 data-i18n="how_title">Qiziqishdan amaliy natijagacha 4 qadam.</h2>
+            </div>
+
+            <div class="sticky-main">
+                <!-- Chap: Cardlar (desktop uchun) -->
+                <div class="cards-wrapper">
+                    <div class="cards-inner" id="cardsInner">
+                        <div class="card active" data-index="0" role="button" tabindex="0" aria-label="1-qadam">
+                            <div class="card-number">01</div>
+                            <div class="card-content">
+                                <div class="card-title" data-i18n="how_step1_title">Maqsadli sayohat</div>
+                                <div class="card-subtitle" data-i18n="how_step1_desc">Bola Quyosh tizimidagi o'zi kashf
+                                    etmoqchi bo'lgan qobiliyat
+                                    sayyorasini tanlaydi.</div>
+                            </div>
+                        </div>
+                        <div class="card" data-index="1" role="button" tabindex="0" aria-label="2-qadam">
+                            <div class="card-number">02</div>
+                            <div class="card-content">
+                                <div class="card-title" data-i18n="how_step2_title">Fikrlab o'rganish</div>
+                                <div class="card-subtitle" data-i18n="how_step2_desc">Sun'iy intellekt bolaning o'rniga
+                                    vazifani bajarmaydi. U
+                                    yo'naltiruvchi savollar orqali bolani to'g'ri javob topishga undaydi.</div>
+                            </div>
+                        </div>
+                        <div class="card" data-index="2" role="button" tabindex="0" aria-label="3-qadam">
+                            <div class="card-number">03</div>
+                            <div class="card-content">
+                                <div class="card-title" data-i18n="how_step3_title">Amaliy harakat</div>
+                                <div class="card-subtitle" data-i18n="how_step3_desc">O'qish, mashq qilish yoki o'z
+                                    hissiyotlarini yozish orqali
+                                    missiya yakunlanadi.</div>
+                            </div>
+                        </div>
+                        <div class="card" data-index="3" role="button" tabindex="0" aria-label="4-qadam">
+                            <div class="card-number">04</div>
+                            <div class="card-content">
+                                <div class="card-title" data-i18n="how_step4_title">Munosib mukofot</div>
+                                <div class="card-subtitle" data-i18n="how_step4_desc">Har bir to'g'ri qadam uchun "Gold
+                                    Coin" yig'iladi. Bu bolada o'z
+                                    mehnati samarasini ko'rish hissini uyg'otadi.</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card" data-index="1">
-                        <div class="card-number">02</div>
-                        <div class="card-content">
-                            <div class="card-title" data-i18n="how_step2_title">Fikrlab o'rganish</div>
-                            <div class="card-subtitle" data-i18n="how_step2_desc">Sun'iy intellekt bolaning o'rniga vazifani bajarmaydi. U
-                                yo'naltiruvchi savollar orqali bolani to'g'ri javob topishga undaydi.</div>
+                </div>
+
+                <!-- O'ng: Rasmlar (desktop uchun) -->
+                <div class="image-wrapper" id="pedagogyImageWrapper">
+                    <div class="image-slide active">
+                        <img src="img/how1.jpg" alt="Maqsadli sayohat">
+                    </div>
+                    <div class="image-slide">
+                        <img src="img/how2.jpg" alt="Fikrlab o'rganish">
+                    </div>
+                    <div class="image-slide">
+                        <img src="img/how3.jpg" alt="Amaliy harakat">
+                    </div>
+                    <div class="image-slide">
+                        <img src="img/how4.jpg" alt="Munosib mukofot">
+                    </div>
+                </div>
+
+                <!-- MOBIL UCHUN CARD STACK VA NAVIGATSIYA -->
+                <div class="mobile-step-container" id="mobileStepContainer">
+                    <div class="mobile-step-cards-wrapper" id="mobileCardsWrapper">
+                        <div class="mobile-step-card active" data-index="0">
+                            <div class="mobile-step-image-wrap">
+                                <img src="img/how1.jpg" alt="Maqsadli sayohat">
+                            </div>
+                            <div class="mobile-step-content">
+                                <div class="mobile-step-number">01</div>
+                                <div class="mobile-step-text">
+                                    <div class="mobile-step-title" data-i18n="how_step1_title">Maqsadli sayohat</div>
+                                    <div class="mobile-step-subtitle" data-i18n="how_step1_desc">Bola Quyosh tizimidagi o'zi kashf etmoqchi bo'lgan qobiliyat sayyorasini tanlaydi.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mobile-step-card is-next" data-index="1">
+                            <div class="mobile-step-image-wrap">
+                                <img src="img/how2.jpg" alt="Fikrlab o'rganish">
+                            </div>
+                            <div class="mobile-step-content">
+                                <div class="mobile-step-number">02</div>
+                                <div class="mobile-step-text">
+                                    <div class="mobile-step-title" data-i18n="how_step2_title">Fikrlab o'rganish</div>
+                                    <div class="mobile-step-subtitle" data-i18n="how_step2_desc">Sun'iy intellekt bolaning o'rniga vazifani bajarmaydi. U yo'naltiruvchi savollar orqali bolani to'g'ri javob topishga undaydi.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mobile-step-card is-next" data-index="2">
+                            <div class="mobile-step-image-wrap">
+                                <img src="img/how3.jpg" alt="Amaliy harakat">
+                            </div>
+                            <div class="mobile-step-content">
+                                <div class="mobile-step-number">03</div>
+                                <div class="mobile-step-text">
+                                    <div class="mobile-step-title" data-i18n="how_step3_title">Amaliy harakat</div>
+                                    <div class="mobile-step-subtitle" data-i18n="how_step3_desc">O'qish, mashq qilish yoki o'z hissiyotlarini yozish orqali missiya yakunlanadi.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mobile-step-card is-next" data-index="3">
+                            <div class="mobile-step-image-wrap">
+                                <img src="img/how4.jpg" alt="Munosib mukofot">
+                            </div>
+                            <div class="mobile-step-content">
+                                <div class="mobile-step-number">04</div>
+                                <div class="mobile-step-text">
+                                    <div class="mobile-step-title" data-i18n="how_step4_title">Munosib mukofot</div>
+                                    <div class="mobile-step-subtitle" data-i18n="how_step4_desc">Har bir to'g'ri qadam uchun "Gold Coin" yig'iladi. Bu bolada o'z mehnati samarasini ko'rish hissini uyg'otadi.</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card" data-index="2">
-                        <div class="card-number">03</div>
-                        <div class="card-content">
-                            <div class="card-title" data-i18n="how_step3_title">Amaliy harakat</div>
-                            <div class="card-subtitle" data-i18n="how_step3_desc">O'qish, mashq qilish yoki o'z hissiyotlarini yozish orqali
-                                missiya yakunlanadi.</div>
-                        </div>
+
+                    <!-- Mobil Progress Tugmalari -->
+                    <div class="mobile-progress" id="mobileProgress">
+                        <button type="button" class="mobile-progress-dot active" data-index="0" aria-label="1-qadam">01</button>
+                        <button type="button" class="mobile-progress-dot" data-index="1" aria-label="2-qadam">02</button>
+                        <button type="button" class="mobile-progress-dot" data-index="2" aria-label="3-qadam">03</button>
+                        <button type="button" class="mobile-progress-dot" data-index="3" aria-label="4-qadam">04</button>
                     </div>
-                    <div class="card" data-index="3">
-                        <div class="card-number">04</div>
-                        <div class="card-content">
-                            <div class="card-title" data-i18n="how_step4_title">Munosib mukofot</div>
-                            <div class="card-subtitle" data-i18n="how_step4_desc">Har bir to'g'ri qadam uchun "Gold Coin" yig'iladi. Bu bolada o'z
-                                mehnati samarasini ko'rish hissini uyg'otadi.</div>
-                        </div>
+
+                    <!-- Swipe indikator eslatmasi -->
+                    <div class="mobile-swipe-hint">
+                        <span class="mobile-swipe-arrow">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                        </span>
+                        <span data-i18n="how_swipe_hint">Yuqoriga suring</span>
+                        <span class="mobile-swipe-step-num" id="mobileSwipeStepNum">1 / 4</span>
                     </div>
                 </div>
             </div>
-
-            <!-- O'ng: Rasmlar (desktop uchun) -->
-            <div class="image-wrapper" id="pedagogyImageWrapper">
-                <div class="image-slide active">
-                    <img src="img/how1.jpg" alt="Maqsadli sayohat">
-                </div>
-                <div class="image-slide">
-                    <img src="img/how2.jpg" alt="Fikrlab o'rganish">
-                </div>
-                <div class="image-slide">
-                    <img src="img/how3.jpg" alt="Amaliy harakat">
-                </div>
-                <div class="image-slide">
-                    <img src="img/how4.jpg" alt="Munosib mukofot">
-                </div>
-            </div>
-
-            <!-- MOBIL UCHUN YANGI CONTAINER (JS orqali to'ldiriladi) -->
-            <div class="mobile-step-container" id="mobileStepContainer"></div>
         </div>
     </section>
 
@@ -455,7 +551,8 @@
                         <div class="pin-head">
                             <div class="pin-num">01</div>
                             <h3 data-i18n="benefits_card1_title">Tayyor javoblar yo'q</h3>
-                            <p data-i18n="benefits_card1_desc">AI-ustoz muammoning yechimini aytmaydi, uni qanday yechishni o'rgatadi. Bola o'ylashga
+                            <p data-i18n="benefits_card1_desc">AI-ustoz muammoning yechimini aytmaydi, uni qanday
+                                yechishni o'rgatadi. Bola o'ylashga
                                 majbur
                                 bo'ladi.</p>
                         </div>
@@ -467,7 +564,8 @@
                         <div class="pin-head">
                             <div class="pin-num">02</div>
                             <h3 data-i18n="benefits_card2_title">Sog'lom chegaralar</h3>
-                            <p data-i18n="benefits_card2_desc">Bolangiz gadjetga qaram bo'lib qolmaydi. Kunlik 20-daqiqalik cheklov ularni
+                            <p data-i18n="benefits_card2_desc">Bolangiz gadjetga qaram bo'lib qolmaydi. Kunlik
+                                20-daqiqalik cheklov ularni
                                 rejalashtirishga
                                 va qadriga
                                 yetishga o'rgatadi.</p>
@@ -480,7 +578,8 @@
                         <div class="pin-head">
                             <div class="pin-num">03</div>
                             <h3 data-i18n="benefits_card3_title">Faqat dars emas, hayotiy ko'nikma</h3>
-                            <p data-i18n="benefits_card3_desc">Ilova nafaqat matematika, balki jismoniy faollik va psixologik barqarorlikni (Neptun) ham
+                            <p data-i18n="benefits_card3_desc">Ilova nafaqat matematika, balki jismoniy faollik va
+                                psixologik barqarorlikni (Neptun) ham
                                 qamrab oladi.</p>
                         </div>
 
@@ -491,7 +590,8 @@
                         <div class="pin-head">
                             <div class="pin-num">04</div>
                             <h3 data-i18n="benefits_card4_title">O'yin orqali iqtisodiyot</h3>
-                            <p data-i18n="benefits_card4_desc">Virtual Venera do'koni orqali bola pul ishlash, yig'ish va sarflash tushunchalarini
+                            <p data-i18n="benefits_card4_desc">Virtual Venera do'koni orqali bola pul ishlash, yig'ish
+                                va sarflash tushunchalarini
                                 amalda
                                 o'rganadi.</p>
                         </div>
@@ -520,17 +620,21 @@
                 <form id="waitlistForm" novalidate>
                     <div class="form-field">
                         <label for="fname" data-i18n="form_label_name">Ism</label>
-                        <input id="fname" name="name" type="text" placeholder="Masalan: Dilnoza" data-i18n-placeholder="form_placeholder_name" required>
+                        <input id="fname" name="name" type="text" placeholder="Masalan: Dilnoza"
+                            data-i18n-placeholder="form_placeholder_name" required>
                     </div>
                     <div class="form-field">
                         <label for="fphone" data-i18n="form_label_phone">Telefon raqam</label>
-                        <input id="fphone" name="phone" type="tel" placeholder="+998 __ ___ __ __" data-i18n-placeholder="form_placeholder_phone" required>
+                        <input id="fphone" name="phone" type="tel" placeholder="+998 __ ___ __ __"
+                            data-i18n-placeholder="form_placeholder_phone" required>
                     </div>
                     <div class="form-field">
                         <label for="fmessage" data-i18n="form_label_message">Xabar</label>
-                        <textarea id="fmessage" name="message" placeholder="Xabar yozing..." data-i18n-placeholder="form_placeholder_message" required></textarea>
+                        <textarea id="fmessage" name="message" placeholder="Xabar yozing..."
+                            data-i18n-placeholder="form_placeholder_message" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn"><span data-i18n="form_submit">Yuborish</span></button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn"><span
+                            data-i18n="form_submit">Yuborish</span></button>
                     <div class="form-note"><span data-i18n="form_note">Ma'lumotlaringiz xavfsiz saqlanadi.</span></div>
                 </form>
             </div>
@@ -608,7 +712,8 @@
             <div class="cert-left reveal">
                 <span class="sec-badge" data-i18n="cert_badge">E'tirof</span>
                 <h2 data-i18n="cert_title">Har bir yutuq munosib e'tirof etiladi.</h2>
-                <p data-i18n="cert_desc">8 ta olam missiyalarini muvaffaqiyatli yakunlagan mitti kashfiyotchilar o'zlarining birinchi "Kosmik
+                <p data-i18n="cert_desc">8 ta olam missiyalarini muvaffaqiyatli yakunlagan mitti kashfiyotchilar
+                    o'zlarining birinchi "Kosmik
                     Sertifikati"ni qo'lga kiritadilar. Bu ularning kelajakdagi katta zafarlari sari ishonchli qadamdir.
                 </p>
             </div>
@@ -621,25 +726,75 @@
     <!-- ================= 8. YAKUNIY CHAQIRUV (CTA) ================= -->
     <section class="final-cta" id="cta">
         <div class="starfield" data-stars="80"></div>
-        <div class="cta-planet"></div>
-        <div class="cta-planet2"></div>
+        <!--<div class="cta-planet"></div>
+        <div class="cta-planet2"></div> -->
         <div class="container">
-            <h2 data-i18n-html="cta_title">Minglab zamonaviy ota-onalar qatoriga qo'shiling va <span class="hl">Kichik
-                    Alloma </span>bilan haqiqiy rivojlanishni bugun boshlang.</h2>
-            <div class="final-buttons reveal d2">
-                <div class="store-btns">
-                    <a href="#panel" class="store-btn">
-                        <img src="img/btn_appstore.png" alt="App Store">
-                    </a>
-                    <a href="#panel" class="store-btn">
-                        <img src="img/btn_googleplay.png" alt="Google Play">
-                    </a>
+            <div class="cta-card reveal">
+                <!-- Fon chiziqlari (Cosmic Orbits, Waves & Constellations) -->
+                <svg class="cta-bg-lines" viewBox="0 0 960 420" preserveAspectRatio="none" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <!-- Orbital Halqalar -->
+                    <ellipse cx="480" cy="210" rx="430" ry="190" stroke="rgba(250, 176, 3, 0.22)" stroke-width="1.5"
+                        stroke-dasharray="8 14" />
+                    <ellipse cx="480" cy="210" rx="350" ry="140" stroke="rgba(99, 102, 241, 0.22)" stroke-width="1.2"
+                        transform="rotate(-7 480 210)" />
+                    <ellipse cx="480" cy="210" rx="270" ry="95" stroke="rgba(250, 176, 3, 0.26)" stroke-width="1.2"
+                        stroke-dasharray="5 9" transform="rotate(9 480 210)" />
+                    <ellipse cx="480" cy="210" rx="170" ry="55" stroke="rgba(99, 102, 241, 0.18)" stroke-width="1"
+                        stroke-dasharray="3 6" transform="rotate(-3 480 210)" />
+
+                    <!-- Kosmik To'lqin Yo'llari -->
+                    <path d="M-40 280 C180 370, 320 70, 580 150 C760 210, 880 90, 1000 110"
+                        stroke="rgba(250, 176, 3, 0.28)" stroke-width="1.5" stroke-dasharray="6 10" />
+                    <path d="M-30 110 C210 50, 390 330, 680 270 C830 240, 930 310, 1000 290"
+                        stroke="rgba(99, 102, 241, 0.24)" stroke-width="1.5" />
+                    <path d="M80 -30 C230 170, 700 110, 890 440" stroke="rgba(250, 176, 3, 0.2)" stroke-width="1.2"
+                        stroke-dasharray="4 8" />
+                    <path d="M150 440 C350 260, 640 360, 840 -20" stroke="rgba(99, 102, 241, 0.16)" stroke-width="1.2"
+                        stroke-dasharray="6 12" />
+
+                    <!-- Yulduzlar & Tugunlar -->
+                    <g class="constellation-nodes">
+                        <circle cx="180" cy="98" r="3.5" fill="#fab003" opacity="0.75" />
+                        <circle cx="180" cy="98" r="9" fill="#fab003" opacity="0.18" />
+                        <circle cx="320" cy="74" r="2.5" fill="#6366f1" opacity="0.65" />
+                        <circle cx="580" cy="150" r="4" fill="#fab003" opacity="0.8" />
+                        <circle cx="580" cy="150" r="11" fill="#fab003" opacity="0.2" />
+                        <circle cx="760" cy="210" r="3" fill="#6366f1" opacity="0.7" />
+                        <circle cx="760" cy="210" r="8" fill="#6366f1" opacity="0.18" />
+                        <circle cx="140" cy="270" r="2.5" fill="#fab003" opacity="0.6" />
+                        <circle cx="820" cy="95" r="3.5" fill="#fab003" opacity="0.75" />
+                        <circle cx="820" cy="95" r="9" fill="#fab003" opacity="0.18" />
+                        <circle cx="870" cy="320" r="2.5" fill="#6366f1" opacity="0.6" />
+
+                        <path d="M260 230 L263 238 L271 241 L263 244 L260 252 L257 244 L249 241 L257 238 Z"
+                            fill="#fab003" opacity="0.5" />
+                        <path d="M700 70 L702 76 L708 78 L702 80 L700 86 L698 80 L692 78 L698 76 Z" fill="#fab003"
+                            opacity="0.55" />
+                        <path
+                            d="M510 320 L511.5 325 L516.5 326.5 L511.5 328 L510 333 L508.5 328 L503.5 326.5 L508.5 325 Z"
+                            fill="#6366f1" opacity="0.5" />
+                    </g>
+                </svg>
+
+                <h2 data-i18n-html="cta_title">Minglab zamonaviy ota-onalar qatoriga qo'shiling va <span
+                        class="hl">Kichik
+                        Alloma </span>bilan haqiqiy rivojlanishni bugun boshlang.</h2>
+                <div class="final-buttons reveal d2">
+                    <div class="store-btns">
+                        <a href="#panel" class="store-btn">
+                            <img src="img/btn_appstore.png" alt="App Store">
+                        </a>
+                        <a href="#panel" class="store-btn">
+                            <img src="img/btn_googleplay.png" alt="Google Play">
+                        </a>
+                    </div>
+                    <a href="#panel" class="btn btn-primary"><span data-i18n="cta_btn">Hozir boshlash</span>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg></a>
                 </div>
-                <a href="#panel" class="btn btn-primary"><span data-i18n="cta_btn">Hozir boshlash</span>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg></a>
             </div>
         </div>
     </section>
@@ -681,91 +836,39 @@
         </div>
         <!-- Copyright -->
         <div class="container footer-bottom">
-            <p>&copy; <span id="year">2025</span> <span data-i18n="footer_rights">Kichik Alloma. Barcha huquqlar himoyalangan.</span></p>
+            <p>&copy; <span id="year">2025</span> <span data-i18n="footer_rights">Kichik Alloma. Barcha huquqlar
+                    himoyalangan.</span></p>
         </div>
     </footer>
 
-    <div id="toast" role="status"> <span id="toastMsg"></span></div>
-
-    
-    <!-- ========== COSMIC 3D MODAL ========== -->
-    <div id="cosmic-3d-modal">
-        <div id="cosmic-3d-canvas-container"></div>
-        <div class="cosmic-ambient-glow" id="cosmic-ambient-glow"></div>
-
-        <button class="cosmic-close-btn" onclick="Cosmic3D.close()" aria-label="Yopish">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-
-        <div class="cosmic-nav-btn-left" onclick="Cosmic3D.prevSlide()" aria-label="Oldingi">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        </div>
-        <div class="cosmic-nav-btn-right" onclick="Cosmic3D.nextSlide()" aria-label="Keyingi">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-
-        <div class="cosmic-text-block" id="cosmic-text-block">
-            <div class="cosmic-slide-badge" id="cosmic-slide-badge"></div>
-            <h2 class="cosmic-slide-title" id="cosmic-slide-title"></h2>
-            <p class="cosmic-slide-subtitle" id="cosmic-slide-subtitle"></p>
-            <p class="cosmic-slide-desc" id="cosmic-slide-desc"></p>
-            <div class="cosmic-items-grid" id="cosmic-items-grid"></div>
-        </div>
-
-        <div class="cosmic-steps-indicator" id="cosmic-steps-indicator"></div>
-        <div class="cosmic-scroll-status" id="cosmic-scroll-status">
-            <span>1 / 6 • Skroll qiling</span>
-        </div>
-    </div>
-    <!-- ========== END COSMIC 3D MODAL ========== -->
-
-        <!-- ================= DISNEY-STYLE PLANET DETAIL MODAL ================= -->
-    <div id="planet-detail-modal" class="planet-modal-backdrop" onclick="handlePlanetModalBackdrop(event)">
-        <div class="planet-modal-dialog" id="planet-modal-dialog">
-            <button class="planet-modal-close" id="planetModalCloseBtn" onclick="closePlanetDetail()" aria-label="Yopish">
-                <span style="font-size:20px;line-height:1;margin-right:4px;">&times;</span> Yopish
+    <!-- ================= SAYYORA MA'LUMOT MODAL OYNASI ================= -->
+    <div class="planet-modal-overlay" id="planetModalOverlay" aria-hidden="true">
+        <div class="planet-modal-card" id="planetModalCard">
+            <button class="modal-close-btn" id="modalCloseBtn" aria-label="Yopish">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span>Yopish</span>
             </button>
-            <div class="planet-modal-body">
-                <!-- Chap tomon: Katta 3D sayyora -->
-                <div class="planet-modal-hero">
-                    <div class="planet-modal-img-wrap">
-                        <img src="img/planet_professions.png" alt="Sayyora" id="planetModalImg" class="planet-modal-img">
-                    </div>
+            <div class="modal-body-wrapper">
+                <div class="modal-left">
+                    <img id="modalPlanetImg" src="img/merkuriy.png" alt="Sayyora" class="modal-planet-img">
                 </div>
-
-                <!-- O'ng tomon: To'liq ma'lumotlar -->
-                <div class="planet-modal-info">
-                    <div class="planet-modal-top-row">
-                        <div>
-                            <h3 class="planet-modal-title" id="planetModalTitle">Merkuriy</h3>
-                            <p class="planet-modal-category" id="planetModalCategory">Sayyora: <strong>Kelajak kasblari va Ijodkorlik</strong></p>
-                        </div>
-                        <div class="planet-modal-badge" id="planetModalBadge">Kasblar Olamiga Sayohat</div>
-                    </div>
-
-                    <p class="planet-modal-desc" id="planetModalDesc">Merkuriy — bolalarga 100 dan ortiq zamonaviy kasblarni interaktiv o'yinlar orqali tanishtiruvchi ijodiy sayyora.</p>
-
-                    <!-- Pastki qator: 3 ta imkoniyat / xususiyat kartochkasi -->
-                    <div class="planet-modal-clips-section">
-                        <h4 class="planet-clips-heading" id="planetClipsHeading">IMKONIYATLAR</h4>
-                        <div class="planet-clips-grid" id="planetModalClips"></div>
-                    </div>
+                <div class="modal-right">
+                    <h3 id="modalPlanetTitle" class="modal-title">Merkuriy</h3>
+                    <div id="modalPlanetSub" class="modal-subtitle">Sayyora: Kelajak kasblari va Qiziqishlar</div>
+                    <p id="modalPlanetDesc" class="modal-desc">Merkuriy — bolaning ijodiy qiziqishlari va kelajak kasblari haqidagi tasavvurini kengaytiruvchi kashfiyotlar makoni.</p>
+                    <div id="modalFeatureHead" class="modal-feature-head">KASBIY YO'NALISHLAR</div>
+                    <div id="modalFeatureGrid" class="modal-feature-grid"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="toast" role="status"> <span id="toastMsg"></span></div>
 
-    <script src="js/three.min.js"></script>
-    <script src="js/cosmic-3d.js"></script>
-<script src="script.js"></script>
-
-    <!-- ================= DISNEY-STYLE PLANET DETAIL MODAL ================= -->
-    
-        </div>
-    </div>
-    <!-- ================= END DISNEY-STYLE PLANET DETAIL MODAL ================= -->
-
+    <script src="script.js"></script>
 </body>
 
 </html>

@@ -12,7 +12,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+// Static files mapping
+app.use(express.static(path.join(__dirname, 'website')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+
 
 // Swagger API Hujjatlari UI: /api-docs va /docs
 app.use(['/api-docs', '/docs'], swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
@@ -272,15 +276,14 @@ app.delete('/api/messages/:id', (req, res) => {
 });
 
 // ==========================================
-// 5. ADMIN PANEL SAHIFASI
+// 5. SAHIFALAR VA ROUTING
 // ==========================================
-app.get(['/', '/admin'], (req, res) => {
+app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Barcha boshqa yo'nalishlar
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'website', 'index.html'));
 });
 
 // Serverni ishga tushirish

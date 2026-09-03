@@ -1,111 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url>
-    <loc>https://kichikalloma.uz/</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    
-    <!-- Hero & Logo -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/hero.jpg</image:loc>
-      <image:title>Kichik Alloma — Kosmik ta'lim ekotizimi</image:title>
-      <image:caption>Farzandingizning ekran vaqtini uning kelajagi uchun sarmoyaga aylantiring</image:caption>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/logo.png</image:loc>
-      <image:title>Kichik Alloma Logotipi</image:title>
-    </image:image>
-
-    <!-- 8 ta Sayyora (Kosmik ekotizim) -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/merkuriy.png</image:loc>
-      <image:title>Merkuriy — Kelajak kasblarini kashf etish va maqsad qo'yish</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/venera.png</image:loc>
-      <image:title>Venera — Virtual do'kon va moliyaviy savodxonlik</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/earth.png</image:loc>
-      <image:title>Yer — Sokratik AI-ustoz va kognitiv ta'lim</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/mars.png</image:loc>
-      <image:title>Mars — Jismoniy faollik va salomatlik</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/jupiter.png</image:loc>
-      <image:title>Yupiter — O'z-o'zini boshqarish va kunlik reja</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/saturn.png</image:loc>
-      <image:title>Saturn — Matematika va mantiqiy fikrlash</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/uran.png</image:loc>
-      <image:title>Uran — Ingliz tili va faol so'z boyligi</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/neptun.png</image:loc>
-      <image:title>Neptun — Emotsional savodxonlik va hissiyotlarni boshqarish</image:title>
-    </image:image>
-
-    <!-- Qanday ishlaydi (Pedagogik yondashuv) -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/how1.jpg</image:loc>
-      <image:title>Qanday ishlaydi — 01: Maqsadli sayohat</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/how2.jpg</image:loc>
-      <image:title>Qanday ishlaydi — 02: Fikrlab o'rganish</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/how3.jpg</image:loc>
-      <image:title>Qanday ishlaydi — 03: Amaliy harakat</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/how4.jpg</image:loc>
-      <image:title>Qanday ishlaydi — 04: Munosib mukofot</image:title>
-    </image:image>
-
-    <!-- Ota-onalar paneli -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/parents_panel.png</image:loc>
-      <image:title>Ota-onalar tahliliy paneli</image:title>
-    </image:image>
-
-    <!-- Jamoa -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team1.jpg</image:loc>
-      <image:title>Shoxrux Komiljonov — Asoschi &amp; CEO</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team2.jpg</image:loc>
-      <image:title>Muhammadsodiq Kozimov — Mobil dasturchi</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team3.jpg</image:loc>
-      <image:title>Jasurbek Egamberdiyev — Filologiya fanlari doktori DSc</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team4.jpg</image:loc>
-      <image:title>Qurbonov Bobur — UX/UI dizayner</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team5.jpg</image:loc>
-      <image:title>Oyatillo Mahmudjonov — Grafik dizayner</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/team6.jpg</image:loc>
-      <image:title>Muhammadali Baxtiyorov — Dasturchi</image:title>
-    </image:image>
-
-    <!-- Sertifikat -->
-    <image:image>
-      <image:loc>https://kichikalloma.uz/img/certificate.jpg</image:loc>
-      <image:title>Kosmik Sertifikat</image:title>
-    </image:image>
-  </url>
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://kichikalloma.uz/</loc>
+        <lastmod>2026-09-01</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link rel="alternate" hreflang="uz" href="https://kichikalloma.uz/" />
+        <xhtml:link rel="alternate" hreflang="ru" href="https://kichikalloma.uz/?lang=ru" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://kichikalloma.uz/?lang=en" />
+    </url>
 </urlset>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayyoralar — Kichik Alloma</title>
+
+    <!-- Shriftlar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/500.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/700.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/800.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/500.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded/700.css">
+
+    <style>
+        :root {
+            --primary: #ffb300;
+            --primary-soft: rgba(255, 208, 0, 0.138);
+            --ink: #12162b;
+            --cream: #fffaf1;
+            --muted: #5d6478;
+            --line: #eee1c4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', system-ui, sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h2,
+        h4 {
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Yuqoridagi va pastdagi bo'sh sectionlar */
+        .spacer-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fdfdfd;
+            border-bottom: 1px dashed var(--line);
+            border-top: 1px dashed var(--line);
+        }
+
+        .spacer-content {
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .spacer-content h3 {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* ============ SAYYORALAR SECTION ============ */
+        .sec-head {
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .sec-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            border: 2px solid var(--primary-soft);
+            color: var(--primary);
+            background-color: rgba(255, 246, 125, 0.2);
+            margin-bottom: 10px;
+        }
+
+        .sec-head h2 {
+            margin: 20px 0 16px;
+            font-size: clamp(26px, 3.6vw, 40px);
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -.01em;
+        }
+
+        .sec-head p {
+            color: var(--muted);
+            font-size: 15.5px;
+            font-weight: 600;
+        }
+
+        .cosmos {
+            background: #ffffff;
+            color: var(--ink);
+            position: relative;
+        }
+
+        .cosmos-sticky-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .starfield {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .starfield i {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: .6;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            50% {
+                opacity: 1;
+                transform: scale(1.25);
+            }
+        }
+
+        .cosmos-glow {
+            position: absolute;
+            top: -220px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 500px;
+            background: radial-gradient(closest-side, rgba(250, 176, 3, .12), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Sayyora kartalari container */
+        .planet-cards-container {
+            position: relative;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .planet-card-stack {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Tashqi konteyner: Sayyora 30px tepaga surilgani va 110px bo'lgani hisobga olingan */
+        .planet-card-item {
+            position: relative;
+            width: 260px;
+            height: 215px;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        /* Sayyora rasmi konteyneri (110px, top: -30px ga ko'tarilgan) */
+        .planet-card-img-wrap {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .planet-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Rangli Card */
+        .planet-card-front {
+            position: absolute;
+            top: 30px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-radius: 22px;
+            padding: 55px 16px 14px 16px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            z-index: 2;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        /* GRADIENT RANGLAR (To'g'rilangan Violet, Magenta va Cyan ranglar) */
+        /* Merkuriy — Orange */
+        .planet-card-item[data-planet="merkuriy"] .planet-card-front {
+            background: linear-gradient(30deg, #d35400 0%, #d35400 60%, #ff9f43 100%);
+        }
+
+        /* Venera — Violet */
+        .planet-card-item[data-planet="venera"] .planet-card-front {
+            background: linear-gradient(30deg, #512da8 0%, #512da8 60%, #8e44ad 100%);
+        }
+
+        /* Yer — Emerald Green */
+        .planet-card-item[data-planet="yer"] .planet-card-front {
+            background: linear-gradient(30deg, #0a6b52 0%, #0a6b52 60%, #10ac84 100%);
+        }
+
+        /* Mars — Red */
+        .planet-card-item[data-planet="mars"] .planet-card-front {
+            background: linear-gradient(30deg, #a82323 0%, #a82323 60%, #ee5253 100%);
+        }
+
+        /* Yupiter — Dark Cyan */
+        .planet-card-item[data-planet="yupiter"] .planet-card-front {
+            background: linear-gradient(30deg, #004d40 0%, #004d40 60%, #00838f 100%);
+        }
+
+        /* Saturn — Yellow/Gold */
+        .planet-card-item[data-planet="saturn"] .planet-card-front {
+            background: linear-gradient(30deg, #a48300 0%, #a48300 60%, #f8dd72 100%);
+        }
+
+        /* Uran — Deep Magenta */
+        .planet-card-item[data-planet="uran"] .planet-card-front {
+            background: linear-gradient(30deg, #6a1b9a 0%, #6a1b9a 60%, #b378d8 100%);
+        }
+
+        /* Neptun — Blue */
+        .planet-card-item[data-planet="neptun"] .planet-card-front {
+            background: linear-gradient(30deg, #1a237e 0%, #1a237e 60%, #3f51b5 100%);
+        }
+
+        .planet-card-body {
+            width: 100%;
+            text-align: left;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .planet-card-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .planet-card-skill {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .planet-card-desc {
+            font-size: 12px;
+            line-height: 1.35;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Page Navigation Chevron Buttons Controls */
+        .planet-nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 30px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(16px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .planet-nav-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .planet-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid var(--line);
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(18, 22, 43, 0.08);
+            transition: all 0.25s ease;
+        }
+
+        .planet-nav-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .planet-page-indicator {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            background: #ffffff;
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: 1.5px solid var(--line);
+        }
+
+        /* Reveal Animatsiyasi */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .reveal.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Desktop Sticky Scroll Animatsiyasi */
+        @media (min-width: 992px) {
+            .cosmos {
+                height: 350vh;
+                padding: 0;
+            }
+
+            .cosmos-sticky-container {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 0;
+            }
+
+            .cosmos-sticky-container .container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .planet-cards-container {
+                height: 215px;
+                perspective: 1200px;
+                overflow: visible;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .planet-card-stack {
+                width: 1120px;
+                height: 215px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transform-origin: center center;
+                will-change: transform;
+            }
+
+            .planet-card-item {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin: -107px 0 0 -130px;
+                will-change: transform, opacity;
+                transform-origin: center center;
+            }
+
+            .planet-card-item.opened {
+                pointer-events: auto;
+            }
+
+            .planet-card-item.opened:hover .planet-card-front {
+                transform: translateY(-8px);
+                box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+            }
+
+            .planet-card-item.opened:hover .planet-card-img {
+                transform: scale(1.1) rotate(-4deg);
+            }
+        }
+
+        /* MOBIL DIZAYN: 8 Ta Card ketma-ket, bir ustunda, animatsiyasiz */
+        @media (max-width: 991px) {
+            .cosmos {
+                padding: 50px 0;
+            }
+
+            .planet-cards-container {
+                overflow: visible;
+                height: auto;
+                margin-top: 30px;
+            }
+
+            .planet-card-stack {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 28px;
+                width: 100%;
+                height: auto;
+                padding: 10px 0;
+            }
+
+            .planet-card-item {
+                position: relative !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 320px;
+                height: 215px !important;
+                margin: 0 !important;
+                transform: none !important;
+                opacity: 1 !important;
+                top: auto !important;
+                left: auto !important;
+                pointer-events: auto;
+            }
+
+            .planet-nav-controls {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Yuqoridagi bo'sh section -->
+    <section class="spacer-section">
+        <div class="spacer-content">
+            <h3>Yuqoridagi Bo'sh Section</h3>
+            <p>Pastga scroll qilib Sayyoralar sectioniga o'ting</p>
+        </div>
+    </section>
+
+    <!-- ================= KOINOT / SAYYORALAR ================= -->
+    <section class="cosmos" id="sayyoralar">
+        <div class="cosmos-sticky-container">
+            <div class="starfield" data-stars="90"></div>
+            <div class="cosmos-glow"></div>
+            <div class="container">
+                <div class="sec-head reveal">
+                    <span class="sec-badge">Kosmik ekotizim</span>
+                    <h2>Hayot uchun kerakli 8 ta eng muhim ko'nikma.</h2>
+                    <p>Har bir sayyora ularning yashirin salohiyatini ochishga yordam beradi</p>
+                </div>
+
+                <!-- Sayyora kartalari -->
+                <div class="planet-cards-container reveal" id="planetCardsContainer">
+                    <div class="planet-card-stack" id="planetCardStack">
+
+                        <!-- 1. Merkuriy -->
+                        <div class="planet-card-item" data-planet="merkuriy">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/merkuriy.png" alt="Merkuriy" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Merkuriy</h4>
+                                    <div class="planet-card-skill">Kasblar</div>
+                                    <p class="planet-card-desc">Kelajak kasblarini kashf etish va maqsad qo'yish.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Venera -->
+                        <div class="planet-card-item" data-planet="venera">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/venera.png" alt="Venera" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Venera</h4>
+                                    <div class="planet-card-skill">Virtual do'kon</div>
+                                    <p class="planet-card-desc">O'z mehnati bilan topgan tangalarini to'g'ri sarflash.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Yer -->
+                        <div class="planet-card-item" data-planet="yer">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/earth.png" alt="Yer" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Yer</h4>
+                                    <div class="planet-card-skill">Kognitiv ta'lim</div>
+                                    <p class="planet-card-desc">Sokratik AI-ustoz bilan mustaqil fikrlashni o'rganish.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Mars -->
+                        <div class="planet-card-item" data-planet="mars">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/mars.png" alt="Mars" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Mars</h4>
+                                    <div class="planet-card-skill">Jismoniy faollik</div>
+                                    <p class="planet-card-desc">Ekrandan uzilib, real tana harakatlarini bajarish.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Yupiter -->
+                        <div class="planet-card-item" data-planet="yupiter">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/jupiter.png" alt="Yupiter" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Yupiter</h4>
+                                    <div class="planet-card-skill">O'z-o'zini boshqarish</div>
+                                    <p class="planet-card-desc">Kunlik reja tuzish va vaqtni to'g'ri taqsimlash.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Saturn -->
+                        <div class="planet-card-item" data-planet="saturn">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/saturn.png" alt="Saturn" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Saturn</h4>
+                                    <div class="planet-card-skill">Matematika</div>
+                                    <p class="planet-card-desc">Mantiqiy fikrlashni kuchaytiruvchi bosqichli masalalar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Uran -->
+                        <div class="planet-card-item" data-planet="uran">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/uran.png" alt="Uran" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Uran</h4>
+                                    <div class="planet-card-skill">Ingliz tili</div>
+                                    <p class="planet-card-desc">Faol so'z boyligi va to'g'ri talaffuz amaliyoti.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. Neptun -->
+                        <div class="planet-card-item" data-planet="neptun">
+                            <div class="planet-card-img-wrap">
+                                <img src="img/neptun.png" alt="Neptun" class="planet-card-img">
+                            </div>
+                            <div class="planet-card-front">
+                                <div class="planet-card-body">
+                                    <h4 class="planet-card-title">Neptun</h4>
+                                    <div class="planet-card-skill">Emotsional savodxonlik</div>
+                                    <p class="planet-card-desc">Kichkintoyning o'z hissiyotlarini tushunishi va
+                                        boshqarishi.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Chevron Tugmalari Navigation (Faqat Desktop scroll 0.8 bo'lganda chiqadi) -->
+                <div class="planet-nav-controls" id="planetNavControls">
+                    <button class="planet-nav-btn" id="planetPrevBtn" aria-label="Oldingi sayyoralar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <span class="planet-page-indicator" id="planetPageIndicator">1 / 2</span>
+                    <button class="planet-nav-btn" id="planetNextBtn" aria-label="Keyingi sayyoralar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Pastdagi bo'sh section -->
+    <section class="spacer-section">
+        <div class="spacer-content">
+            <h3>Pastdagi Bo'sh Section</h3>
+            <p>Sayohat yakunlandi</p>
+        </div>
+    </section>
+
+    <script>
+        var kaAll = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
+        var kaOne = function (sel, ctx) { return (ctx || document).querySelector(sel); };
+
+        /* ============ Reveal on scroll ============ */
+        var kaRevealIO = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in');
+                    kaRevealIO.unobserve(entry.target);
+                }
+            });
+        }, { threshold: .15 });
+        kaAll('.reveal').forEach(function (el) { kaRevealIO.observe(el); });
+
+        /* ============ Yulduzli osmon ============ */
+        kaAll('.starfield').forEach(function (field) {
+            var kaN = parseInt(field.getAttribute('data-stars'), 10) || 60;
+            for (var kaI = 0; kaI < kaN; kaI++) {
+                var kaStar = document.createElement('i');
+                var kaSize = (Math.random() * 2.2 + 1).toFixed(1);
+                kaStar.style.left = (Math.random() * 100).toFixed(2) + '%';
+                kaStar.style.top = (Math.random() * 100).toFixed(2) + '%';
+                kaStar.style.width = kaSize + 'px';
+                kaStar.style.height = kaSize + 'px';
+                kaStar.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+                kaStar.style.animationDuration = (2.5 + Math.random() * 3).toFixed(2) + 's';
+                field.appendChild(kaStar);
+            }
+        });
+
+        /* ============ Desktop Scroll & Pagination Logic ============ */
+        (function initPlanetCardsAnimation() {
+            var section = kaOne('.cosmos');
+            var stack = kaOne('#planetCardStack');
+            var navControls = kaOne('#planetNavControls');
+            var prevBtn = kaOne('#planetPrevBtn');
+            var nextBtn = kaOne('#planetNextBtn');
+            var pageIndicator = kaOne('#planetPageIndicator');
+
+            if (!section || !stack) return;
+
+            var cards = kaAll('.planet-card-item', stack);
+            if (cards.length === 0) return;
+
+            var currentPage = 0; // 0 = 1-sahifa (1-4 sayyora), 1 = 2-sahifa (5-8 sayyora)
+
+            var COLS = 4;
+            var CARD_W = 260;
+            var CARD_H = 215;
+            var GAP_X = 26;
+
+            function getFinalPositions() {
+                var positions = [];
+                var totalW = COLS * CARD_W + (COLS - 1) * GAP_X;
+                var startX = -totalW / 2 + CARD_W / 2;
+                for (var c = 0; c < COLS; c++) {
+                    positions.push({ x: startX + c * (CARD_W + GAP_X), y: 0 });
+                }
+                return positions;
+            }
+            var finals = getFinalPositions();
+
+            var initials = [0, 1, 2, 3].map(function (i) {
+                var offset = i - 1.5;
+                return {
+                    x: offset * 8,
+                    y: offset * 5,
+                    r: offset * 2.2,
+                    s: 1 - Math.abs(offset) * 0.02
+                };
+            });
+
+            function getProgress() {
+                var rect = section.getBoundingClientRect();
+                var scrollHeight = section.offsetHeight - window.innerHeight;
+                if (scrollHeight <= 0) return 0;
+                var scrolled = -rect.top;
+                return Math.max(0, Math.min(1, scrolled / scrollHeight));
+            }
+
+            var ease = function (t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; };
+
+            function render() {
+                if (window.innerWidth < 992) {
+                    cards.forEach(function (card) {
+                        card.style.display = 'block';
+                        card.style.transform = '';
+                        card.style.opacity = '';
+                        card.style.zIndex = '';
+                        card.classList.remove('opened');
+                    });
+                    stack.style.transform = '';
+                    return;
+                }
+
+                var p = getProgress();
+                var ep = ease(p);
+                var isFullyOpened = p >= 0.70;
+
+                // Chevron knopkalari 0.8 scroll qismida paydo bo'ladi
+                if (p >= 0.80) {
+                    if (navControls) navControls.classList.add('visible');
+                } else {
+                    if (navControls) navControls.classList.remove('visible');
+                }
+
+                var startIdx = currentPage * 4;
+                var endIdx = startIdx + 4;
+
+                cards.forEach(function (card, index) {
+                    if (index < startIdx || index >= endIdx) {
+                        card.style.display = 'none';
+                        return;
+                    }
+
+                    card.style.display = 'block';
+                    var i = index - startIdx;
+                    var ini = initials[i];
+                    var fin = finals[i];
+
+                    var x = ini.x + (fin.x - ini.x) * ep;
+                    var y = ini.y + (fin.y - ini.y) * ep;
+                    var r = ini.r * (1 - ep);
+                    var s = ini.s + (1 - ini.s) * ep;
+
+                    var opacity = 0.95 + 0.05 * Math.min(1, p * 3);
+
+                    card.style.transform = 'translate(' + x + 'px, ' + y + 'px) rotate(' + r + 'deg) scale(' + s + ')';
+                    card.style.opacity = opacity;
+                    card.style.zIndex = Math.round(ep * 10) + 1;
+
+                    if (isFullyOpened) {
+                        card.classList.add('opened');
+                    } else {
+                        card.classList.remove('opened');
+                    }
+                });
+
+                scaleStage();
+            }
+
+            function scaleStage() {
+                if (window.innerWidth < 992) return;
+
+                var gridW = COLS * CARD_W + (COLS - 1) * GAP_X; // 1118
+                var gridH = CARD_H; // 215
+
+                var parentW = stack.parentElement.clientWidth;
+                var parentH = window.innerHeight - 200;
+
+                var scaleW = parentW / gridW;
+                var scaleH = parentH / gridH;
+
+                var scale = Math.min(1, scaleW, scaleH);
+                stack.style.transform = 'scale(' + scale + ')';
+            }
+
+            function switchPlanetPage(page) {
+                currentPage = page;
+                if (pageIndicator) pageIndicator.textContent = (currentPage + 1) + ' / 2';
+                render();
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function () {
+                    switchPlanetPage(currentPage === 0 ? 1 : 0);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    switchPlanetPage(currentPage === 0 ? 1 : 0);
+                });
+            }
+
+            window.addEventListener('scroll', render, { passive: true });
+            window.addEventListener('resize', render);
+            render();
+        })();
+    </script>
+</body>
+
+</html>
