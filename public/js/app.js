@@ -249,6 +249,7 @@ async function fetchStats() {
     if (!res.ok) throw new Error('Statistika olishda xatolik');
     const data = await res.json();
 
+    if (document.getElementById('stat-total-visitors')) document.getElementById('stat-total-visitors').innerText = (data.totalVisitors || 0).toLocaleString();
     if (document.getElementById('stat-total-planets')) document.getElementById('stat-total-planets').innerText = data.totalPlanets || 0;
     if (document.getElementById('stat-total-amenities')) document.getElementById('stat-total-amenities').innerText = data.totalAmenities || 0;
     if (document.getElementById('stat-total-teams')) document.getElementById('stat-total-teams').innerText = data.totalTeams || 0;
@@ -383,7 +384,11 @@ function renderPlanets() {
 
       <div class="planet-content">
         <div class="planet-header-row">
-          <h4 class="planet-card-title">${escapeHtml(planetTitle)}</h4>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="width: 16px; height: 16px; border-radius: 50%; background: ${item.gradient || 'linear-gradient(150deg, #ff5e00, #ff8c00)'}; display: inline-block; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 0 6px rgba(0,0,0,0.5);" title="Card foni gradienti"></span>
+            <h4 class="planet-card-title">${escapeHtml(planetTitle)}</h4>
+            ${item.video ? `<span style="background: rgba(250,204,21,0.18); color: #facc15; border: 1px solid rgba(250,204,21,0.4); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px;" title="Video dars mavjud"><i class="bi bi-play-circle-fill"></i> Video</span>` : ''}
+          </div>
           <span class="badge-status ${item.status === 'active' ? 'active' : 'inactive'}">
             ${item.status === 'active' ? '● Faol' : '● Nofaol'}
           </span>
@@ -409,6 +414,41 @@ function renderPlanets() {
   `;
   }).join('');
 }
+
+// Gradient yordamchi funksiyalari
+function parsePlanetGradient(gradStr) {
+  let color1 = '#ff5e00';
+  let color2 = '#ff8c00';
+  let angle = '150deg';
+  if (!gradStr) return { color1, color2, angle, full: `linear-gradient(${angle}, ${color1} 0%, ${color2} 100%)` };
+
+  const angleMatch = gradStr.match(/(\d+deg)/);
+  if (angleMatch) angle = angleMatch[1];
+
+  const hexMatches = gradStr.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/g);
+  if (hexMatches && hexMatches.length >= 2) {
+    color1 = hexMatches[0];
+    color2 = hexMatches[1];
+  }
+  return { color1, color2, angle, full: gradStr };
+}
+
+window.handleGradientChange = function() {
+  const c1 = (document.getElementById('planet-grad-color1') && document.getElementById('planet-grad-color1').value) || '#ff5e00';
+  const c2 = (document.getElementById('planet-grad-color2') && document.getElementById('planet-grad-color2').value) || '#ff8c00';
+  const ang = (document.getElementById('planet-grad-angle') && document.getElementById('planet-grad-angle').value) || '150deg';
+  const grad = `linear-gradient(${ang}, ${c1} 0%, ${c2} 100%)`;
+  if (document.getElementById('planet-gradient-val')) document.getElementById('planet-gradient-val').value = grad;
+  const prev = document.getElementById('planet-gradient-preview');
+  if (prev) prev.style.background = grad;
+};
+
+window.setPlanetGradient = function(c1, c2, ang = '150deg') {
+  if (document.getElementById('planet-grad-color1')) document.getElementById('planet-grad-color1').value = c1;
+  if (document.getElementById('planet-grad-color2')) document.getElementById('planet-grad-color2').value = c2;
+  if (document.getElementById('planet-grad-angle')) document.getElementById('planet-grad-angle').value = ang;
+  handleGradientChange();
+};
 
 // Open Planet Modal
 function openPlanetModal(id = null) {
@@ -441,6 +481,21 @@ function openPlanetModal(id = null) {
       }
 
       updatePlanetImageDisplay(currentImage);
+
+      // Gradientni o'rnatish
+      const gradInfo = parsePlanetGradient(item.gradient);
+      if (document.getElementById('planet-grad-color1')) document.getElementById('planet-grad-color1').value = gradInfo.color1;
+      if (document.getElementById('planet-grad-color2')) document.getElementById('planet-grad-color2').value = gradInfo.color2;
+      if (document.getElementById('planet-grad-angle')) document.getElementById('planet-grad-angle').value = gradInfo.angle;
+      if (document.getElementById('planet-gradient-val')) document.getElementById('planet-gradient-val').value = item.gradient || gradInfo.full;
+      const prev = document.getElementById('planet-gradient-preview');
+      if (prev) prev.style.background = item.gradient || gradInfo.full;
+
+      // Videoni o'rnatish
+      const currentVideo = item.video || '';
+      if (document.getElementById('planet-video-url')) document.getElementById('planet-video-url').value = currentVideo;
+      updatePlanetVideoPreview(currentVideo);
+
       modalTitle.innerHTML = '<i class="bi bi-pencil-square text-yellow"></i> <span>Sayyorani Tahrirlash</span>';
     }
   } else {
@@ -448,6 +503,9 @@ function openPlanetModal(id = null) {
     document.getElementById('planet-preset-select').value = '/images/planets/earth.svg';
     document.getElementById('planet-image-val').value = '/images/planets/earth.svg';
     updatePlanetImageDisplay('/images/planets/earth.svg');
+    setPlanetGradient('#ff5e00', '#ff8c00', '150deg');
+    if (document.getElementById('planet-video-url')) document.getElementById('planet-video-url').value = '';
+    updatePlanetVideoPreview('');
     modalTitle.innerHTML = '<i class="bi bi-plus-circle text-yellow"></i> <span>Yangi Sayyora Qo\'shish</span>';
   }
 
@@ -455,9 +513,78 @@ function openPlanetModal(id = null) {
 }
 
 function closePlanetModal() {
+  const player = document.getElementById('planet-video-preview-player');
+  if (player) {
+    try { player.pause(); } catch(e) {}
+    player.src = '';
+  }
   const modal = document.getElementById('planet-modal');
   if (modal) modal.classList.remove('show');
 }
+
+// Video boshqaruvi funksiyalari
+function updatePlanetVideoPreview(url) {
+  const wrap = document.getElementById('planet-video-preview-wrap');
+  const player = document.getElementById('planet-video-preview-player');
+  if (!wrap || !player) return;
+
+  if (url && url.trim()) {
+    player.src = url.trim();
+    wrap.style.display = 'block';
+  } else {
+    try { player.pause(); } catch(e) {}
+    player.src = '';
+    wrap.style.display = 'none';
+  }
+}
+
+window.handlePlanetVideoUrlChange = function(url) {
+  updatePlanetVideoPreview(url);
+};
+
+window.clearPlanetVideo = function() {
+  if (document.getElementById('planet-video-url')) document.getElementById('planet-video-url').value = '';
+  if (document.getElementById('planet-video-file-upload')) document.getElementById('planet-video-file-upload').value = '';
+  updatePlanetVideoPreview('');
+};
+
+window.handlePlanetVideoFileUpload = async function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 120 * 1024 * 1024) {
+    showToast("Video hajmi 120MB dan oshmasligi kerak!", "error");
+    event.target.value = '';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  showToast("Video yuklanmoqda, iltimos kuting...", "info");
+
+  try {
+    const res = await fetch('/api/website/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Video yuklashda xatolik yuz berdi");
+    }
+
+    const data = await res.json();
+    const videoUrl = data.url || (data.filename ? '/images/uploads/' + data.filename : '');
+    if (document.getElementById('planet-video-url')) {
+      document.getElementById('planet-video-url').value = videoUrl;
+    }
+    updatePlanetVideoPreview(videoUrl);
+    showToast("Video muvaffaqiyatli yuklandi!", "success");
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+};
 
 function handlePlanetPresetChange(val) {
   const customGroup = document.getElementById('custom-url-group');
@@ -494,13 +621,15 @@ async function handleSavePlanet(event) {
   const description = document.getElementById('planet-desc').value.trim();
   const image = document.getElementById('planet-image-val').value || '/images/planets/earth.svg';
   const status = document.getElementById('planet-status').value;
+  const gradient = (document.getElementById('planet-gradient-val') && document.getElementById('planet-gradient-val').value) || null;
+  const video = (document.getElementById('planet-video-url') && document.getElementById('planet-video-url').value.trim()) || null;
 
   if (!title) {
     showToast("Iltimos, sayyora nomini kiriting!", "error");
     return;
   }
 
-  const payload = { title, description, image, status };
+  const payload = { title, description, image, status, gradient, video };
 
   try {
     let res;

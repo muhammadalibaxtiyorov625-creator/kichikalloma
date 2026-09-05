@@ -13,6 +13,8 @@ class PlanetBase(BaseModel):
     status: Optional[str] = Field("active", example="active", description="Sayyora holati ('active' yoki 'inactive')")
     is_blocked: Optional[bool] = Field(False, example=False, description="Sayyora bloklanganmi (True/False)")
     is_block: Optional[bool] = Field(False, example=False, description="Sayyora bloklanganmi (is_blocked bilan bir xil)")
+    gradient: Optional[str] = Field(None, example="linear-gradient(150deg, #ff5e00 0%, #ff8c00 100%)", description="Sayyora card gradient foni")
+    video: Optional[str] = Field(None, example="/video_2026-08-20_10-54-38.mp4", description="Sayyora tanishtiruv videosi")
 
 class PlanetCreate(PlanetBase):
     pass
@@ -25,6 +27,8 @@ class PlanetUpdate(BaseModel):
     status: Optional[str] = None
     is_blocked: Optional[bool] = None
     is_block: Optional[bool] = None
+    gradient: Optional[str] = None
+    video: Optional[str] = None
 
 class PlanetResponse(PlanetBase):
     id: int
@@ -149,6 +153,7 @@ class StatsResponse(BaseModel):
     totalMessages: int = Field(..., example=4)
     unreadMessages: int = Field(..., example=3)
     totalFaqs: int = Field(0, example=4)
+    totalVisitors: Optional[int] = Field(None, example=1077069)
 
 # ==========================================
 # WEB SAYT (WEBSITE) LANDING SCHEMA

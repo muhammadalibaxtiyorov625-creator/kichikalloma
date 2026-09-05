@@ -54,6 +54,9 @@ var i18nData = {
         planets_badge: "Kosmik ekotizim",
         planets_title: "Hayot uchun kerakli 8 ta eng muhim ko'nikma.",
         planets_sub: "Har bir sayyora ularning yashirin salohiyatini ochishga yordam beradi",
+        stat_visitors: "Umumiy tashriflar",
+        stat_planets: "Sayyoralar soni",
+        stat_team: "Jamoadoshlar soni",
         mercury_title: "Merkuriy",
         mercury_skill: "Kasblar",
         mercury_desc: "Kelajak kasblarini kashf etish va maqsad qo'yish.",
@@ -142,6 +145,9 @@ var i18nData = {
         planets_badge: "Космическая экосистема",
         planets_title: "8 важнейших навыков для жизни.",
         planets_sub: "Каждая планета помогает раскрыть их скрытый потенциал",
+        stat_visitors: "Всего визитов",
+        stat_planets: "Количество планет",
+        stat_team: "Наша команда",
         mercury_title: "Меркурий",
         mercury_skill: "Профессии",
         mercury_desc: "Открытие профессий будущего и постановка целей.",
@@ -230,6 +236,9 @@ var i18nData = {
         planets_badge: "Cosmic ecosystem",
         planets_title: "8 essential skills for life.",
         planets_sub: "Each planet helps unlock their hidden potential",
+        stat_visitors: "Total Visitors",
+        stat_planets: "Skill Planets",
+        stat_team: "Team Members",
         mercury_title: "Mercury",
         mercury_skill: "Professions",
         mercury_desc: "Discovering future professions and setting goals.",
@@ -389,6 +398,113 @@ function initDropdowns() {
 
 initDropdowns();
 
+/* ============ COSMOS STATS ANIMATED COUNTER & BACKEND ============ */
+function animateCounter(el, target, duration, hasPlus) {
+    if (!el) return;
+    var startTime = null;
+    duration = duration || 1800;
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        var current = Math.floor(ease * target);
+        el.textContent = current.toLocaleString('en-US') + (hasPlus && progress === 1 ? '+' : '');
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            el.textContent = target.toLocaleString('en-US') + (hasPlus ? '+' : '');
+        }
+    }
+    window.requestAnimationFrame(step);
+}
+
+function initCosmosStats() {
+    var statsBanner = kaOne('#cosmosStats');
+    if (!statsBanner) return;
+
+    var animated = false;
+    var statsData = {
+        visitors: 1,
+        planets: 8,
+        teams: 6
+    };
+
+    function runCounters() {
+        if (animated) return;
+        animated = true;
+
+        var visEl = kaOne('#statVisitors');
+        var plEl = kaOne('#statPlanets');
+        var tmEl = kaOne('#statTeam');
+
+        if (visEl) animateCounter(visEl, statsData.visitors, 1800, false);
+        if (plEl) animateCounter(plEl, statsData.planets, 1200, false);
+        if (tmEl) animateCounter(tmEl, statsData.teams, 1400, false);
+    }
+
+    // Backend statistikasini olish va real API ma'lumotlari bilan yangilash
+    fetch('/api/website/stats')
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+            if (!data) return;
+
+            if (typeof data.totalVisitors === 'number') {
+                statsData.visitors = data.totalVisitors;
+            }
+            if (typeof data.totalPlanets === 'number') {
+                statsData.planets = data.totalPlanets;
+            }
+            if (typeof data.totalTeams === 'number') {
+                statsData.teams = data.totalTeams;
+            }
+
+            var visEl = kaOne('#statVisitors');
+            var plEl = kaOne('#statPlanets');
+            var tmEl = kaOne('#statTeam');
+
+            if (animated) {
+                if (visEl) animateCounter(visEl, statsData.visitors, 1000, false);
+                if (plEl) animateCounter(plEl, statsData.planets, 800, false);
+                if (tmEl) animateCounter(tmEl, statsData.teams, 800, false);
+            }
+        })
+        .catch(function () {});
+
+    // Saytga tashrifni serverda real hisoblab borish
+    try {
+        fetch('/api/website/track-visit', { method: 'POST' })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (res) {
+                if (res && typeof res.totalVisitors === 'number') {
+                    statsData.visitors = res.totalVisitors;
+                    var visEl = kaOne('#statVisitors');
+                    if (visEl && animated) {
+                        animateCounter(visEl, statsData.visitors, 800, false);
+                    }
+                }
+            })
+            .catch(function () {});
+    } catch (e) {}
+
+    // Scroll qilib kelganda animatsiyani ishga tushirish
+    if ('IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    runCounters();
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        obs.observe(statsBanner);
+    } else {
+        runCounters();
+    }
+}
+
+initCosmosStats();
+
 /* ============ Reveal on scroll ============ */
 var kaRevealIO = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
@@ -439,8 +555,49 @@ if (kaTeamMarquee) {
     heroFig.style.willChange = 'transform';
     heroFig.style.transformOrigin = 'center top';
 
-    var autoPlayTriggered = false;
+    function togglePlayPause() {
+        if (heroVideo.paused) {
+            heroVideo.muted = false;
+            heroVideo.volume = 1.0;
+            var p = heroVideo.play();
+            if (p !== undefined) {
+                p.then(function () {
+                    videoBtn.classList.add('playing');
+                }).catch(function (err) {
+                    console.log("Play unmuted blocked, falling back to muted:", err);
+                    heroVideo.muted = true;
+                    heroVideo.play().then(function () {
+                        videoBtn.classList.add('playing');
+                    });
+                });
+            }
+        } else {
+            heroVideo.pause();
+            videoBtn.classList.remove('playing');
+        }
+    }
 
+    /* Video yoki tugma bosilganda o'ynash/to'xtatish */
+    videoBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        togglePlayPause();
+    });
+
+    heroVideo.addEventListener('click', function (e) {
+        e.stopPropagation();
+        togglePlayPause();
+    });
+
+    heroVideo.addEventListener('play', function () {
+        heroVideo.muted = false;
+        videoBtn.classList.add('playing');
+    });
+
+    heroVideo.addEventListener('pause', function () {
+        videoBtn.classList.remove('playing');
+    });
+
+    var autoPlayTriggered = false;
     function updateVideoScaleAndPlay() {
         var rect = heroFig.getBoundingClientRect();
         var vh = window.innerHeight;
@@ -450,35 +607,20 @@ if (kaTeamMarquee) {
 
         heroFig.style.transform = 'scale(' + scale.toFixed(4) + ')';
 
-        /* Video 100% scale holatiga yetganda bir marta avtomatik ijro bo'ladi */
         if (scale >= 0.999 && !autoPlayTriggered) {
             autoPlayTriggered = true;
+            heroVideo.muted = false;
+            heroVideo.volume = 1.0;
             heroVideo.play().then(function () {
                 videoBtn.classList.add('playing');
-            }).catch(function (error) {
-                console.log("Autoplay brauzer tomonidan bloklandi:", error);
+            }).catch(function () {
+                heroVideo.muted = true;
+                heroVideo.play().then(function () {
+                    videoBtn.classList.add('playing');
+                }).catch(function () {});
             });
         }
     }
-
-    /* Manual Play/Pause bosilganda */
-    videoBtn.addEventListener('click', function () {
-        if (heroVideo.paused) {
-            heroVideo.play();
-            videoBtn.classList.add('playing');
-        } else {
-            heroVideo.pause();
-            videoBtn.classList.remove('playing');
-        }
-    });
-
-    heroVideo.addEventListener('play', function () {
-        videoBtn.classList.add('playing');
-    });
-
-    heroVideo.addEventListener('pause', function () {
-        videoBtn.classList.remove('playing');
-    });
 
     window.addEventListener('scroll', updateVideoScaleAndPlay, { passive: true });
     updateVideoScaleAndPlay();
@@ -641,7 +783,13 @@ if (yearEl) {
                     descEl.textContent = match.description;
                 }
 
-                // 4. Modal ma'lumotini yangilash
+                // 4. Admin paneldan belgilangan gradient fonini yangilash
+                var cardFront = kaOne('.planet-card-front', card);
+                if (cardFront && match.gradient) {
+                    cardFront.style.background = match.gradient;
+                }
+
+                // 5. Modal ma'lumotini yangilash
                 if (window.planetData && window.planetData[key]) {
                     if (match.image) {
                         window.planetData[key].img = kaFixImgUrl(match.image, window.planetData[key].img);
@@ -651,6 +799,12 @@ if (yearEl) {
                     }
                     if (match.description) {
                         window.planetData[key].desc = match.description;
+                    }
+                    if (match.video) {
+                        window.planetData[key].video = kaFixImgUrl(match.video, window.planetData[key].video);
+                    }
+                    if (match.gradient) {
+                        window.planetData[key].bg = match.gradient;
                     }
                 }
             });
@@ -815,7 +969,7 @@ if (yearEl) {
 
         if (modalFeatureGrid) {
             modalFeatureGrid.innerHTML = '';
-            data.features.forEach(function (feat) {
+            (data.features || []).forEach(function (feat) {
                 var item = document.createElement('div');
                 item.className = 'modal-feature-item';
                 item.innerHTML = '<span class="modal-feature-icon">' + feat.icon + '</span>' +
@@ -823,14 +977,1590 @@ if (yearEl) {
                                  '<div class="modal-feature-sub">' + feat.sub + '</div>';
                 modalFeatureGrid.appendChild(item);
             });
+
+            // 4-chi Card: Sinab ko'rish (Uran uchun so'zlar & test, boshqalar uchun video dars)
+            var videoSrc = data.video || '/video/video_2026-08-20_10-54-38.mp4';
+            var videoItem = document.createElement('div');
+            videoItem.className = 'modal-feature-item modal-feature-video-item';
+            videoItem.setAttribute('role', 'button');
+
+            if (key === 'uran') {
+                videoItem.setAttribute('title', "Uran: So'z kartochkalari va Test o'yini");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon" style="background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">So\'zlar & Test o\'yini 🎮</div>';
+                videoItem.onclick = function () {
+                    window.openUranPractice();
+                };
+            } else if (key === 'venera') {
+                videoItem.setAttribute('title', "Venera: Virtual do'kon va Bolani kiyintirish");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon" style="background: linear-gradient(135deg, #ec4899, #f43f5e) !important;">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">Kiyintirish & Do\'kon 🛍️</div>';
+                videoItem.onclick = function () {
+                    window.openVeneraShop();
+                };
+            } else if (key === 'neptun') {
+                videoItem.setAttribute('title', "Neptun: Sehrli Hissiyotlar Daraxti");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon" style="background: linear-gradient(135deg, #10b981, #06b6d4) !important;">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-1 18h2v2h-2z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">Hissiyotlar Daraxti 🌳</div>';
+                videoItem.onclick = function () {
+                    window.openNeptunTree();
+                };
+            } else if (key === 'saturn') {
+                videoItem.setAttribute('title', "Saturn: Matematika mashqlari va Test");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444) !important;">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 3h2v4h4v2h-4v4h-2v-4H9v-2h4V6zm-6 10h4v2H7v-2z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">Matematika & Test 🧮</div>';
+                videoItem.onclick = function () {
+                    window.openSaturnPractice();
+                };
+            } else if (key === 'yupiter') {
+                videoItem.setAttribute('title', "Yupiter: Kunlik reja jadvali va Note eslatmalar");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon" style="background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 4h-2v-2h2v2zm4 4h-2v-2h2v2z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">Reja Jadvali & Note 📅</div>';
+                videoItem.onclick = function () {
+                    window.openYupiterSchedule();
+                };
+            } else {
+                videoItem.setAttribute('title', "Sayyora darsini videoda sinab ko'rish");
+                videoItem.innerHTML = '<span class="modal-feature-icon video-play-icon">' +
+                                      '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' +
+                                      '</span>' +
+                                      '<div class="modal-feature-title">Sinab ko\'rish</div>' +
+                                      '<div class="modal-feature-sub">Videoni tomosha qilish</div>';
+                videoItem.onclick = function () {
+                    window.playPlanetModalVideo(videoSrc, data.title);
+                };
+            }
+            modalFeatureGrid.appendChild(videoItem);
         }
+
+        // Yangi sayyora ochilganda barcha interaktiv o'yinlarni yopiq holatda saqlash
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
 
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
     }
 
+    window.playPlanetModalVideo = function (videoUrl, planetTitle) {
+        window.closeUranPractice();
+        var box = kaOne('#modalVideoPlayerBox');
+        var videoEl = kaOne('#modalPlanetVideoEl');
+        var titleEl = kaOne('#modalVideoTitleText');
+        if (!box || !videoEl) return;
+
+        if (titleEl) titleEl.textContent = (planetTitle || 'Sayyora') + " — Sinab ko'rish darsi";
+        if (videoUrl) {
+            videoEl.src = videoUrl;
+        }
+        box.style.display = 'block';
+        videoEl.muted = false;
+        videoEl.volume = 1.0;
+
+        setTimeout(function () {
+            var playPromise = videoEl.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function () {
+                    videoEl.muted = true;
+                    videoEl.play();
+                });
+            }
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
+    };
+
+    window.closePlanetModalVideo = function () {
+        var box = kaOne('#modalVideoPlayerBox');
+        var videoEl = kaOne('#modalPlanetVideoEl');
+        if (videoEl) {
+            try { videoEl.pause(); } catch (e) {}
+            videoEl.currentTime = 0;
+        }
+        if (box) box.style.display = 'none';
+    };
+
+    /* ==========================================================================
+       URAN SAYYORASI: SO'Z KARTOCHKALARI VA TEST (RANDOM CARDS + AUDIO + QUIZ)
+       ========================================================================== */
+    var uranPracticeData = {
+        cards: [],
+        currentIndex: 0,
+        quiz: null
+    };
+
+    // Web Speech Audio Synthesizer for English
+    function speakEnglishWord(word) {
+        if (!word) return;
+        try {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                var u = new SpeechSynthesisUtterance(word);
+                u.lang = 'en-US';
+                u.rate = 0.82;
+                u.pitch = 1.05;
+                window.speechSynthesis.speak(u);
+            }
+        } catch (e) {
+            console.warn('Speech synthesis error:', e);
+        }
+    }
+
+    // Web Audio API sound effect (Chime for correct answer)
+    function playChimeEffect(isSuccess) {
+        try {
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            var ctx = new AudioCtx();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (isSuccess) {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.12);
+                osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.5);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(140, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.25);
+            }
+        } catch (e) {}
+    }
+
+    window.openUranPractice = function () {
+        window.closePlanetModalVideo();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
+        var box = kaOne('#modalUranPracticeBox');
+        if (!box) return;
+        box.style.display = 'block';
+        window.refreshUranPractice();
+        setTimeout(function () {
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    };
+
+    window.closeUranPractice = function () {
+        var box = kaOne('#modalUranPracticeBox');
+        if (box) box.style.display = 'none';
+        if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+        }
+    };
+
+    window.flipUranCard = function () {
+        var card = kaOne('#uranFlashcard');
+        if (card) {
+            card.classList.toggle('flipped');
+        }
+    };
+
+    function renderUranCurrentCard() {
+        var cards = uranPracticeData.cards;
+        if (!cards || cards.length === 0) return;
+        var idx = uranPracticeData.currentIndex;
+        var c = cards[idx];
+        if (!c) return;
+
+        var cardEl = kaOne('#uranFlashcard');
+        if (cardEl) cardEl.classList.remove('flipped');
+
+        var stepIndicator = kaOne('#uranStepIndicator');
+        if (stepIndicator) stepIndicator.textContent = (idx + 1) + ' / ' + cards.length + '-so\'z';
+
+        var wordEn = kaOne('#uranWordEn');
+        if (wordEn) wordEn.textContent = c.word_en || '';
+
+        var transcription = kaOne('#uranTranscription');
+        if (transcription) transcription.textContent = c.transcription ? c.transcription : '';
+
+        var wordUz = kaOne('#uranWordUz');
+        if (wordUz) wordUz.textContent = c.word_uz || '';
+
+        var example = kaOne('#uranWordExample');
+        if (example) example.textContent = c.example_sentence ? c.example_sentence : (c.word_uz + ' — ingliz tilida ' + c.word_en);
+
+        var imgWrap = kaOne('#uranCardImgWrap');
+        var imgEl = kaOne('#uranCardImg');
+        if (imgEl && imgWrap) {
+            if (c.image) {
+                imgEl.src = c.image;
+                imgEl.style.display = 'block';
+                imgWrap.style.display = 'flex';
+            } else {
+                imgWrap.style.display = 'none';
+            }
+        }
+
+        // Dots update
+        var dotsWrap = kaOne('#uranDotsWrap');
+        if (dotsWrap) {
+            dotsWrap.innerHTML = '';
+            for (var i = 0; i < cards.length; i++) {
+                var dot = document.createElement('span');
+                dot.className = 'uran-dot' + (i === idx ? ' active' : '');
+                dotsWrap.appendChild(dot);
+            }
+        }
+
+        // Prev button
+        var prevBtn = kaOne('#uranPrevCardBtn');
+        if (prevBtn) {
+            prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+            prevBtn.style.pointerEvents = idx === 0 ? 'none' : 'auto';
+        }
+
+        // Next button
+        var nextBtn = kaOne('#uranNextCardBtn');
+        if (nextBtn) {
+            if (idx === cards.length - 1) {
+                nextBtn.innerHTML = 'Testni boshlash 🧠';
+            } else {
+                nextBtn.innerHTML = 'Keyingi ▶';
+            }
+        }
+
+        // Auto speak current word
+        speakEnglishWord(c.word_en);
+    }
+
+    window.playCurrentUranWordAudio = function () {
+        var cards = uranPracticeData.cards;
+        if (!cards || cards.length === 0) return;
+        var c = cards[uranPracticeData.currentIndex];
+        if (c && c.word_en) {
+            speakEnglishWord(c.word_en);
+        }
+    };
+
+    window.prevUranCard = function () {
+        if (uranPracticeData.currentIndex > 0) {
+            uranPracticeData.currentIndex--;
+            renderUranCurrentCard();
+        }
+    };
+
+    window.nextUranCard = function () {
+        var cards = uranPracticeData.cards;
+        if (!cards || cards.length === 0) return;
+
+        if (uranPracticeData.currentIndex < cards.length - 1) {
+            uranPracticeData.currentIndex++;
+            renderUranCurrentCard();
+        } else {
+            // 3-4 ta kartochkadan keyin Test bosqichini boshlaymiz!
+            startUranQuizStage();
+        }
+    };
+
+    function startUranQuizStage() {
+        var cardsStage = kaOne('#uranCardsStage');
+        var quizStage = kaOne('#uranQuizStage');
+        var stepIndicator = kaOne('#uranStepIndicator');
+
+        if (cardsStage) cardsStage.style.display = 'none';
+        if (quizStage) quizStage.style.display = 'block';
+        if (stepIndicator) stepIndicator.textContent = '🧠 Test bosqichi';
+
+        var quiz = uranPracticeData.quiz;
+        if (!quiz) return;
+
+        var qTitle = kaOne('#uranQuizQuestion');
+        if (qTitle) qTitle.textContent = quiz.question || '«' + quiz.word_en + '» so\'zining o\'zbekcha tarjimasi qaysi?';
+
+        var qWord = kaOne('#uranQuizWordEn');
+        if (qWord) qWord.textContent = quiz.word_en;
+
+        var feedback = kaOne('#uranQuizFeedback');
+        if (feedback) feedback.style.display = 'none';
+
+        var optionsContainer = kaOne('#uranQuizOptions');
+        if (optionsContainer) {
+            optionsContainer.innerHTML = '';
+            (quiz.options || []).forEach(function (opt) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'uran-quiz-opt-btn';
+                btn.textContent = opt;
+                btn.onclick = function () {
+                    handleUranAnswer(opt, btn, quiz.correct);
+                };
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Auto speak quiz word
+        speakEnglishWord(quiz.word_en);
+    }
+
+    window.playQuizWordAudio = function () {
+        var quiz = uranPracticeData.quiz;
+        if (quiz && quiz.word_en) {
+            speakEnglishWord(quiz.word_en);
+        }
+    };
+
+    function handleUranAnswer(selected, clickedBtn, correct) {
+        var allBtns = kaAll('.uran-quiz-opt-btn');
+        allBtns.forEach(function (b) { b.disabled = true; });
+
+        var feedback = kaOne('#uranQuizFeedback');
+        var fbIcon = kaOne('#uranFeedbackIcon');
+        var fbText = kaOne('#uranFeedbackText');
+
+        if (selected === correct) {
+            clickedBtn.classList.add('correct');
+            playChimeEffect(true);
+            if (fbIcon) fbIcon.textContent = '🎉';
+            if (fbText) fbText.innerHTML = 'To\'g\'ri topdingiz! <strong>«' + correct + '»</strong> barakalla! 🏆';
+        } else {
+            clickedBtn.classList.add('wrong');
+            playChimeEffect(false);
+            allBtns.forEach(function (b) {
+                if (b.textContent === correct) {
+                    b.classList.add('correct');
+                }
+            });
+            if (fbIcon) fbIcon.textContent = '💡';
+            if (fbText) fbText.innerHTML = 'To\'g\'ri javob: <strong>«' + correct + '»</strong> edi. Harakatni davom eting!';
+        }
+
+        if (feedback) feedback.style.display = 'block';
+    }
+
+    window.refreshUranPractice = function () {
+        var cardsStage = kaOne('#uranCardsStage');
+        var quizStage = kaOne('#uranQuizStage');
+        if (cardsStage) cardsStage.style.display = 'block';
+        if (quizStage) quizStage.style.display = 'none';
+
+        var stepIndicator = kaOne('#uranStepIndicator');
+        if (stepIndicator) stepIndicator.textContent = 'Yuklanmoqda...';
+
+        fetch('/api/website/uran/practice?count=3')
+            .then(function (res) {
+                if (!res.ok) throw new Error('Api error');
+                return res.json();
+            })
+            .then(function (data) {
+                if (!data || !data.cards || data.cards.length === 0) throw new Error('No cards');
+                uranPracticeData.cards = data.cards;
+                uranPracticeData.currentIndex = 0;
+                uranPracticeData.quiz = data.quiz;
+                renderUranCurrentCard();
+            })
+            .catch(function () {
+                // Fallback default sample cards if offline
+                uranPracticeData.cards = [
+                    { word_en: 'Apple', word_uz: 'Olma', transcription: '[ˈæp.əl]', example_sentence: 'I like red sweet apple.' },
+                    { word_en: 'Book', word_uz: 'Kitob', transcription: '[bʊk]', example_sentence: 'Open your English book.' },
+                    { word_en: 'Star', word_uz: 'Yulduz', transcription: '[stɑːr]', example_sentence: 'Look at the bright star in the sky.' }
+                ];
+                uranPracticeData.currentIndex = 0;
+                uranPracticeData.quiz = {
+                    word_en: 'Apple',
+                    correct: 'Olma',
+                    question: '«Apple» so\'zining o\'zbekcha tarjimasi qaysi?',
+                    options: ['Olma', 'Kitob', 'Yulduz', 'Qalam']
+                };
+                renderUranCurrentCard();
+            });
+    };
+
+    /* ==========================================================================
+       SATURN SAYYORASI: MATEMATIKA MAShQLARI VA TEST (MATH CARDS + QUIZ)
+       ========================================================================== */
+    var saturnPracticeData = {
+        cards: [],
+        currentIndex: 0,
+        quiz: null
+    };
+
+    function speakMathText(text) {
+        if (!text) return;
+        try {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                var u = new SpeechSynthesisUtterance(text);
+                u.lang = 'uz-UZ';
+                u.rate = 0.9;
+                u.pitch = 1.05;
+                window.speechSynthesis.speak(u);
+            }
+        } catch (e) {}
+    }
+
+    window.openSaturnPractice = function () {
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeYupiterSchedule();
+
+        var box = kaOne('#modalSaturnPracticeBox');
+        if (!box) return;
+        box.style.display = 'block';
+        window.refreshSaturnPractice();
+        setTimeout(function () {
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    };
+
+    window.closeSaturnPractice = function () {
+        var box = kaOne('#modalSaturnPracticeBox');
+        if (box) box.style.display = 'none';
+        if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+        }
+    };
+
+    window.flipSaturnCard = function () {
+        var card = kaOne('#saturnFlashcard');
+        if (card) {
+            card.classList.toggle('flipped');
+        }
+    };
+
+    function renderSaturnCurrentCard() {
+        var cards = saturnPracticeData.cards;
+        if (!cards || cards.length === 0) return;
+        var idx = saturnPracticeData.currentIndex;
+        var c = cards[idx];
+        if (!c) return;
+
+        var cardEl = kaOne('#saturnFlashcard');
+        if (cardEl) cardEl.classList.remove('flipped');
+
+        var stepIndicator = kaOne('#saturnStepIndicator');
+        if (stepIndicator) stepIndicator.textContent = (idx + 1) + ' / ' + cards.length + '-mashq';
+
+        var badgeEl = kaOne('#saturnCardTag');
+        if (badgeEl) badgeEl.textContent = c.badge || "Matematika amali 🧮";
+
+        var visualEl = kaOne('#saturnCardVisual');
+        if (visualEl) visualEl.textContent = c.visual || '';
+
+        var problemEl = kaOne('#saturnCardProblem');
+        if (problemEl) problemEl.textContent = c.problem || '';
+
+        var answerEl = kaOne('#saturnCardAnswer');
+        if (answerEl) answerEl.textContent = "Javob: " + c.answer;
+
+        var explanationEl = kaOne('#saturnCardExplanation');
+        if (explanationEl) explanationEl.textContent = c.explanation || '';
+
+        // Dots
+        var dotsWrap = kaOne('#saturnDotsWrap');
+        if (dotsWrap) {
+            dotsWrap.innerHTML = '';
+            for (var i = 0; i < cards.length; i++) {
+                var dot = document.createElement('span');
+                dot.className = 'saturn-dot' + (i === idx ? ' active' : '');
+                dotsWrap.appendChild(dot);
+            }
+        }
+
+        // Prev button
+        var prevBtn = kaOne('#saturnPrevCardBtn');
+        if (prevBtn) {
+            prevBtn.style.opacity = idx === 0 ? '0.4' : '1';
+            prevBtn.style.pointerEvents = idx === 0 ? 'none' : 'auto';
+        }
+
+        // Next button
+        var nextBtn = kaOne('#saturnNextCardBtn');
+        if (nextBtn) {
+            if (idx === cards.length - 1) {
+                nextBtn.innerHTML = 'Testni boshlash 🧠 ▶';
+            } else {
+                nextBtn.innerHTML = 'Keyingi ▶';
+            }
+        }
+    }
+
+    window.playCurrentSaturnAudio = function () {
+        // Saturn ovozi o'chirildi (user request)
+    };
+
+    window.prevSaturnCard = function () {
+        if (saturnPracticeData.currentIndex > 0) {
+            saturnPracticeData.currentIndex--;
+            renderSaturnCurrentCard();
+        }
+    };
+
+    window.nextSaturnCard = function () {
+        var cards = saturnPracticeData.cards;
+        if (!cards || cards.length === 0) return;
+
+        if (saturnPracticeData.currentIndex < cards.length - 1) {
+            saturnPracticeData.currentIndex++;
+            renderSaturnCurrentCard();
+        } else {
+            startSaturnQuizStage();
+        }
+    };
+
+    function startSaturnQuizStage() {
+        var cardsStage = kaOne('#saturnCardsStage');
+        var quizStage = kaOne('#saturnQuizStage');
+        var stepIndicator = kaOne('#saturnStepIndicator');
+
+        if (cardsStage) cardsStage.style.display = 'none';
+        if (quizStage) quizStage.style.display = 'block';
+        if (stepIndicator) stepIndicator.textContent = '🧠 Test bosqichi';
+
+        var quiz = saturnPracticeData.quiz;
+        if (!quiz) return;
+
+        var qTitle = kaOne('#saturnQuizQuestion');
+        if (qTitle) qTitle.textContent = quiz.question || 'Misolni hisoblang:';
+
+        var qVisual = kaOne('#saturnQuizVisual');
+        if (qVisual) qVisual.textContent = quiz.visual || '';
+
+        var feedback = kaOne('#saturnQuizFeedback');
+        if (feedback) feedback.style.display = 'none';
+
+        var optionsContainer = kaOne('#saturnQuizOptions');
+        if (optionsContainer) {
+            optionsContainer.innerHTML = '';
+            (quiz.options || []).forEach(function (opt) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'saturn-quiz-opt-btn';
+                btn.textContent = opt;
+                btn.onclick = function () {
+                    handleSaturnAnswer(opt, btn, quiz.correct, quiz.explanation);
+                };
+                optionsContainer.appendChild(btn);
+            });
+        }
+    }
+
+    window.playSaturnQuizAudio = function () {
+        // Saturn ovozi o'chirildi (user request)
+    };
+
+    function handleSaturnAnswer(selected, clickedBtn, correct, explanation) {
+        var allBtns = kaAll('.saturn-quiz-opt-btn');
+        allBtns.forEach(function (b) { b.disabled = true; });
+
+        var feedback = kaOne('#saturnQuizFeedback');
+        var fbIcon = kaOne('#saturnFeedbackIcon');
+        var fbText = kaOne('#saturnFeedbackText');
+
+        if (selected === correct) {
+            clickedBtn.classList.add('correct');
+            playChimeEffect(true);
+            if (fbIcon) fbIcon.textContent = '🎉';
+            if (fbText) fbText.innerHTML = 'To\'g\'ri topdingiz! <strong>«' + correct + '»</strong> barakalla! 🏆<br><small>' + (explanation || '') + '</small>';
+        } else {
+            clickedBtn.classList.add('wrong');
+            playChimeEffect(false);
+            allBtns.forEach(function (b) {
+                if (b.textContent === correct) {
+                    b.classList.add('correct');
+                }
+            });
+            if (fbIcon) fbIcon.textContent = '💡';
+            if (fbText) fbText.innerHTML = 'To\'g\'ri javob: <strong>«' + correct + '»</strong> edi.<br><small>' + (explanation || '') + '</small>';
+        }
+
+        if (feedback) feedback.style.display = 'block';
+    }
+
+    window.refreshSaturnPractice = function () {
+        var cardsStage = kaOne('#saturnCardsStage');
+        var quizStage = kaOne('#saturnQuizStage');
+        if (cardsStage) cardsStage.style.display = 'block';
+        if (quizStage) quizStage.style.display = 'none';
+
+        var stepIndicator = kaOne('#saturnStepIndicator');
+        if (stepIndicator) stepIndicator.textContent = 'Yuklanmoqda...';
+
+        fetch('/api/website/saturn/practice?count=3')
+            .then(function (res) {
+                if (!res.ok) throw new Error('API');
+                return res.json();
+            })
+            .then(function (data) {
+                if (!data || !data.cards || data.cards.length === 0) throw new Error('No cards');
+                saturnPracticeData.cards = data.cards;
+                saturnPracticeData.currentIndex = 0;
+                saturnPracticeData.quiz = data.quiz;
+                renderSaturnCurrentCard();
+            })
+            .catch(function () {
+                saturnPracticeData.cards = [
+                    {
+                        badge: "Qo'shish amali ➕",
+                        problem: "3 + 4 = ?",
+                        visual: "🍎 🍎 🍎  +  🍎 🍎 🍎 🍎",
+                        answer: "7",
+                        explanation: "3 ta olmaga 4 ta olma qo'shilsa, jami 7 ta olma bo'ladi: 3 + 4 = 7",
+                        audio_text: "Uchga to'rtni qo'shganda yetti bo'ladi."
+                    },
+                    {
+                        badge: "Ayirish amali ➖",
+                        problem: "8 - 3 = ?",
+                        visual: "⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐  ➖  ⭐ ⭐ ⭐",
+                        answer: "5",
+                        explanation: "8 ta yulduzdan 3 tasi olinsa, 5 ta yulduz qoladi: 8 - 3 = 5",
+                        audio_text: "Sakkizdan uchni ayirsak besh qoladi."
+                    },
+                    {
+                        badge: "Mantiqiy jumboq 🧩",
+                        problem: "Daraxtda 5 ta qushcha bor edi. Yana 3 tasi keldi. Jami nechta?",
+                        visual: "🦜 🦜 🦜 🦜 🦜  ➕  🦜 🦜 🦜",
+                        answer: "8",
+                        explanation: "5 ga 3 ni qo'shganda 8 ta qushcha bo'ladi!",
+                        audio_text: "Beshga uchni qo'shsak sakkiz ta bo'ladi."
+                    }
+                ];
+                saturnPracticeData.currentIndex = 0;
+                saturnPracticeData.quiz = {
+                    question: "6 + 3 yig'indisi nechiga teng?",
+                    visual: "🍇🍇🍇🍇🍇🍇  +  🍇🍇🍇",
+                    correct: "9",
+                    options: ["7", "8", "9", "10"],
+                    explanation: "6 ga 3 ni qo'shganda 9 bo'ladi!",
+                    audio_text: "Oltiga uchni qo'shsak necha bo'ladi? To'qqiz!"
+                };
+                renderSaturnCurrentCard();
+            });
+    };
+
+    /* ==========================================================================
+       VENERA SAYYORASI: VIRTUAL DO'KON VA KIYINTIRISH (WARDROBE & DRESS UP)
+       ========================================================================== */
+    var veneraWardrobeData = {
+        coins: 200,
+        currentTab: 'outfits',
+        inventory: {
+            outfits: ['default', 'doppi'],
+            backdrops: ['space', 'registan']
+        },
+        equipped: {
+            outfit: 'default',
+            backdrop: 'space'
+        },
+        categories: [
+            {
+                id: 'outfits',
+                name: 'Haqiqiy 3D Liboslar',
+                icon: '🥋',
+                items: [
+                    {
+                        id: 'default',
+                        name: 'Asl Milliy Libos',
+                        icon: '👘',
+                        image: 'img/venera_boy.png?v=3',
+                        price: 0,
+                        desc: 'O\'zining qulay milliy yaktagi'
+                    },
+                    {
+                        id: 'doppi',
+                        name: 'Milliy Do\'ppi & Zar Chopon',
+                        icon: '🇺🇿',
+                        image: 'img/wardrobe_doppi.jpg',
+                        price: 30,
+                        desc: 'Zardo\'zi saroy choponi va O\'zbek milliy do\'ppisi'
+                    },
+                    {
+                        id: 'crown',
+                        name: 'Qirollik Toji & Shohona Libos',
+                        icon: '👑',
+                        image: 'img/wardrobe_crown.jpg',
+                        price: 45,
+                        desc: 'Oltin toj, qimmatbaho javohirlar va qizil plash'
+                    },
+                    {
+                        id: 'astronaut',
+                        name: 'Fazogir & Kosmik Shlem',
+                        icon: '🚀',
+                        image: 'img/wardrobe_astronaut.jpg',
+                        price: 50,
+                        desc: 'Haqiqiy kosmonavt skafandri va koinot dubulg\'asi'
+                    },
+                    {
+                        id: 'scientist',
+                        name: 'Bilimdon Alloma & Professor',
+                        icon: '🎓',
+                        image: 'img/wardrobe_scientist.jpg',
+                        price: 35,
+                        desc: 'Akademik shlyapa, ko\'zoynak va oq xalat'
+                    },
+                    {
+                        id: 'superhero',
+                        name: 'Super Alloma Qahramon',
+                        icon: '🦸',
+                        image: 'img/wardrobe_superhero.jpg',
+                        price: 40,
+                        desc: 'Yulduzli qahramonlik zirhi va qudratli qizil plash'
+                    },
+                    {
+                        id: 'sport',
+                        name: 'Zamonaviy Sportchi & Gamer',
+                        icon: '🧢',
+                        image: 'img/wardrobe_sport.jpg',
+                        price: 25,
+                        desc: 'Sport kastyumi, kepka, quyosh ko\'zoynagi va naushnik'
+                    }
+                ]
+            },
+            {
+                id: 'backdrops',
+                name: 'Sehrli Fonlar',
+                icon: '🌌',
+                items: [
+                    { id: 'space', name: 'Koinot & Venera', icon: '🪐', price: 0, desc: 'Yulduzli koinot va sayyoralar bag\'rida' },
+                    { id: 'registan', name: 'Registon Saroyi', icon: '🏛️', price: 20, desc: 'Samarqand va Buxoro qadimiy madaniyati' },
+                    { id: 'future_lab', name: 'Kelajak Markazi', icon: '🧪', price: 25, desc: 'Yuqori texnologiyalar laboratoriyasi' },
+                    { id: 'cozy_room', name: 'Kutubxona Xonasi', icon: '📚', price: 15, desc: 'Shinamgina allomalar kutubxonasi' }
+                ]
+            }
+        ]
+    };
+
+    var veneraOutfitDetails = {
+        default: {
+            src: 'img/venera_boy.png?v=3',
+            title: 'Asl Milliy Libos',
+            desc: 'O\'zining qulay milliy yaktagi'
+        },
+        doppi: {
+            src: 'img/wardrobe_doppi.jpg',
+            title: 'Milliy Do\'ppi & Zar Chopon',
+            desc: 'Zardo\'zi saroy choponi va O\'zbek milliy do\'ppisi'
+        },
+        crown: {
+            src: 'img/wardrobe_crown.jpg',
+            title: 'Qirollik Toji & Shohona Libos',
+            desc: 'Oltin toj, qimmatbaho javohirlar va qizil plash'
+        },
+        astronaut: {
+            src: 'img/wardrobe_astronaut.jpg',
+            title: 'Fazogir & Kosmik Shlem',
+            desc: 'Haqiqiy kosmonavt skafandri va koinot dubulg\'asi'
+        },
+        scientist: {
+            src: 'img/wardrobe_scientist.jpg',
+            title: 'Bilimdon Alloma & Professor',
+            desc: 'Akademik shlyapa, ko\'zoynak va oq xalat'
+        },
+        superhero: {
+            src: 'img/wardrobe_superhero.jpg',
+            title: 'Super Alloma Qahramon',
+            desc: 'Yulduzli qahramonlik zirhi va qudratli qizil plash'
+        },
+        sport: {
+            src: 'img/wardrobe_sport.jpg',
+            title: 'Zamonaviy Sportchi & Gamer',
+            desc: 'Sport kastyumi, kepka, quyosh ko\'zoynagi va naushnik'
+        }
+    };
+
+    window.openVeneraShop = function () {
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
+        var box = kaOne('#modalVeneraShopBox');
+        if (!box) return;
+        box.style.display = 'block';
+
+        fetch('/api/website/venera/wardrobe')
+            .then(function (res) {
+                if (!res.ok) throw new Error('API');
+                return res.json();
+            })
+            .then(function (data) {
+                if (data && data.categories) {
+                    veneraWardrobeData.categories = data.categories;
+                    if (data.character && typeof data.character.coins === 'number') {
+                        veneraWardrobeData.coins = data.character.coins;
+                    }
+                }
+                renderVeneraShopUI();
+            })
+            .catch(function () {
+                renderVeneraShopUI();
+            });
+
+        setTimeout(function () {
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    };
+
+    window.closeVeneraShop = function () {
+        var box = kaOne('#modalVeneraShopBox');
+        if (box) box.style.display = 'none';
+    };
+
+    window.switchVeneraTab = function (catId) {
+        veneraWardrobeData.currentTab = catId;
+        var tabs = kaAll('.venera-tab-btn');
+        tabs.forEach(function (btn) {
+            if (btn.getAttribute('data-cat') === catId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        renderVeneraItemsGrid();
+    };
+
+    function renderVeneraShopUI() {
+        var coinEl = kaOne('#veneraCoinBalance');
+        if (coinEl) coinEl.textContent = veneraWardrobeData.coins;
+        renderVeneraAvatar();
+        renderVeneraItemsGrid();
+    }
+
+    function renderVeneraAvatar() {
+        var baseImg = kaOne('#veneraBoyBaseImg');
+        var backdropEl = kaOne('#veneraBackdrop');
+        var eq = veneraWardrobeData.equipped;
+
+        var outfit = veneraOutfitDetails[eq.outfit] || veneraOutfitDetails['default'];
+
+        if (baseImg) {
+            baseImg.style.opacity = '0.4';
+            baseImg.style.transform = 'scale(0.96)';
+            setTimeout(function () {
+                baseImg.src = outfit.src;
+                baseImg.style.opacity = '1';
+                baseImg.style.transform = 'scale(1)';
+            }, 120);
+        }
+
+        if (backdropEl) {
+            backdropEl.className = 'venera-avatar-backdrop bg-' + (eq.backdrop || 'space');
+        }
+
+        var titleEl = kaOne('#veneraStyleTitle');
+        var descEl = kaOne('#veneraStyleDesc');
+        if (titleEl) titleEl.textContent = outfit.title;
+        if (descEl) descEl.textContent = outfit.desc;
+    }
+
+    function renderVeneraItemsGrid() {
+        var grid = kaOne('#veneraItemsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        var currentCatId = veneraWardrobeData.currentTab;
+        var cat = (veneraWardrobeData.categories || []).find(function (c) { return c.id === currentCatId; });
+        if (!cat || !cat.items) return;
+
+        var inventoryList = veneraWardrobeData.inventory[currentCatId] || [];
+        var eq = veneraWardrobeData.equipped;
+
+        cat.items.forEach(function (item) {
+            var isOwned = inventoryList.indexOf(item.id) !== -1 || item.price === 0;
+            var isWorn = false;
+
+            if (currentCatId === 'outfits') isWorn = (eq.outfit === item.id);
+            else if (currentCatId === 'backdrops') isWorn = (eq.backdrop === item.id);
+
+            var card = document.createElement('div');
+            card.className = 'venera-item-card' + (isWorn ? ' active' : '');
+
+            var badgeClass = isWorn ? 'badge-worn' : (isOwned ? 'badge-owned' : 'badge-buy');
+            var badgeText = isWorn ? '✓ Kiyilgan' : (isOwned ? 'Kiyish' : item.price + ' 🪙');
+
+            var thumbHtml = item.image ? 
+                '<img src="' + item.image + '" alt="' + item.name + '" class="venera-item-thumb">' : 
+                '<div class="venera-item-icon">' + item.icon + '</div>';
+
+            card.innerHTML = thumbHtml +
+                             '<div class="venera-item-name">' + item.name + '</div>' +
+                             '<div class="venera-item-desc">' + item.desc + '</div>' +
+                             '<div class="venera-item-action-row">' +
+                             '<span class="venera-item-badge ' + badgeClass + '">' + badgeText + '</span>' +
+                             '</div>';
+
+            card.onclick = function () {
+                handleVeneraItemClick(currentCatId, item, isOwned, isWorn);
+            };
+
+            grid.appendChild(card);
+        });
+    }
+
+    function handleVeneraItemClick(catId, item, isOwned, isWorn) {
+        if (!isOwned) {
+            // Sotib olish
+            if (veneraWardrobeData.coins >= item.price) {
+                veneraWardrobeData.coins -= item.price;
+                if (!veneraWardrobeData.inventory[catId]) veneraWardrobeData.inventory[catId] = [];
+                veneraWardrobeData.inventory[catId].push(item.id);
+                playChimeEffect(true);
+                equipVeneraItem(catId, item.id);
+                renderVeneraShopUI();
+                showVeneraTip('Tabriklaymiz! «' + item.name + '» xarid qilindi va kiyildi! 🎉');
+            } else {
+                playChimeEffect(false);
+                showVeneraTip('Tangalar yetarli emas! Yana Gold Coin to\'plang! 🪙');
+            }
+            return;
+        }
+
+        // Agar egalik qilsa: kiyish
+        playChimeEffect(true);
+        equipVeneraItem(catId, item.id);
+        renderVeneraShopUI();
+    }
+
+    function equipVeneraItem(catId, itemId) {
+        var eq = veneraWardrobeData.equipped;
+        if (catId === 'outfits') eq.outfit = itemId;
+        else if (catId === 'backdrops') eq.backdrop = itemId;
+    }
+
+    function showVeneraTip(text) {
+        var tipEl = kaOne('#veneraTipText');
+        if (tipEl) tipEl.textContent = text;
+    }
+
+    window.randomVeneraOutfit = function () {
+        var outfits = ['default', 'doppi', 'crown', 'astronaut', 'scientist', 'superhero', 'sport'];
+        var backdrops = ['space', 'registan', 'future_lab', 'cozy_room'];
+
+        var eq = veneraWardrobeData.equipped;
+        eq.outfit = outfits[Math.floor(Math.random() * outfits.length)];
+        eq.backdrop = backdrops[Math.floor(Math.random() * backdrops.length)];
+
+        playChimeEffect(true);
+        renderVeneraShopUI();
+        showVeneraTip('Tasodifiy ajoyib 3D uslub yaratildi! 🎲✨');
+    };
+
+    window.resetVeneraOutfit = function () {
+        veneraWardrobeData.equipped = {
+            outfit: 'default',
+            backdrop: 'space'
+        };
+        playChimeEffect(true);
+        renderVeneraShopUI();
+        showVeneraTip('Kiyimlar tozalab, asl holatiga qaytarildi 🔄');
+    };
+
+    window.takeVeneraSnapshot = function () {
+        var flash = kaOne('#veneraFlashOverlay');
+        if (flash) {
+            flash.classList.remove('flash');
+            void flash.offsetWidth;
+            flash.classList.add('flash');
+        }
+        playChimeEffect(true);
+        showVeneraTip('Qoyilmaqom ko\'rinish! Kichik Alloma rasmga tushdi 📸🌟');
+    };
+
+    /* ==========================================================================
+       NEPTUN SAYYORASI: BUGUNGI HISSIYOT DARAXTI (EXACT MATCH TO REFERENCE)
+       ========================================================================== */
+    var neptunMoodState = {
+        selectedMood: null,
+        isDockOpen: false,
+        presetMoods: [
+            { emoji: '😠', title: 'Jahldor', desc: 'Biroz jahlim chiqdi yoki xafaman' },
+            { emoji: '😄', title: 'Xursand', desc: 'Kayfiyatim a\'lo, juda quvnoqman!' },
+            { emoji: '🤔', title: 'Fikrchan', desc: 'Yangi narsalar haqida o\'ylayapman' },
+            { emoji: '🥺', title: 'G\'amgin', desc: 'Biroz g\'amginman, mehr kerak' },
+            { emoji: '🤕', title: 'Charchagan', desc: 'Tanam biroz toliqdi yoki dam olyapman' }
+        ]
+    };
+
+    function playPopStickSound() {
+        try {
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            var ctx = new AudioCtx();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(420, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(1180, ctx.currentTime + 0.16);
+            gain.gain.setValueAtTime(0.35, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.22);
+        } catch (e) {}
+    }
+
+    window.openNeptunTree = function () {
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
+
+        var box = kaOne('#modalNeptunTreeBox');
+        if (!box) return;
+        box.style.display = 'block';
+
+        renderNeptunMoodBadge();
+
+        setTimeout(function () {
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    };
+
+    window.closeNeptunTree = function () {
+        var box = kaOne('#modalNeptunTreeBox');
+        if (box) box.style.display = 'none';
+        window.closeNeptunMoodDock();
+    };
+
+    window.toggleNeptunMoodDock = function (e) {
+        if (e) e.stopPropagation();
+        if (neptunMoodState.isDockOpen) {
+            window.closeNeptunMoodDock();
+        } else {
+            window.openNeptunMoodDock();
+        }
+    };
+
+    window.openNeptunMoodDock = function () {
+        neptunMoodState.isDockOpen = true;
+        var dock = kaOne('#neptunMoodDock');
+        var backdrop = kaOne('#neptunMoodBackdrop');
+        if (dock) dock.style.display = 'block';
+        if (backdrop) backdrop.style.display = 'block';
+        playPopStickSound();
+        showNeptunMoodFeedback('Bugungi kayfiyatingizga mos emojini tanlang: 😠 😄 🤔 🥺 🤕');
+    };
+
+    window.closeNeptunMoodDock = function () {
+        neptunMoodState.isDockOpen = false;
+        var dock = kaOne('#neptunMoodDock');
+        var backdrop = kaOne('#neptunMoodBackdrop');
+        if (dock) dock.style.display = 'none';
+        if (backdrop) backdrop.style.display = 'none';
+    };
+
+    window.selectNeptunMood = function (emoji, title, desc) {
+        neptunMoodState.selectedMood = { emoji: emoji, title: title, desc: desc };
+        window.closeNeptunMoodDock();
+        renderNeptunMoodBadge();
+        playPopStickSound();
+
+        var badge = kaOne('#neptunMoodCircleBadge');
+        if (badge) {
+            badge.style.transform = 'translate(-50%, -50%) scale(1.18)';
+            setTimeout(function () {
+                badge.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 260);
+        }
+
+        showNeptunMoodFeedback('Bugun: «' + title + '» ' + emoji + ' — Daraxtga mahkam yopishtirildi!');
+    };
+
+    function renderNeptunMoodBadge() {
+        var orb = kaOne('#moodGlowingOrb');
+        var emojiEl = kaOne('#moodSelectedEmoji');
+        var ring = kaOne('#moodDashedRing');
+
+        if (neptunMoodState.selectedMood) {
+            if (orb) orb.style.display = 'none';
+            if (emojiEl) {
+                emojiEl.textContent = neptunMoodState.selectedMood.emoji;
+                emojiEl.style.display = 'inline-block';
+            }
+            if (ring) ring.classList.add('has-mood');
+        } else {
+            if (orb) orb.style.display = 'block';
+            if (emojiEl) emojiEl.style.display = 'none';
+            if (ring) ring.classList.remove('has-mood');
+        }
+    }
+
+    window.randomNeptunMood = function () {
+        var list = neptunMoodState.presetMoods;
+        var rand = list[Math.floor(Math.random() * list.length)];
+        window.selectNeptunMood(rand.emoji, rand.title, rand.desc);
+        playChimeEffect(true);
+    };
+
+    window.resetNeptunMood = function () {
+        neptunMoodState.selectedMood = null;
+        window.closeNeptunMoodDock();
+        renderNeptunMoodBadge();
+        playChimeEffect(false);
+        showNeptunMoodFeedback('Daraxt tozalandi. Bugungi kayfiyatingizni qaytadan tanlashingiz mumkin!');
+    };
+
+    window.takeNeptunSnapshot = function () {
+        var flash = kaOne('#neptunFlashOverlay');
+        if (flash) {
+            flash.classList.remove('flash');
+            void flash.offsetWidth;
+            flash.classList.add('flash');
+        }
+        playChimeEffect(true);
+        showNeptunMoodFeedback('Qoyilmaqom! Bugungi hissiyot daraxtingiz suratga olindi 📸🌳');
+    };
+
+    function showNeptunMoodFeedback(text) {
+        var el = kaOne('#neptunMoodFeedbackText');
+        if (el) {
+            el.textContent = text;
+            el.style.opacity = '0.7';
+            setTimeout(function () { el.style.opacity = '1'; }, 150);
+        }
+    }
+
+    /* ==========================================================================
+       YUPITER SAYYORASI: TAYM-MENEJMENT VA KUNLIK REJA JADVALI (SCHEDULE & NOTES)
+       ========================================================================== */
+    function padZero(n) {
+        return n < 10 ? '0' + n : '' + n;
+    }
+
+    function formatDateYMD(d) {
+        if (!d) d = new Date();
+        var year = d.getFullYear();
+        var month = padZero(d.getMonth() + 1);
+        var day = padZero(d.getDate());
+        return year + '-' + month + '-' + day;
+    }
+
+    var UZ_MONTH_NAMES = [
+        "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+        "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"
+    ];
+
+    var UZ_WEEKDAY_NAMES = [
+        "Yakshanba", "Dushanba", "Seshanba", "Chorshanba",
+        "Payshanba", "Juma", "Shanba"
+    ];
+
+    var yupiterState = {
+        currentYear: new Date().getFullYear(),
+        currentMonth: new Date().getMonth(),
+        selectedDate: formatDateYMD(new Date()),
+        notes: {},
+        presets: [],
+        mottoes: []
+    };
+
+    function initYupiterDefaultNotes() {
+        try {
+            var raw = localStorage.getItem('yupiter_schedule_notes');
+            if (raw) {
+                yupiterState.notes = JSON.parse(raw) || {};
+            } else {
+                var today = new Date();
+                var todayKey = formatDateYMD(today);
+                
+                var tomorrow = new Date();
+                tomorrow.setDate(today.getDate() + 1);
+                var tomorrowKey = formatDateYMD(tomorrow);
+
+                yupiterState.notes = {};
+                yupiterState.notes[todayKey] = [
+                    { id: '1', text: "Kitob mutolaasi 📖 (20 daqiqa)", time: "20 daqiqa", done: true },
+                    { id: '2', text: "Matematika mashqi va jumboqlar 🧮", time: "16:00", done: false }
+                ];
+                yupiterState.notes[tomorrowKey] = [
+                    { id: '3', text: "Ingliz tili lug'atlaridan 5 ta so'z yodlash 🇬🇧", time: "10:00", done: false },
+                    { id: '4', text: "Badantarbiya va jismoniy mashqlar 🏃", time: "18:00", done: false }
+                ];
+                localStorage.setItem('yupiter_schedule_notes', JSON.stringify(yupiterState.notes));
+            }
+        } catch (e) {
+            yupiterState.notes = {};
+        }
+    }
+
+    function saveYupiterNotesToStorage() {
+        try {
+            localStorage.setItem('yupiter_schedule_notes', JSON.stringify(yupiterState.notes));
+        } catch (e) {}
+    }
+
+    window.openYupiterSchedule = function () {
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+
+        var box = kaOne('#modalYupiterScheduleBox');
+        if (!box) return;
+        box.style.display = 'block';
+
+        initYupiterDefaultNotes();
+
+        var now = new Date();
+        yupiterState.currentYear = now.getFullYear();
+        yupiterState.currentMonth = now.getMonth();
+        if (!yupiterState.selectedDate) {
+            yupiterState.selectedDate = formatDateYMD(now);
+        }
+
+        renderYupiterCalendar();
+        renderYupiterNotesPanel();
+
+        fetch('/api/website/yupiter/calendar-presets')
+            .then(function (res) {
+                if (!res.ok) throw new Error('API error');
+                return res.json();
+            })
+            .then(function (data) {
+                if (data && Array.isArray(data.presets)) {
+                    yupiterState.presets = data.presets;
+                    renderYupiterPresets();
+                }
+                if (data && Array.isArray(data.mottoes) && data.mottoes.length > 0) {
+                    yupiterState.mottoes = data.mottoes;
+                    var banner = kaOne('#yupiterMottoBanner');
+                    if (banner) {
+                        var randMotto = data.mottoes[Math.floor(Math.random() * data.mottoes.length)];
+                        banner.textContent = randMotto;
+                    }
+                }
+            })
+            .catch(function () {
+                renderYupiterPresets();
+            });
+
+        setTimeout(function () {
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    };
+
+    window.closeYupiterSchedule = function () {
+        var box = kaOne('#modalYupiterScheduleBox');
+        if (box) box.style.display = 'none';
+    };
+
+    window.goToTodayYupiter = function () {
+        var now = new Date();
+        yupiterState.currentYear = now.getFullYear();
+        yupiterState.currentMonth = now.getMonth();
+        yupiterState.selectedDate = formatDateYMD(now);
+        renderYupiterCalendar();
+        renderYupiterNotesPanel();
+    };
+
+    window.changeYupiterMonth = function (delta) {
+        yupiterState.currentMonth += delta;
+        if (yupiterState.currentMonth < 0) {
+            yupiterState.currentMonth = 11;
+            yupiterState.currentYear--;
+        } else if (yupiterState.currentMonth > 11) {
+            yupiterState.currentMonth = 0;
+            yupiterState.currentYear++;
+        }
+        renderYupiterCalendar();
+    };
+
+    function renderYupiterCalendar() {
+        var titleEl = kaOne('#yupiterMonthYearTitle');
+        if (titleEl) {
+            titleEl.textContent = UZ_MONTH_NAMES[yupiterState.currentMonth] + ' ' + yupiterState.currentYear;
+        }
+
+        var gridEl = kaOne('#yupiterDaysGrid');
+        if (!gridEl) return;
+        gridEl.innerHTML = '';
+
+        var year = yupiterState.currentYear;
+        var month = yupiterState.currentMonth;
+
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        var firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+
+        for (var i = 0; i < firstDayIndex; i++) {
+            var emptyCell = document.createElement('div');
+            emptyCell.className = 'yupiter-day-cell is-empty';
+            gridEl.appendChild(emptyCell);
+        }
+
+        var todayKey = formatDateYMD(new Date());
+
+        for (var d = 1; d <= daysInMonth; d++) {
+            var mStr = String(month + 1).padStart(2, '0');
+            var dStr = String(d).padStart(2, '0');
+            var dateKey = year + '-' + mStr + '-' + dStr;
+
+            var cell = document.createElement('div');
+            cell.className = 'yupiter-day-cell';
+            cell.setAttribute('data-date', dateKey);
+
+            if (dateKey === todayKey) {
+                cell.classList.add('is-today');
+            }
+            if (dateKey === yupiterState.selectedDate) {
+                cell.classList.add('is-selected');
+            }
+
+            var dayNum = document.createElement('span');
+            dayNum.className = 'yupiter-day-num';
+            dayNum.textContent = d;
+            cell.appendChild(dayNum);
+
+            var dayNotes = yupiterState.notes[dateKey] || [];
+            if (dayNotes.length > 0) {
+                var dot = document.createElement('span');
+                dot.className = 'yupiter-day-dot';
+                dot.title = dayNotes.length + " ta reja";
+                cell.appendChild(dot);
+            }
+
+            (function (k) {
+                cell.onclick = function () {
+                    selectYupiterDate(k);
+                };
+            })(dateKey);
+
+            gridEl.appendChild(cell);
+        }
+    }
+
+    function selectYupiterDate(dateKey) {
+        yupiterState.selectedDate = dateKey;
+
+        var allCells = kaAll('.yupiter-day-cell[data-date]');
+        allCells.forEach(function (c) {
+            if (c.getAttribute('data-date') === dateKey) {
+                c.classList.add('is-selected');
+            } else {
+                c.classList.remove('is-selected');
+            }
+        });
+
+        renderYupiterNotesPanel();
+
+        var input = kaOne('#yupiterNoteInput');
+        if (input) input.focus();
+    }
+
+    function formatUzbekDateFull(dateKey) {
+        if (!dateKey) return '';
+        var parts = dateKey.split('-');
+        if (parts.length !== 3) return dateKey;
+        var y = parseInt(parts[0], 10);
+        var m = parseInt(parts[1], 10) - 1;
+        var d = parseInt(parts[2], 10);
+
+        var dateObj = new Date(y, m, d);
+        var weekday = UZ_WEEKDAY_NAMES[dateObj.getDay()] || '';
+        var monthName = UZ_MONTH_NAMES[m] || '';
+
+        return d + '-' + monthName + ', ' + y + ' (' + weekday + ')';
+    }
+
+    function renderYupiterNotesPanel() {
+        var labelEl = kaOne('#yupiterSelectedDateLabel');
+        if (labelEl) {
+            labelEl.innerHTML = '📌 Tanlangan sana: <strong>' + formatUzbekDateFull(yupiterState.selectedDate) + '</strong>';
+        }
+
+        var notes = yupiterState.notes[yupiterState.selectedDate] || [];
+        var countBadge = kaOne('#yupiterNotesCountBadge');
+        if (countBadge) {
+            countBadge.textContent = notes.length > 0 ? (notes.length + ' ta reja') : "Reja yo'q";
+        }
+
+        var listEl = kaOne('#yupiterNotesList');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+
+        if (notes.length === 0) {
+            var empty = document.createElement('div');
+            empty.className = 'yupiter-empty-notes';
+            empty.innerHTML = '✨ Ushbu sanaga hali reja belgilanmagan.<br>Yuqoridagi maydonga yozing yoki namunalardan birini tanlang!';
+            listEl.appendChild(empty);
+            return;
+        }
+
+        notes.forEach(function (item) {
+            var row = document.createElement('div');
+            row.className = 'yupiter-note-item';
+
+            var left = document.createElement('div');
+            left.className = 'yupiter-note-left';
+
+            var check = document.createElement('div');
+            check.className = 'yupiter-checkbox' + (item.done ? ' checked' : '');
+            check.setAttribute('role', 'checkbox');
+            check.setAttribute('aria-checked', item.done ? 'true' : 'false');
+            check.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            check.onclick = function () {
+                toggleYupiterNoteDone(item.id);
+            };
+
+            var timeBadge = document.createElement('span');
+            timeBadge.className = 'yupiter-note-time';
+            timeBadge.textContent = item.time || '20 daq';
+
+            var text = document.createElement('span');
+            text.className = 'yupiter-note-text' + (item.done ? ' done' : '');
+            text.textContent = item.text;
+
+            left.appendChild(check);
+            left.appendChild(timeBadge);
+            left.appendChild(text);
+
+            var delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'yupiter-delete-btn';
+            delBtn.title = "O'chirish";
+            delBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+            delBtn.onclick = function () {
+                deleteYupiterNote(item.id);
+            };
+
+            row.appendChild(left);
+            row.appendChild(delBtn);
+
+            listEl.appendChild(row);
+        });
+    }
+
+    function renderYupiterPresets() {
+        var container = kaOne('#yupiterPresetsList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        var defaultPresets = [
+            { text: "Kitob mutolaasi 📖" },
+            { text: "Matematika mashqi 🧮" },
+            { text: "Badantarbiya & sport 🏃" },
+            { text: "Ingliz tili so'zlari 🇬🇧" },
+            { text: "Uy vazifasi ✍️" },
+            { text: "Rasm chizish 🎨" },
+            { text: "Xonani yig'ish 🧹" }
+        ];
+
+        var list = (yupiterState.presets && yupiterState.presets.length > 0)
+            ? yupiterState.presets
+            : defaultPresets;
+
+        list.forEach(function (p) {
+            var tag = document.createElement('span');
+            tag.className = 'yupiter-preset-tag';
+            tag.textContent = p.text || p;
+            tag.onclick = function () {
+                var input = kaOne('#yupiterNoteInput');
+                if (input) {
+                    input.value = p.text || p;
+                    input.focus();
+                }
+            };
+            container.appendChild(tag);
+        });
+    }
+
+    window.saveYupiterNote = function () {
+        var input = kaOne('#yupiterNoteInput');
+        var timeSelect = kaOne('#yupiterTimeSelect');
+        if (!input) return;
+
+        var val = (input.value || '').trim();
+        if (!val) {
+            input.focus();
+            input.style.borderColor = '#ef4444';
+            setTimeout(function () { input.style.borderColor = ''; }, 1200);
+            return;
+        }
+
+        var timeVal = timeSelect ? timeSelect.value : '20 daqiqa';
+        var dateKey = yupiterState.selectedDate;
+
+        if (!yupiterState.notes[dateKey]) {
+            yupiterState.notes[dateKey] = [];
+        }
+
+        var newNote = {
+            id: 'note_' + Date.now(),
+            text: val,
+            time: timeVal,
+            done: false
+        };
+
+        yupiterState.notes[dateKey].push(newNote);
+        saveYupiterNotesToStorage();
+
+        input.value = '';
+        renderYupiterNotesPanel();
+        renderYupiterCalendar();
+
+        if (typeof showToast === 'function') {
+            showToast("Reja muvaffaqiyatli saqlandi! 🎯");
+        } else if (typeof playChimeEffect === 'function') {
+            playChimeEffect(true);
+        }
+    };
+
+    function toggleYupiterNoteDone(id) {
+        var notes = yupiterState.notes[yupiterState.selectedDate] || [];
+        var found = notes.find(function (n) { return n.id === id; });
+        if (found) {
+            found.done = !found.done;
+            saveYupiterNotesToStorage();
+            renderYupiterNotesPanel();
+            if (found.done && typeof playChimeEffect === 'function') {
+                playChimeEffect(true);
+            }
+        }
+    }
+
+    function deleteYupiterNote(id) {
+        var notes = yupiterState.notes[yupiterState.selectedDate] || [];
+        yupiterState.notes[yupiterState.selectedDate] = notes.filter(function (n) { return n.id !== id; });
+        saveYupiterNotesToStorage();
+        renderYupiterNotesPanel();
+        renderYupiterCalendar();
+    }
+
     function closePlanetModal() {
+        window.closePlanetModalVideo();
+        window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';

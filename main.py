@@ -706,6 +706,8 @@ def format_planet_row(row, request: Request, lang: str = "uzb") -> dict:
     d["ai_intro"] = intro
     audio_file = get_planet_audio_hash(pid, intro)
     d["audio_url"] = to_full_image_url(f"/audio_cache/{audio_file}", request)
+    raw_video = (d.get("video") or "").strip()
+    d["video"] = to_full_image_url(raw_video, request) if raw_video else None
     return d
 
 
@@ -2511,6 +2513,331 @@ def admin_get_uran_words(category_id: Optional[int] = None, request: Request = N
         for r in rows
     ]
 
+@app.get("/api/website/uran/practice", tags=["Website & Admin API"], summary="Uran: Random 3-4 ta so'z kartochkalari va test")
+def get_uran_practice(count: int = 3, request: Request = None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    safe_count = max(2, min(count, 5))
+    cursor.execute("SELECT * FROM uran_words ORDER BY RANDOM() LIMIT ?", (safe_count,))
+    selected_rows = cursor.fetchall()
+
+    if not selected_rows:
+        conn.close()
+        return {"cards": [], "quiz": None}
+
+    cards = [
+        {
+            "id": r["id"],
+            "category_id": r["category_id"],
+            "word_uz": r["word_uz"],
+            "word_en": r["word_en"],
+            "word_ru": r["word_ru"] or "",
+            "transcription": r["transcription"] or "",
+            "image": to_full_image_url(r["image"], request) if request else r["image"],
+            "audio_url": to_full_image_url(r["audio_url"], request) if (r["audio_url"] and request) else r["audio_url"],
+            "example_sentence": r["example_sentence"] or "",
+            "example_translation": r["example_translation"] or "",
+        }
+        for r in selected_rows
+    ]
+
+    # Test uchun kartochkalardan bittasini tanlaymiz
+    target = random.choice(cards)
+    correct_answer = target["word_uz"]
+
+    # Qolgan 3 ta noto'g'ri variantni bazadan olamiz
+    cursor.execute("SELECT word_uz FROM uran_words WHERE id != ? ORDER BY RANDOM() LIMIT 3", (target["id"],))
+    distractor_rows = cursor.fetchall()
+    conn.close()
+
+    distractors = [d["word_uz"] for d in distractor_rows]
+    options = [correct_answer] + distractors
+    random.shuffle(options)
+
+    quiz = {
+        "word_en": target["word_en"],
+        "transcription": target["transcription"],
+        "question": f"«{target['word_en']}» so'zining o'zbekcha tarjimasi nima?",
+        "correct": correct_answer,
+        "options": options,
+        "image": target["image"],
+        "audio_url": target["audio_url"]
+    }
+
+    return {"cards": cards, "quiz": quiz}
+
+@app.get("/api/website/saturn/practice", tags=["Website & Admin API"], summary="Saturn: 2-3 ta matematika mashqi va test")
+def get_saturn_practice(count: int = 3):
+    pool_cards = [
+        {
+            "id": "math_1",
+            "badge": "Qo'shish amali ➕",
+            "problem": "3 + 4 = ?",
+            "visual": "🍎 🍎 🍎  +  🍎 🍎 🍎 🍎",
+            "answer": "7",
+            "explanation": "3 ta olmaga 4 ta olma qo'shilsa, jami 7 ta olma bo'ladi: 3 + 4 = 7",
+            "audio_text": "Uchga to'rtni qo'shganda yetti bo'ladi."
+        },
+        {
+            "id": "math_2",
+            "badge": "Ayirish amali ➖",
+            "problem": "8 - 3 = ?",
+            "visual": "⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐  ➖  ⭐ ⭐ ⭐",
+            "answer": "5",
+            "explanation": "8 ta yulduzdan 3 tasi olinsa, 5 ta yulduz qoladi: 8 - 3 = 5",
+            "audio_text": "Sakkizdan uchni ayirsak besh qoladi."
+        },
+        {
+            "id": "math_3",
+            "badge": "Mantiqiy jumboq 🧩",
+            "problem": "Daraxtda 5 ta qush bor edi. Yana 3 tasi uchib keldi. Jami nechta bo'ldi?",
+            "visual": "🦜 🦜 🦜 🦜 🦜  ➕  🦜 🦜 🦜",
+            "answer": "8",
+            "explanation": "5 ta qushchaga 3 ta qushcha qo'shildi: 5 + 3 = 8 ta qushcha!",
+            "audio_text": "Beshga uchni qo'shsak sakkiz ta bo'ladi."
+        },
+        {
+            "id": "math_4",
+            "badge": "Qo'shish amali ➕",
+            "problem": "6 + 2 = ?",
+            "visual": "🍓 🍓 🍓 🍓 🍓 🍓  +  🍓 🍓",
+            "answer": "8",
+            "explanation": "6 ta qulupnayga 2 ta qulupnay qo'shilsa, jami 8 ta bo'ladi: 6 + 2 = 8",
+            "audio_text": "Oltiga ikkini qo'shsak sakkiz bo'ladi."
+        },
+        {
+            "id": "math_5",
+            "badge": "Ayirish amali ➖",
+            "problem": "10 - 4 = ?",
+            "visual": "🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈 🎈  ➖  🎈 🎈 🎈 🎈",
+            "answer": "6",
+            "explanation": "10 ta shardan 4 tasi uchib ketsa, 6 ta shar qoladi: 10 - 4 = 6",
+            "audio_text": "O'ndan to'rtni ayirsak olti qoladi."
+        },
+        {
+            "id": "math_6",
+            "badge": "Taqqoslash amali ⚖️",
+            "problem": "Qaysi biri ko'p: 7 ta olma yoki 4 ta olma?",
+            "visual": "🍎🍎🍎🍎🍎🍎🍎  (7)   vs   (4)  🍎🍎🍎🍎",
+            "answer": "7 ta olma",
+            "explanation": "7 soni 4 sonidan katta: 7 > 4, demak 7 ta olma ko'proq!",
+            "audio_text": "Yetti to'rtdan katta, demak yetti ta olma ko'p."
+        }
+    ]
+
+    pool_quizzes = [
+        {
+            "question": "6 + 3 yig'indisi nechiga teng?",
+            "visual": "🍇🍇🍇🍇🍇🍇  +  🍇🍇🍇",
+            "correct": "9",
+            "options": ["7", "8", "9", "10"],
+            "explanation": "6 ga 3 ni qo'shganda 9 hosil bo'ladi: 6 + 3 = 9",
+            "audio_text": "Oltiga uchni qo'shsak necha bo'ladi? To'qqiz!"
+        },
+        {
+            "question": "9 dan 4 ni ayirsak nechchi qoladi? (9 - 4 = ?)",
+            "visual": "⭐⭐⭐⭐⭐⭐⭐⭐⭐  ➖  ⭐⭐⭐⭐",
+            "correct": "5",
+            "options": ["3", "4", "5", "6"],
+            "explanation": "9 dan 4 ni ayirganda 5 qoladi: 9 - 4 = 5",
+            "audio_text": "To'qqizdan to'rtni ayirsak besh qoladi!"
+        },
+        {
+            "question": "Akmalda 4 ta, ukasida 3 ta shokolad bor. Jami nechta shokolad bor?",
+            "visual": "🍫🍫🍫🍫  +  🍫🍫🍫",
+            "correct": "7 ta",
+            "options": ["5 ta", "6 ta", "7 ta", "8 ta"],
+            "explanation": "4 + 3 = 7 ta shokolad bo'ladi!",
+            "audio_text": "To'rtga uchni qo'shsak yetti ta bo'ladi!"
+        },
+        {
+            "question": "7 + 3 hisoblang: (7 + 3 = ?)",
+            "visual": "🌸🌸🌸🌸🌸🌸🌸  +  🌸🌸🌸",
+            "correct": "10",
+            "options": ["8", "9", "10", "11"],
+            "explanation": "7 ga 3 ni qo'shganda butun 10 hosil bo'ladi: 7 + 3 = 10",
+            "audio_text": "Yettiga uchni qo'shsak o'n bo'ladi!"
+        }
+    ]
+
+    safe_count = max(2, min(count, 4))
+    selected_cards = random.sample(pool_cards, safe_count)
+    selected_quiz = random.choice(pool_quizzes)
+    # Shuffle options
+    shuffled_options = list(selected_quiz["options"])
+    random.shuffle(shuffled_options)
+    quiz_data = dict(selected_quiz)
+    quiz_data["options"] = shuffled_options
+
+    return {"cards": selected_cards, "quiz": quiz_data}
+
+@app.get("/api/website/yupiter/calendar-presets", tags=["Website & Admin API"], summary="Yupiter: Taym-menejment taqvimi va kunlik reja shablonlari")
+def get_yupiter_calendar_presets():
+    return {
+        "presets": [
+            {"id": "read", "text": "Kitob mutolaasi 📖 (20 daqiqa)", "category": "Mutolaa"},
+            {"id": "math", "text": "Matematika mashqi 🧮", "category": "Ta'lim"},
+            {"id": "sport", "text": "Badantarbiya va sport 🏃", "category": "Sport"},
+            {"id": "lang", "text": "Ingliz tili so'zlari 🇬🇧", "category": "Tillar"},
+            {"id": "hw", "text": "Uy vazifalarini bajarish ✍️", "category": "Ta'lim"},
+            {"id": "art", "text": "Rasm chizish va ijod 🎨", "category": "Ijod"},
+            {"id": "clean", "text": "Xonani tartibga keltirish 🧹", "category": "Tartib"}
+        ],
+        "mottoes": [
+            "20 daqiqa qoidasi: Rejalashtirilgan har bir mashg'ulot intizom va quvonch keltiradi! ⏱️",
+            "Vaqtni unumli taqsimlagan bola kelajakda buyuk allomaga aylanadi! 🌟",
+            "Bugungi 20 daqiqalik odat ertangi ulkan muvaffaqiyat poydevoridir! 🚀",
+            "Reja asosida yashash fikrni tiniq va ruhni tetik qiladi! 🎯"
+        ]
+    }
+
+@app.get("/api/website/venera/wardrobe", tags=["Website & Admin API"], summary="Venera: Virtual Do'kon va Kiyintirish ma'lumotlari")
+def get_venera_wardrobe():
+    return {
+        "character": {
+            "name": "Kichik Alloma",
+            "image": "/img/venera_boy.png?v=3",
+            "coins": 200
+        },
+        "categories": [
+            {
+                "id": "outfits",
+                "name": "Haqiqiy 3D Liboslar",
+                "icon": "🥋",
+                "items": [
+                    {
+                        "id": "default",
+                        "name": "Asl Milliy Libos",
+                        "icon": "👘",
+                        "image": "/img/venera_boy.png?v=3",
+                        "price": 0,
+                        "desc": "O'zining qulay milliy yaktagi"
+                    },
+                    {
+                        "id": "doppi",
+                        "name": "Milliy Do'ppi & Zar Chopon",
+                        "icon": "🇺🇿",
+                        "image": "/img/wardrobe_doppi.jpg",
+                        "price": 30,
+                        "desc": "Zardo'zi saroy choponi va O'zbek milliy do'ppisi"
+                    },
+                    {
+                        "id": "crown",
+                        "name": "Qirollik Toji & Shohona Libos",
+                        "icon": "👑",
+                        "image": "/img/wardrobe_crown.jpg",
+                        "price": 45,
+                        "desc": "Oltin toj, qimmatbaho javohirlar va qizil plash"
+                    },
+                    {
+                        "id": "astronaut",
+                        "name": "Fazogir & Kosmik Shlem",
+                        "icon": "🚀",
+                        "image": "/img/wardrobe_astronaut.jpg",
+                        "price": 50,
+                        "desc": "Haqiqiy kosmonavt skafandri va koinot dubulg'asi"
+                    },
+                    {
+                        "id": "scientist",
+                        "name": "Bilimdon Alloma & Professor",
+                        "icon": "🎓",
+                        "image": "/img/wardrobe_scientist.jpg",
+                        "price": 35,
+                        "desc": "Akademik shlyapa, ko'zoynak va oq xalat"
+                    },
+                    {
+                        "id": "superhero",
+                        "name": "Super Alloma Qahramon",
+                        "icon": "🦸",
+                        "image": "/img/wardrobe_superhero.jpg",
+                        "price": 40,
+                        "desc": "Yulduzli qahramonlik zirhi va qudratli qizil plash"
+                    },
+                    {
+                        "id": "sport",
+                        "name": "Zamonaviy Sportchi & Gamer",
+                        "icon": "🧢",
+                        "image": "/img/wardrobe_sport.jpg",
+                        "price": 25,
+                        "desc": "Sport kastyumi, kepka, quyosh ko'zoynagi va naushnik"
+                    }
+                ]
+            },
+            {
+                "id": "backdrops",
+                "name": "Sehrli Fonlar",
+                "icon": "🌌",
+                "items": [
+                    {"id": "space", "name": "Koinot & Venera", "icon": "🪐", "price": 0, "desc": "Yulduzli koinot va sayyoralar bag'rida"},
+                    {"id": "registan", "name": "Registon Saroyi", "icon": "🏛️", "price": 20, "desc": "Samarqand va Buxoro qadimiy madaniyati"},
+                    {"id": "future_lab", "name": "Kelajak Markazi", "icon": "🧪", "price": 25, "desc": "Yuqori texnologiyalar laboratoriyasi"},
+                    {"id": "cozy_room", "name": "Kutubxona Xonasi", "icon": "📚", "price": 15, "desc": "Shinamgina allomalar kutubxonasi"}
+                ]
+            }
+        ]
+    }
+
+@app.get("/api/website/neptun/tree", tags=["Website & Admin API"], summary="Neptun: Sehrli Hissiyotlar Daraxti ma'lumotlari")
+def get_neptun_tree():
+    return {
+        "title": "Sehrli Hissiyotlar Daraxti",
+        "treeImage": "/img/neptun_tree.png",
+        "description": "Daraxt o'rtasini yoki shoxlarini bosing, emoji tanlang va daraxtga yopishtiring!",
+        "categories": [
+            {
+                "id": "emotions",
+                "name": "His-tuyg'ular",
+                "icon": "💖",
+                "emojis": [
+                    {"emoji": "😊", "name": "Xursand", "desc": "Quvnoq kayfiyat"},
+                    {"emoji": "🤩", "name": "Hayratda", "desc": "Ajoyib kashfiyot"},
+                    {"emoji": "🥰", "name": "Mehrli", "desc": "Mehr va samimiyat"},
+                    {"emoji": "😎", "name": "Quvnoq", "desc": "O'ziga ishongan"},
+                    {"emoji": "🥳", "name": "Bayram", "desc": "Xursandchilik"},
+                    {"emoji": "😇", "name": "Beg'ubor", "desc": "Yaxshi niyat"},
+                    {"emoji": "🤗", "name": "Do'stona", "desc": "Quchoqlash va do'stlik"},
+                    {"emoji": "🤔", "name": "Fikrchan", "desc": "Donolik va o'ylov"},
+                    {"emoji": "😴", "name": "Orom", "desc": "Tinch va osuda"},
+                    {"emoji": "💖", "name": "Yurakcha", "desc": "Cheksiz sevgi"}
+                ]
+            },
+            {
+                "id": "fruits",
+                "name": "Mevalar & Tabiat",
+                "icon": "🍎",
+                "emojis": [
+                    {"emoji": "🍎", "name": "Qizil olma", "desc": "Shirin qizil olma"},
+                    {"emoji": "🍏", "name": "Yashil olma", "desc": "Mazali yashil olma"},
+                    {"emoji": "🍊", "name": "Apelsin", "desc": "Sershira apelsin"},
+                    {"emoji": "🍋", "name": "Limon", "desc": "Nordongina limon"},
+                    {"emoji": "🍓", "name": "Qulupnay", "desc": "Xushbo'y qulupnay"},
+                    {"emoji": "🍒", "name": "Gilos", "desc": "Qizg'aldoq gilos"},
+                    {"emoji": "🍇", "name": "Uzum", "desc": "Shirin uzum shingili"},
+                    {"emoji": "🌸", "name": "Bahor guli", "desc": "Nafis gulbarg"},
+                    {"emoji": "🌻", "name": "Kungaboqar", "desc": "Quyosh guli"},
+                    {"emoji": "🍀", "name": "Omad yaprog'i", "desc": "To'rt yaproqli yonbosh"}
+                ]
+            },
+            {
+                "id": "magic",
+                "name": "Sehr & Qahramonlar",
+                "icon": "✨",
+                "emojis": [
+                    {"emoji": "🌟", "name": "Oltin yulduz", "desc": "Koinot yulduzi"},
+                    {"emoji": "🦋", "name": "Sehrli kapalak", "desc": "Rangin qanotli kapalak"},
+                    {"emoji": "🐝", "name": "Mehnatkash ari", "desc": "Asalari"},
+                    {"emoji": "🦜", "name": "To'tiqush", "desc": "Quvnoq qushcha"},
+                    {"emoji": "🦉", "name": "Dono boyo'g'li", "desc": "Bilimdon qush"},
+                    {"emoji": "🎈", "name": "Rangli shar", "desc": "Uchar havo shari"},
+                    {"emoji": "🎁", "name": "Sovg'a", "desc": "Kutilmagan sovg'a"},
+                    {"emoji": "💎", "name": "Olmos", "desc": "Yaltiroq qimmatbaho tosh"},
+                    {"emoji": "👑", "name": "Toj", "desc": "Shohona toj"},
+                    {"emoji": "🌈", "name": "Kamalak", "desc": "Yetti rang jilosi"}
+                ]
+            }
+        ]
+    }
+
 @app.post("/api/website/uran/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Website & Admin API"], summary="Admin: Yangi So'z Qo'shish")
 def admin_create_uran_word(payload: UranWordCreate, request: Request):
     conn = get_db_connection()
@@ -3323,9 +3650,11 @@ def create_planet(planet: PlanetCreate, request: Request):
     clean_img = sanitize_image_path(planet.image or "/images/planets/earth.svg")
     new_status = planet.status or "active"
     new_is_blocked = 1 if (new_status == "inactive" or planet.is_blocked or planet.is_block) else 0
+    new_gradient = planet.gradient if planet.gradient is not None else None
+    new_video = planet.video.strip() if planet.video else None
     cursor.execute(
-        "INSERT INTO planets (title, description, image, status, is_blocked, is_block) VALUES (?, ?, ?, ?, ?, ?)",
-        (title, planet.description.strip() if planet.description else "", clean_img, new_status, new_is_blocked, new_is_blocked)
+        "INSERT INTO planets (title, description, image, status, is_blocked, is_block, gradient, video) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (title, planet.description.strip() if planet.description else "", clean_img, new_status, new_is_blocked, new_is_blocked, new_gradient, new_video)
     )
     conn.commit()
     planet_id = cursor.lastrowid
@@ -3352,6 +3681,8 @@ def update_planet(planet_id: int, planet: PlanetUpdate, request: Request):
     new_desc = planet.description.strip() if planet.description is not None else existing["description"]
     new_image = sanitize_image_path(planet.image) if planet.image is not None else existing["image"]
     new_status = planet.status if planet.status is not None else existing["status"]
+    new_gradient = planet.gradient if planet.gradient is not None else (existing["gradient"] if "gradient" in existing.keys() else None)
+    new_video = planet.video.strip() if planet.video is not None else (existing["video"] if "video" in existing.keys() else None)
 
     # is_blocked va is_block: status yoki kelgan qiymatdan sinxronlash
     if planet.is_blocked is not None:
@@ -3370,8 +3701,8 @@ def update_planet(planet_id: int, planet: PlanetUpdate, request: Request):
         new_is_blocked = 1 if new_status == "inactive" else 0
 
     cursor.execute(
-        "UPDATE planets SET title = ?, description = ?, image = ?, status = ?, is_blocked = ?, is_block = ? WHERE id = ?",
-        (new_title, new_desc, new_image, new_status, new_is_blocked, new_is_blocked, planet_id)
+        "UPDATE planets SET title = ?, description = ?, image = ?, status = ?, is_blocked = ?, is_block = ?, gradient = ?, video = ? WHERE id = ?",
+        (new_title, new_desc, new_image, new_status, new_is_blocked, new_is_blocked, new_gradient, new_video, planet_id)
     )
     conn.commit()
     cursor.execute("SELECT * FROM planets WHERE id = ?", (planet_id,))
@@ -3788,9 +4119,9 @@ def get_stats():
     total_amenities = am_row["total"] or 0
     active_amenities = am_row["active"] or 0
 
-    cursor.execute("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM planets")
+    cursor.execute("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM planets WHERE id != 50")
     pl_row = cursor.fetchone()
-    total_planets = pl_row["total"] or 0
+    total_planets = pl_row["total"] or 8
     active_planets = pl_row["active"] or 0
 
     cursor.execute("SELECT COUNT(*) as total FROM teams")
@@ -3805,6 +4136,19 @@ def get_stats():
     faq_row = cursor.fetchone()
     total_faqs = faq_row["total"] or 0
 
+    # Tashrif buyuruvchilar soni
+    cursor.execute("SELECT value FROM system_meta WHERE key = 'site_visitors'")
+    vis_row = cursor.fetchone()
+    if not vis_row:
+        total_visitors = 1
+        cursor.execute("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('site_visitors', ?)", (str(total_visitors),))
+        conn.commit()
+    else:
+        try:
+            total_visitors = int(vis_row["value"])
+        except Exception:
+            total_visitors = 1
+
     conn.close()
     return {
         "totalPlanets": total_planets,
@@ -3815,8 +4159,29 @@ def get_stats():
         "totalGallery": total_gallery,
         "totalMessages": total_messages,
         "unreadMessages": unread_messages,
-        "totalFaqs": total_faqs
+        "totalFaqs": total_faqs,
+        "totalVisitors": total_visitors
     }
+
+
+@app.post("/api/website/track-visit", tags=["Web Sayt (Website)"], summary="Saytga yangi tashrifni qayd qilish")
+def track_website_visit():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM system_meta WHERE key = 'site_visitors'")
+    row = cursor.fetchone()
+    if not row:
+        val = 1
+        cursor.execute("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('site_visitors', ?)", (str(val),))
+    else:
+        try:
+            val = int(row["value"]) + 1
+        except Exception:
+            val = 1
+        cursor.execute("UPDATE system_meta SET value = ? WHERE key = 'site_visitors'", (str(val),))
+    conn.commit()
+    conn.close()
+    return {"success": True, "totalVisitors": val}
 
 
 # 7. WEB SAYT LANDING TO'PLAMI

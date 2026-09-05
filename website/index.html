@@ -154,7 +154,7 @@
 
             <!-- VIDEO PLAYER CONTAINERI -->
             <figure class="hero-figure reveal in">
-                <video id="heroVideo" class="hero-video" loop playsinline muted>
+                <video id="heroVideo" class="hero-video" loop playsinline>
                     <source src="video/hero_vid.mp4" type="video/mp4">
                     Brauzeringiz video tegini qo'llab-quvvatlamaydi.
                 </video>
@@ -195,6 +195,36 @@
             <div class="starfield" data-stars="90"></div>
             <div class="cosmos-glow"></div>
             <div class="container">
+                <!-- ================= STATS BANNER / METRIKALAR ================= -->
+                <div class="cosmos-stats-banner reveal" id="cosmosStats">
+                    <div class="cosmos-stats-grid">
+                        <!-- 1. Saytga kirganlar (Umumiy tashriflar) -->
+                        <div class="cosmos-stat-item">
+                            <div class="cosmos-stat-number" id="statVisitors" data-target="1">1</div>
+                            <div class="cosmos-stat-label" data-i18n="stat_visitors">Umumiy tashriflar</div>
+                            <div class="cosmos-stat-line" aria-hidden="true"></div>
+                        </div>
+
+                        <div class="cosmos-stat-divider" aria-hidden="true"></div>
+
+                        <!-- 2. Sayyoralar soni -->
+                        <div class="cosmos-stat-item">
+                            <div class="cosmos-stat-number" id="statPlanets" data-target="8">8</div>
+                            <div class="cosmos-stat-label" data-i18n="stat_planets">Sayyoralar soni</div>
+                            <div class="cosmos-stat-line" aria-hidden="true"></div>
+                        </div>
+
+                        <div class="cosmos-stat-divider" aria-hidden="true"></div>
+
+                        <!-- 3. Jamoadoshlar soni -->
+                        <div class="cosmos-stat-item">
+                            <div class="cosmos-stat-number" id="statTeam" data-target="6">6</div>
+                            <div class="cosmos-stat-label" data-i18n="stat_team">Jamoadoshlar soni</div>
+                            <div class="cosmos-stat-line" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="sec-head reveal">
                     <span class="sec-badge" data-i18n="planets_badge">Kosmik ekotizim</span>
                     <h2 data-i18n="planets_title">Hayot uchun kerakli 8 ta eng muhim ko'nikma.</h2>
@@ -861,6 +891,437 @@
                     <p id="modalPlanetDesc" class="modal-desc">Merkuriy — bolaning ijodiy qiziqishlari va kelajak kasblari haqidagi tasavvurini kengaytiruvchi kashfiyotlar makoni.</p>
                     <div id="modalFeatureHead" class="modal-feature-head">KASBIY YO'NALISHLAR</div>
                     <div id="modalFeatureGrid" class="modal-feature-grid"></div>
+
+                    <!-- Sayyora Videosi (Sinab ko'rish) Player qismi -->
+                    <div id="modalVideoPlayerBox" class="modal-video-player-box" style="display: none;">
+                        <div class="modal-video-topbar">
+                            <span class="modal-video-tag">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <span id="modalVideoTitleText">Sinab ko'rish darsi</span>
+                            </span>
+                            <button type="button" class="btn-close-modal-video" onclick="closePlanetModalVideo()" title="Videoni yopish">
+                                ✕ Yopish
+                            </button>
+                        </div>
+                        <div class="modal-video-frame">
+                            <video id="modalPlanetVideoEl" controls playsinline preload="metadata">
+                                <source src="" type="video/mp4">
+                                Brauzeringiz videoni qo'llab-quvvatlamaydi.
+                            </video>
+                        </div>
+                    </div>
+
+                    <!-- Uran Interaktiv Kartochkalar & Test Qismi -->
+                    <div id="modalUranPracticeBox" class="modal-uran-practice-box" style="display: none;">
+                        <div class="uran-practice-header">
+                            <div class="uran-practice-title">
+                                <span class="uran-badge">🎮 Interaktiv O'yin</span>
+                                <span id="uranStepIndicator" class="uran-step-indicator">1 / 3-so'z</span>
+                            </div>
+                            <div class="uran-practice-actions">
+                                <button type="button" class="btn-uran-action" onclick="refreshUranPractice()" title="Yangi so'zlar olish">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                                    <span>Yangi so'zlar</span>
+                                </button>
+                                <button type="button" class="btn-close-modal-video" onclick="closeUranPractice()" title="Yopish">✕ Yopish</button>
+                            </div>
+                        </div>
+
+                        <!-- 1-BOSQICH: Interaktiv So'z Kartochkalari -->
+                        <div id="uranCardsStage" class="uran-cards-stage">
+                            <div class="uran-flashcard-container" id="uranFlashcardContainer">
+                                <div class="uran-flashcard" id="uranFlashcard" onclick="flipUranCard()">
+                                    <div class="uran-card-face uran-card-front">
+                                        <div class="uran-card-tag">Inglizcha</div>
+                                        <div class="uran-card-img-wrap" id="uranCardImgWrap">
+                                            <img id="uranCardImg" src="" alt="Word">
+                                        </div>
+                                        <h3 class="uran-card-word-en" id="uranWordEn">Apple</h3>
+                                        <div class="uran-card-transcription" id="uranTranscription">[ˈæp.əl]</div>
+                                        <button type="button" class="uran-sound-btn" onclick="event.stopPropagation(); playCurrentUranWordAudio()" title="Talaffuzni eshitish">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                            <span>Ovozni eshitish</span>
+                                        </button>
+                                        <div class="uran-card-flip-hint">Tarjimasini ko'rish uchun bosing 👆</div>
+                                    </div>
+                                    <div class="uran-card-face uran-card-back">
+                                        <div class="uran-card-tag">O'zbekcha tarjimasi</div>
+                                        <h3 class="uran-card-word-uz" id="uranWordUz">Olma</h3>
+                                        <p class="uran-card-example" id="uranWordExample">Sweet red apple.</p>
+                                        <button type="button" class="uran-sound-btn secondary" onclick="event.stopPropagation(); playCurrentUranWordAudio()">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                            <span>Qayta eshitish</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kartochka Navigatsiyasi -->
+                            <div class="uran-card-controls">
+                                <button type="button" class="uran-nav-btn" id="uranPrevCardBtn" onclick="prevUranCard()">
+                                    ◀ Oldingi
+                                </button>
+                                <div class="uran-dots-wrap" id="uranDotsWrap">
+                                    <span class="uran-dot active"></span>
+                                    <span class="uran-dot"></span>
+                                    <span class="uran-dot"></span>
+                                </div>
+                                <button type="button" class="uran-nav-btn primary" id="uranNextCardBtn" onclick="nextUranCard()">
+                                    Keyingi ▶
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2-BOSQICH: Test / Quiz (3-4 so'zdan keyin) -->
+                        <div id="uranQuizStage" class="uran-quiz-stage" style="display: none;">
+                            <div class="uran-quiz-card">
+                                <div class="uran-quiz-badge">🧠 Bilimni sinash testi</div>
+                                <h4 class="uran-quiz-question" id="uranQuizQuestion">«Apple» so'zining o'zbekcha tarjimasi qaysi?</h4>
+                                <div class="uran-quiz-listen-wrap">
+                                    <button type="button" class="uran-quiz-listen-btn" onclick="playQuizWordAudio()" title="So'zni eshitish">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                        <span id="uranQuizWordEn">Apple</span> talaffuzini eshitish
+                                    </button>
+                                </div>
+
+                                <!-- 4 ta Variant -->
+                                <div class="uran-quiz-options" id="uranQuizOptions"></div>
+
+                                <!-- Feedback Message -->
+                                <div class="uran-quiz-feedback" id="uranQuizFeedback" style="display: none;">
+                                    <div class="feedback-icon" id="uranFeedbackIcon">🎉</div>
+                                    <div class="feedback-text" id="uranFeedbackText">To'g'ri topdingiz! Barakalla!</div>
+                                    <button type="button" class="btn-uran-action primary" id="uranQuizNextBtn" onclick="refreshUranPractice()">
+                                        Yana 3 ta so'z o'rganish 🔄
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saturn Interaktiv Matematika & Test Qismi -->
+                    <div id="modalSaturnPracticeBox" class="modal-saturn-practice-box" style="display: none;">
+                        <div class="saturn-practice-header">
+                            <div class="saturn-practice-title">
+                                <span class="saturn-badge">🧮 Matematika & Mantiq</span>
+                                <span id="saturnStepIndicator" class="saturn-step-indicator">1 / 3-mashq</span>
+                            </div>
+                            <div class="saturn-practice-actions">
+                                <button type="button" class="btn-saturn-action" onclick="refreshSaturnPractice()" title="Yangi masalalar olish">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                                    <span>Yangi masalalar</span>
+                                </button>
+                                <button type="button" class="btn-close-modal-video" onclick="closeSaturnPractice()" title="Yopish">✕ Yopish</button>
+                            </div>
+                        </div>
+
+                        <!-- 1-BOSQICH: Interaktiv Matematika Kartochkalari -->
+                        <div id="saturnCardsStage" class="saturn-cards-stage">
+                            <div class="saturn-flashcard-container" id="saturnFlashcardContainer">
+                                <div class="saturn-flashcard" id="saturnFlashcard" onclick="flipSaturnCard()">
+                                    <!-- Old tomoni (Masala) -->
+                                    <div class="saturn-card-face saturn-card-front">
+                                        <div class="saturn-card-tag" id="saturnCardTag">Qo'shish amali ➕</div>
+                                        <div class="saturn-card-visual" id="saturnCardVisual">🍎 🍎 🍎  +  🍎 🍎 🍎 🍎</div>
+                                        <h3 class="saturn-card-problem" id="saturnCardProblem">3 + 4 = ?</h3>
+                                        <div class="saturn-card-flip-hint">Yechim va javobni ko'rish uchun bosing 👆</div>
+                                    </div>
+                                    <!-- Orqa tomoni (Yechim & Tushuntirish) -->
+                                    <div class="saturn-card-face saturn-card-back">
+                                        <div class="saturn-card-tag">To'g'ri javob & Yechim 💡</div>
+                                        <h3 class="saturn-card-answer" id="saturnCardAnswer">Javob: 7</h3>
+                                        <p class="saturn-card-explanation" id="saturnCardExplanation">3 ta olmaga 4 ta olma qo'shilsa, jami 7 ta olma bo'ladi: 3 + 4 = 7</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kartochka Navigatsiyasi -->
+                            <div class="saturn-card-controls">
+                                <button type="button" class="saturn-nav-btn" id="saturnPrevCardBtn" onclick="prevSaturnCard()">
+                                    ◀ Oldingi
+                                </button>
+                                <div class="saturn-dots-wrap" id="saturnDotsWrap">
+                                    <span class="saturn-dot active"></span>
+                                    <span class="saturn-dot"></span>
+                                    <span class="saturn-dot"></span>
+                                </div>
+                                <button type="button" class="saturn-nav-btn primary" id="saturnNextCardBtn" onclick="nextSaturnCard()">
+                                    Keyingi ▶
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2-BOSQICH: Test / Quiz (2-3 mashqdan keyin) -->
+                        <div id="saturnQuizStage" class="saturn-quiz-stage" style="display: none;">
+                            <div class="saturn-quiz-card">
+                                <div class="saturn-quiz-badge">🧠 Matematik test</div>
+                                <h4 class="saturn-quiz-question" id="saturnQuizQuestion">6 + 3 yig'indisi nechiga teng?</h4>
+                                <div class="saturn-quiz-visual" id="saturnQuizVisual">🍇🍇🍇🍇🍇🍇  +  🍇🍇🍇</div>
+                                <!-- 4 ta Variant -->
+                                <div class="saturn-quiz-options" id="saturnQuizOptions"></div>
+
+                                <!-- Feedback Message -->
+                                <div class="saturn-quiz-feedback" id="saturnQuizFeedback" style="display: none;">
+                                    <div class="feedback-icon" id="saturnFeedbackIcon">🎉</div>
+                                    <div class="feedback-text" id="saturnFeedbackText">To'g'ri topdingiz! Barakalla!</div>
+                                    <button type="button" class="btn-saturn-action primary" id="saturnQuizNextBtn" onclick="refreshSaturnPractice()">
+                                        Yana 3 ta masala yechish 🔄
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Venera Virtual Do'kon & Kiyintirish (Dress Up) Qismi -->
+                    <div id="modalVeneraShopBox" class="modal-venera-shop-box" style="display: none;">
+                        <div class="venera-shop-header">
+                            <div class="venera-shop-title">
+                                <span class="venera-badge">🛍️ Virtual Do'kon</span>
+                                <div class="venera-coin-pill" title="Mavjud Gold Coin tangalaringiz">
+                                    <span class="venera-coin-icon">🪙</span>
+                                    <span id="veneraCoinBalance">200</span>
+                                    <span class="venera-coin-label">Gold Coin</span>
+                                </div>
+                            </div>
+                            <div class="venera-shop-actions">
+                                <button type="button" class="btn-venera-action" onclick="randomVeneraOutfit()" title="Tasodifiy kiyintirish">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="8" cy="8" r="1.5"></circle><circle cx="16" cy="16" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle></svg>
+                                    <span>Tasodifiy 🎲</span>
+                                </button>
+                                <button type="button" class="btn-venera-action" onclick="resetVeneraOutfit()" title="Barcha kiyimlarni tozalash">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
+                                    <span>Tozalash</span>
+                                </button>
+                                <button type="button" class="btn-close-modal-video" onclick="closeVeneraShop()" title="Yopish">✕ Yopish</button>
+                            </div>
+                        </div>
+
+                        <div class="venera-wardrobe-container">
+                            <!-- Chap taraf: Bolaning Avatari va kiyimlari qatlami -->
+                            <div class="venera-avatar-stage" id="veneraAvatarStage">
+                                <div class="venera-avatar-backdrop bg-space" id="veneraBackdrop"></div>
+                                
+                                <div class="venera-character-frame" id="veneraCharacterFrame">
+                                    <!-- Bolaning 3D libosdagi haqiqiy rasmi -->
+                                    <img src="img/venera_boy.png?v=3" alt="Kichik Alloma" class="venera-boy-img" id="veneraBoyBaseImg">
+                                    <img src="" alt="Yangi libos" class="venera-boy-img-next" id="veneraBoyNextImg" style="display: none; opacity: 0;">
+
+                                    <!-- Rasmga olish chaqnash effekti -->
+                                    <div class="venera-flash-overlay" id="veneraFlashOverlay"></div>
+                                </div>
+
+                                <!-- Avatar Tagidagi Status & Rasmga olish -->
+                                <div class="venera-avatar-meta">
+                                    <div class="venera-meta-info">
+                                        <span class="venera-avatar-name" id="veneraStyleTitle">Kichik Alloma</span>
+                                        <span class="venera-avatar-sub" id="veneraStyleDesc">Milliy va zamonaviy uslub</span>
+                                    </div>
+                                    <button type="button" class="venera-snap-btn" onclick="takeVeneraSnapshot()" title="Suratga olish">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                        <span>Surat 📸</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- O'ng taraf: Do'kon vitrinasi va buyumlar -->
+                            <div class="venera-shop-sidebar">
+                                <div class="venera-tabs-bar" id="veneraTabsBar">
+                                    <button type="button" class="venera-tab-btn active" data-cat="outfits" onclick="switchVeneraTab('outfits')">
+                                        <span>🥋 Haqiqiy 3D Liboslar</span>
+                                    </button>
+                                    <button type="button" class="venera-tab-btn" data-cat="backdrops" onclick="switchVeneraTab('backdrops')">
+                                        <span>🌌 Sehrli Fonlar</span>
+                                    </button>
+                                </div>
+
+                                <!-- Buyumlar ro'yxati -->
+                                <div class="venera-items-grid" id="veneraItemsGrid"></div>
+
+                                <!-- Do'kon status maslahati -->
+                                <div class="venera-shop-tip">
+                                    <span class="venera-tip-icon">💡</span>
+                                    <span id="veneraTipText">Kiyimlarni tanlang va bolani o'z didingizga mos kiyintiring!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Neptun: Bugungi Hissiyot Daraxti (Exact Match to User Reference) -->
+                    <div id="modalNeptunTreeBox" class="modal-neptun-tree-box" style="display: none;">
+                        <!-- Mobile Phone Container Viewport -->
+                        <div class="neptun-phone-frame" id="neptunPhoneFrame">
+                            <!-- Top Status Bar & Back Button -->
+                            <div class="neptun-phone-topbar">
+                                <button type="button" class="neptun-back-btn" onclick="closeNeptunTree()" title="Orqaga / Yopish">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 18l-6-6 6-6"/>
+                                    </svg>
+                                </button>
+                                <div class="neptun-phone-clock">9:41</div>
+                                <div class="neptun-phone-icons">
+                                    <svg width="15" height="12" viewBox="0 0 24 18" fill="currentColor"><path d="M12 3c-4.97 0-9 2.03-12 5.09l12 11.91 12-11.91c-3-3.06-7.03-5.09-12-5.09z"/></svg>
+                                    <svg width="20" height="12" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="1" width="22" height="12" rx="3"/><path d="M25 4v6" stroke-linecap="round"/><rect x="3" y="3" width="16" height="8" rx="1.5" fill="currentColor"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Screen Content Area with Forest Background & Tree -->
+                            <div class="neptun-screen-canvas" id="neptunScreenCanvas">
+                                <!-- Flash Snap Overlay -->
+                                <div class="neptun-flash-overlay" id="neptunFlashOverlay"></div>
+
+                                <!-- Dim backdrop when emoji dock is open -->
+                                <div class="neptun-mood-dock-backdrop" id="neptunMoodBackdrop" onclick="closeNeptunMoodDock()" style="display: none;"></div>
+
+                                <!-- "Bugun" Glowing Circular Badge on Tree Trunk -->
+                                <div class="neptun-mood-circle-badge" id="neptunMoodCircleBadge" onclick="toggleNeptunMoodDock(event)" role="button" tabindex="0" title="Bugungi kayfiyatni tanlash uchun bosing">
+                                    <div class="mood-badge-label">Bugun</div>
+                                    <div class="mood-dashed-ring" id="moodDashedRing">
+                                        <!-- Glowing Orb (when no emoji selected) -->
+                                        <div class="mood-glowing-orb" id="moodGlowingOrb"></div>
+                                        <!-- Selected Emoji (when chosen) -->
+                                        <span class="mood-selected-emoji" id="moodSelectedEmoji" style="display: none;"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Emoji Capsule Dock (Panel 2 from user image) -->
+                                <div class="neptun-mood-dock" id="neptunMoodDock" style="display: none;">
+                                    <div class="mood-dock-arrow"></div>
+                                    <div class="mood-dock-emojis">
+                                        <button type="button" class="mood-emoji-btn" onclick="selectNeptunMood('😠', 'Jahldor', 'Biroz xafa yoki jahldor')" title="Jahldor">
+                                            <span>😠</span>
+                                        </button>
+                                        <button type="button" class="mood-emoji-btn" onclick="selectNeptunMood('😄', 'Xursand', 'Juda xursand va baxtli')" title="Xursand">
+                                            <span>😄</span>
+                                        </button>
+                                        <button type="button" class="mood-emoji-btn" onclick="selectNeptunMood('🤔', 'Fikrchan', 'Fikrga cho\'mgan va dono')" title="Fikrchan">
+                                            <span>🤔</span>
+                                        </button>
+                                        <button type="button" class="mood-emoji-btn" onclick="selectNeptunMood('🥺', 'G\'amgin', 'Biroz g\'amgin yoki mehrtalab')" title="G'amgin">
+                                            <span>🥺</span>
+                                        </button>
+                                        <button type="button" class="mood-emoji-btn" onclick="selectNeptunMood('🤕', 'Charchagan', 'Charchagan yoki tobi yo\'q')" title="Charchagan">
+                                            <span>🤕</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Control bar at bottom of phone -->
+                                <div class="neptun-forest-bottom-bar">
+                                    <button type="button" class="forest-bar-btn" onclick="randomNeptunMood()" title="Tasodifiy his-tuyg'u">
+                                        <span>Tasodifiy 🎲</span>
+                                    </button>
+                                    <button type="button" class="forest-bar-btn" onclick="resetNeptunMood()" title="Tozalash">
+                                        <span>Tozalash 🔄</span>
+                                    </button>
+                                    <button type="button" class="forest-bar-btn" onclick="takeNeptunSnapshot()" title="Suratga olish">
+                                        <span>Surat 📸</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Status Banner -->
+                            <div class="neptun-phone-footer">
+                                <div class="neptun-mood-feedback" id="neptunMoodFeedback">
+                                    <span class="feedback-icon">🌳</span>
+                                    <span id="neptunMoodFeedbackText">Daraxt o'rtasidagi «Bugun» doirasini bosing va kayfiyatingizni yopishtiring!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yupiter: Taym-Menejment & Kunlik Reja Jadvali (Schedule & Note) Qismi -->
+                    <div id="modalYupiterScheduleBox" class="modal-yupiter-schedule-box" style="display: none;">
+                        <div class="yupiter-schedule-header">
+                            <div class="yupiter-schedule-title">
+                                <span class="yupiter-badge">📅 Taym-Menejment & Reja</span>
+                                <span class="yupiter-motto-pill">⏱️ 20 daqiqa qoidasi</span>
+                            </div>
+                            <div class="yupiter-schedule-actions">
+                                <button type="button" class="btn-yupiter-action" onclick="goToTodayYupiter()" title="Bugungi kunga o'tish">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <span>Bugun</span>
+                                </button>
+                                <button type="button" class="btn-close-modal-video" onclick="closeYupiterSchedule()" title="Yopish">✕ Yopish</button>
+                            </div>
+                        </div>
+
+                        <!-- Motivational Banner -->
+                        <div class="yupiter-motto-banner" id="yupiterMottoBanner">
+                            🌟 Vaqtni unumli taqsimlagan bola kelajakda buyuk allomaga aylanadi!
+                        </div>
+
+                        <!-- Calendar Month Navigation -->
+                        <div class="yupiter-cal-nav">
+                            <button type="button" class="yupiter-cal-nav-btn" onclick="changeYupiterMonth(-1)" title="Oldingi oy">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <div class="yupiter-cal-month-title" id="yupiterMonthYearTitle">Sentyabr 2026</div>
+                            <button type="button" class="yupiter-cal-nav-btn" onclick="changeYupiterMonth(1)" title="Keyingi oy">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        </div>
+
+                        <!-- Schedule / Calendar Grid -->
+                        <div class="yupiter-calendar-wrap">
+                            <div class="yupiter-weekdays-row">
+                                <div>Dush</div>
+                                <div>Sesh</div>
+                                <div>Chor</div>
+                                <div>Pay</div>
+                                <div>Juma</div>
+                                <div>Shan</div>
+                                <div>Yak</div>
+                            </div>
+                            <div class="yupiter-days-grid" id="yupiterDaysGrid">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Selected Date Note Panel -->
+                        <div class="yupiter-note-panel" id="yupiterNotePanel">
+                            <div class="yupiter-note-header">
+                                <div class="yupiter-selected-date" id="yupiterSelectedDateLabel">
+                                    📌 Tanlangan sana: <strong>5-Sentyabr, 2026</strong>
+                                </div>
+                                <span class="yupiter-notes-count-badge" id="yupiterNotesCountBadge">0 ta reja</span>
+                            </div>
+
+                            <!-- Note Input and Presets -->
+                            <div class="yupiter-note-input-wrap">
+                                <div class="yupiter-input-row">
+                                    <input type="text" id="yupiterNoteInput" class="yupiter-note-input" placeholder="Ushbu kunga yangi reja yoki note yozing..." maxlength="120" onkeydown="if(event.key==='Enter') saveYupiterNote();">
+                                    <select id="yupiterTimeSelect" class="yupiter-time-select">
+                                        <option value="20 daqiqa">⏱️ 20 daq</option>
+                                        <option value="30 daqiqa">⏱️ 30 daq</option>
+                                        <option value="45 daqiqa">⏱️ 45 daq</option>
+                                        <option value="1 soat">⏱️ 1 soat</option>
+                                        <option value="08:00">⏰ 08:00</option>
+                                        <option value="10:00">⏰ 10:00</option>
+                                        <option value="14:00">⏰ 14:00</option>
+                                        <option value="16:00">⏰ 16:00</option>
+                                        <option value="18:00">⏰ 18:00</option>
+                                        <option value="20:00">⏰ 20:00</option>
+                                    </select>
+                                    <button type="button" class="btn-yupiter-add" onclick="saveYupiterNote()">
+                                        <span>Qo'shish ➕</span>
+                                    </button>
+                                </div>
+
+                                <!-- Quick Preset Tags -->
+                                <div class="yupiter-presets-bar">
+                                    <span class="yupiter-presets-label">Tezkor namunalar:</span>
+                                    <div class="yupiter-presets-list" id="yupiterPresetsList">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notes list for selected date -->
+                            <div class="yupiter-notes-list" id="yupiterNotesList">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

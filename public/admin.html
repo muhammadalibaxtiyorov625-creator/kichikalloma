@@ -19,6 +19,59 @@
   <link rel="stylesheet" href="/css/cosmic-3d.css?v=20260828_v1">
 </head>
 <body>
+
+  <!-- ================= ADMIN LOGIN OVERLAY ================= -->
+  <div id="admin-login-overlay">
+    <div class="login-card">
+      <div class="login-glow"></div>
+
+      <div class="login-logo">
+        <div class="login-logo-icon">🛡️</div>
+        <div class="login-logo-text">
+          <h2>ADMIN<span>PRO</span></h2>
+          <p>Kichik Alloma Boshqaruv Tizimi</p>
+        </div>
+      </div>
+
+      <div class="login-title">
+        <h3>Xush kelibsiz</h3>
+        <p>Davom etish uchun tizimga kiring</p>
+      </div>
+
+      <div class="login-error" id="login-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="login-error-msg">Email yoki parol noto'g'ri</span>
+      </div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div class="login-field">
+          <label>Email</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-envelope-fill"></i>
+            <input type="email" id="login-email" placeholder="kichikalloma@gmail.com" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label>Parol</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-lock-fill"></i>
+            <input type="password" id="login-password" placeholder="••••••••••" autocomplete="current-password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn" id="login-submit-btn">
+          Kirish
+        </button>
+      </form>
+
+      <div class="login-footer">
+        🔒 Barcha ma'lumotlar xavfsiz saqlanadi
+      </div>
+    </div>
+  </div>
+  <!-- ================= END LOGIN OVERLAY ================= -->
+
   <div class="app-layout">
     <!-- Sidebar Overlay for mobile / tablet -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -94,9 +147,13 @@
       </nav>
 
       <div class="sidebar-footer">
+        <button type="button" class="btn-sidebar-logout" onclick="handleAdminLogout()" title="Tizimdan chiqish">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Tizimdan chiqish</span>
+        </button>
         <div class="status-indicator">
           <span class="pulse-dot"></span>
-          <span>Tizim: <strong>FastAPI (3009)</strong></span>
+          <span>Tizim: <strong>FastAPI Active</strong></span>
         </div>
       </div>
     </aside>
@@ -119,6 +176,10 @@
             <i class="bi bi-code-slash"></i>
             <span class="swagger-text">Swagger API</span>
           </a>
+          <button type="button" class="btn-header-logout" onclick="handleAdminLogout()" title="Tizimdan chiqish">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Chiqish</span>
+          </button>
         </div>
       </header>
 
@@ -129,6 +190,17 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-icon yellow">
+                <i class="bi bi-eye-fill"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Umumiy Tashriflar</span>
+                <h3 class="stat-value text-yellow" id="stat-total-visitors">0</h3>
+                <span class="stat-sub">Saytga kirganlar soni</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon yellow-glow">
                 <i class="bi bi-globe-americas"></i>
               </div>
               <div class="stat-info">
@@ -752,6 +824,77 @@
             </div>
           </div>
 
+          <!-- Card Gradient Fonini Tanlash -->
+          <div class="form-group" style="margin-top: 14px;">
+            <label><i class="bi bi-palette-fill text-yellow"></i> Card Gradient Foni (Ranglar):</label>
+            <div class="gradient-picker-wrap">
+              <div class="gradient-inputs-row">
+                <div class="gradient-color-col">
+                  <span class="color-label">1-Rang:</span>
+                  <input type="color" id="planet-grad-color1" class="color-picker-input" value="#ff5e00" oninput="handleGradientChange()">
+                </div>
+                <div class="gradient-color-col">
+                  <span class="color-label">2-Rang:</span>
+                  <input type="color" id="planet-grad-color2" class="color-picker-input" value="#ff8c00" oninput="handleGradientChange()">
+                </div>
+                <div class="gradient-color-col" style="flex: 1.2;">
+                  <span class="color-label">Yo'nalish:</span>
+                  <select id="planet-grad-angle" class="form-control" onchange="handleGradientChange()" style="padding: 6px 10px; font-size: 13px;">
+                    <option value="150deg">150° (Diagonal)</option>
+                    <option value="135deg">135° (Burchakli)</option>
+                    <option value="180deg">180° (Yuqoridan-pastga)</option>
+                    <option value="90deg">90° (Chapdan-o'ngga)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Tayyor Preset Ranglar -->
+              <div class="gradient-presets-wrap">
+                <span class="preset-label">Andozalar:</span>
+                <div class="gradient-preset-chips">
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #ff5e00, #ff8c00);" onclick="setPlanetGradient('#ff5e00', '#ff8c00', '150deg')" title="Merkuriy (Olovrang)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #7c1fc2, #a824d6);" onclick="setPlanetGradient('#7c1fc2', '#a824d6', '150deg')" title="Venera (Binafsha)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #0077ff, #00b08a);" onclick="setPlanetGradient('#0077ff', '#00b08a', '150deg')" title="Yer (Ko'k-Zangori)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #d32f2f, #991b1b);" onclick="setPlanetGradient('#d32f2f', '#991b1b', '150deg')" title="Mars (Qizil)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #0265dc, #0099aa);" onclick="setPlanetGradient('#0265dc', '#0099aa', '150deg')" title="Yupiter (Moviy)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #e65100, #f57c00);" onclick="setPlanetGradient('#e65100', '#f57c00', '150deg')" title="Saturn (To'q sariq)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #e0246a, #7b1fa2);" onclick="setPlanetGradient('#e0246a', '#7b1fa2', '150deg')" title="Uran (Pushti-Binafsha)"></button>
+                  <button type="button" class="preset-chip" style="background: linear-gradient(150deg, #0d47a1, #1a237e);" onclick="setPlanetGradient('#0d47a1', '#1a237e', '150deg')" title="Neptun (To'q ko'k)"></button>
+                </div>
+              </div>
+
+              <!-- Gradient Preview Bar -->
+              <div class="gradient-preview-bar" id="planet-gradient-preview" style="background: linear-gradient(150deg, #ff5e00, #ff8c00);">
+                <span>Card foni jonli ko'rinishi ✨</span>
+              </div>
+              <input type="hidden" id="planet-gradient-val" value="linear-gradient(150deg, #ff5e00 0%, #ff8c00 100%)">
+            </div>
+          </div>
+
+          <!-- Sayyora Videosi (Sinab ko'rish darsi) -->
+          <div class="form-group" style="margin-top: 16px;">
+            <label for="planet-video-url"><i class="bi bi-play-btn-fill text-yellow"></i> Sayyora Videosi (Sinab ko'rish darsi):</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+              <input type="text" id="planet-video-url" class="form-control" placeholder="/video_2026-08-20_10-54-38.mp4 yoki https://..." oninput="handlePlanetVideoUrlChange(this.value)">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="clearPlanetVideo()" title="Tozalash" style="white-space: nowrap; padding: 6px 12px; font-size: 12px;">
+                <i class="bi bi-x-circle"></i> O'chirish
+              </button>
+            </div>
+
+            <!-- Video File Upload Input -->
+            <div style="margin-bottom: 8px;">
+              <label for="planet-video-file-upload" style="font-size: 12px; color: var(--text-muted); cursor: pointer; display: block; margin-bottom: 4px;">
+                <i class="bi bi-upload"></i> Yoki kompyuterdan yangi video (.mp4, .webm) yuklash:
+              </label>
+              <input type="file" id="planet-video-file-upload" class="form-control file-input" accept="video/mp4,video/webm,video/ogg,video/*" onchange="handlePlanetVideoFileUpload(event)">
+            </div>
+
+            <!-- Video Preview Player -->
+            <div id="planet-video-preview-wrap" style="background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 8px; display: none;">
+              <video id="planet-video-preview-player" controls playsinline style="width: 100%; max-height: 180px; display: block;"></video>
+            </div>
+          </div>
+
           <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
             <label for="planet-status">Holati:</label>
             <select id="planet-status" class="form-control">
@@ -1133,5 +1276,100 @@
   <script src="/js/three.min.js"></script>
   <script src="/js/cosmic-3d.js?v=20260828_v1"></script>
   <script src="/js/app.js?v=20260828_v23_modal_active_fix"></script>
+
+  <!-- =============== ADMIN LOGIN LOGIC =============== -->
+  <script>
+  (function () {
+    var ADMIN_EMAIL    = 'kichikalloma@gmail.com';
+    var ADMIN_PASSWORD = 'KichikAlloma9765100';
+    var SESSION_KEY    = 'ka_admin_auth';
+    var SESSION_TTL    = 8 * 60 * 60 * 1000; // 8 soat
+
+    var overlay  = document.getElementById('admin-login-overlay');
+    var errBox   = document.getElementById('login-error');
+    var errMsg   = document.getElementById('login-error-msg');
+    var submitBtn = document.getElementById('login-submit-btn');
+
+    function isAuthenticated() {
+      try {
+        var raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+        if (!raw) return false;
+        var data = JSON.parse(raw);
+        return data && data.auth === true && (Date.now() - data.ts) < SESSION_TTL;
+      } catch (e) { return false; }
+    }
+
+    function saveSession() {
+      var data = JSON.stringify({ auth: true, ts: Date.now() });
+      try { sessionStorage.setItem(SESSION_KEY, data); } catch (e) {}
+      try { localStorage.setItem(SESSION_KEY, data); } catch (e) {}
+    }
+
+    function showError(msg) {
+      errMsg.textContent = msg || "Email yoki parol noto'g'ri";
+      errBox.classList.add('show');
+    }
+
+    function hideError() {
+      errBox.classList.remove('show');
+    }
+
+    function grantAccess() {
+      overlay.classList.add('hidden');
+      setTimeout(function () { overlay.style.display = 'none'; }, 450);
+    }
+
+    /* Sessiya bor bo'lsa darhol o'tish */
+    if (isAuthenticated()) {
+      grantAccess();
+    }
+
+    /* Login form submit */
+    window.handleAdminLogin = function (e) {
+      e.preventDefault();
+      hideError();
+
+      var email    = (document.getElementById('login-email').value || '').trim().toLowerCase();
+      var password = (document.getElementById('login-password').value || '').trim();
+
+      if (!email) { showError('Email manzilini kiriting'); return; }
+      if (!password) { showError('Parolni kiriting'); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Tekshirilmoqda…';
+
+      /* Kichik kechikish (UX uchun) */
+      setTimeout(function () {
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+          saveSession();
+          submitBtn.textContent = '✅ Kirish muvaffaqiyatli';
+          submitBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+          setTimeout(grantAccess, 600);
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Kirish';
+          showError("Email yoki parol noto'g'ri. Qayta urinib ko'ring.");
+          /* Parol kiritish maydonini tozalash */
+          document.getElementById('login-password').value = '';
+          document.getElementById('login-password').focus();
+        }
+      }, 500);
+    };
+
+    /* Logout funksiyasi */
+    window.handleAdminLogout = function () {
+      if (confirm("Haqiqatan ham admin paneldan chiqmoqchimisiz?")) {
+        try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+        try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+        overlay.style.display = 'flex';
+        overlay.classList.remove('hidden');
+        document.getElementById('login-password').value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Kirish';
+        submitBtn.style.background = '';
+      }
+    };
+  })();
+  </script>
 </body>
 </html>
