@@ -837,14 +837,21 @@
                   <span class="color-label">2-Rang:</span>
                   <input type="color" id="planet-grad-color2" class="color-picker-input" value="#ff8c00" oninput="handleGradientChange()">
                 </div>
-                <div class="gradient-color-col" style="flex: 1.2;">
-                  <span class="color-label">Yo'nalish:</span>
-                  <select id="planet-grad-angle" class="form-control" onchange="handleGradientChange()" style="padding: 6px 10px; font-size: 13px;">
-                    <option value="150deg">150° (Diagonal)</option>
-                    <option value="135deg">135° (Burchakli)</option>
-                    <option value="180deg">180° (Yuqoridan-pastga)</option>
-                    <option value="90deg">90° (Chapdan-o'ngga)</option>
-                  </select>
+                <div class="gradient-color-col" style="flex: 1.4;">
+                  <span class="color-label">Yo'nalish (Gradus):</span>
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    <input type="text" id="planet-grad-angle" class="form-control" value="150deg" placeholder="150deg" oninput="handleGradientChange()" style="padding: 6px 8px; font-size: 13px; width: 85px; font-weight: 700; text-align: center;" title="Ixtiyoriy burchakni yozing (masalan: 120deg, 45deg)">
+                    <select id="planet-grad-angle-select" class="form-control" onchange="handleAngleSelectChange(this.value)" style="padding: 6px 8px; font-size: 12px; flex: 1;">
+                      <option value="">Tayyor burchaklar ▾</option>
+                      <option value="150deg">150° (Diagonal)</option>
+                      <option value="135deg">135° (Burchakli)</option>
+                      <option value="180deg">180° (Yuqoridan-pastga)</option>
+                      <option value="90deg">90° (Chapdan-o'ngga)</option>
+                      <option value="45deg">45° (Pastki burchak)</option>
+                      <option value="0deg">0° (Pastdan-yuqoriga)</option>
+                      <option value="270deg">270° (O'ngdan-chapga)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

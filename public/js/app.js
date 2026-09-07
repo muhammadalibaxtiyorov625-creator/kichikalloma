@@ -422,8 +422,13 @@ function parsePlanetGradient(gradStr) {
   let angle = '150deg';
   if (!gradStr) return { color1, color2, angle, full: `linear-gradient(${angle}, ${color1} 0%, ${color2} 100%)` };
 
-  const angleMatch = gradStr.match(/(\d+deg)/);
-  if (angleMatch) angle = angleMatch[1];
+  const angleMatch = gradStr.match(/linear-gradient\(\s*([^,]+)/);
+  if (angleMatch && angleMatch[1]) {
+    const rawAngle = angleMatch[1].trim();
+    if (rawAngle.includes('deg') || rawAngle.includes('to ') || /^\d+$/.test(rawAngle)) {
+      angle = rawAngle.endsWith('deg') || rawAngle.startsWith('to ') ? rawAngle : rawAngle + 'deg';
+    }
+  }
 
   const hexMatches = gradStr.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/g);
   if (hexMatches && hexMatches.length >= 2) {
@@ -433,20 +438,49 @@ function parsePlanetGradient(gradStr) {
   return { color1, color2, angle, full: gradStr };
 }
 
+window.handleAngleSelectChange = function(val) {
+  if (!val) return;
+  const angleInput = document.getElementById('planet-grad-angle');
+  if (angleInput) {
+    angleInput.value = val;
+    handleGradientChange();
+  }
+};
+
 window.handleGradientChange = function() {
   const c1 = (document.getElementById('planet-grad-color1') && document.getElementById('planet-grad-color1').value) || '#ff5e00';
   const c2 = (document.getElementById('planet-grad-color2') && document.getElementById('planet-grad-color2').value) || '#ff8c00';
-  const ang = (document.getElementById('planet-grad-angle') && document.getElementById('planet-grad-angle').value) || '150deg';
+  let ang = (document.getElementById('planet-grad-angle') && document.getElementById('planet-grad-angle').value) || '150deg';
+  
+  // Format pure numbers into degrees (e.g. 120 -> 120deg)
+  ang = ang.trim();
+  if (/^\d+$/.test(ang)) {
+    ang = ang + 'deg';
+  }
+  if (!ang) ang = '150deg';
+
   const grad = `linear-gradient(${ang}, ${c1} 0%, ${c2} 100%)`;
   if (document.getElementById('planet-gradient-val')) document.getElementById('planet-gradient-val').value = grad;
   const prev = document.getElementById('planet-gradient-preview');
   if (prev) prev.style.background = grad;
+
+  // Sync select if it matches
+  const select = document.getElementById('planet-grad-angle-select');
+  if (select) {
+    const exists = Array.from(select.options).some(o => o.value === ang);
+    select.value = exists ? ang : '';
+  }
 };
 
 window.setPlanetGradient = function(c1, c2, ang = '150deg') {
   if (document.getElementById('planet-grad-color1')) document.getElementById('planet-grad-color1').value = c1;
   if (document.getElementById('planet-grad-color2')) document.getElementById('planet-grad-color2').value = c2;
   if (document.getElementById('planet-grad-angle')) document.getElementById('planet-grad-angle').value = ang;
+  const select = document.getElementById('planet-grad-angle-select');
+  if (select) {
+    const exists = Array.from(select.options).some(o => o.value === ang);
+    select.value = exists ? ang : '';
+  }
   handleGradientChange();
 };
 
@@ -487,6 +521,11 @@ function openPlanetModal(id = null) {
       if (document.getElementById('planet-grad-color1')) document.getElementById('planet-grad-color1').value = gradInfo.color1;
       if (document.getElementById('planet-grad-color2')) document.getElementById('planet-grad-color2').value = gradInfo.color2;
       if (document.getElementById('planet-grad-angle')) document.getElementById('planet-grad-angle').value = gradInfo.angle;
+      const angleSelect = document.getElementById('planet-grad-angle-select');
+      if (angleSelect) {
+        const exists = Array.from(angleSelect.options).some(o => o.value === gradInfo.angle);
+        angleSelect.value = exists ? gradInfo.angle : '';
+      }
       if (document.getElementById('planet-gradient-val')) document.getElementById('planet-gradient-val').value = item.gradient || gradInfo.full;
       const prev = document.getElementById('planet-gradient-preview');
       if (prev) prev.style.background = item.gradient || gradInfo.full;

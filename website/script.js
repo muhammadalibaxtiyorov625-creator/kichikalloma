@@ -724,10 +724,153 @@ if (yearEl) {
             }).join('');
 
             marquee.innerHTML = html;
+            if (window._kaRecalcTeamMarquee) window._kaRecalcTeamMarquee();
         })
         .catch(function () {
             /* API javob bermasa, HTML dagi statik kontent qoladi */
         });
+})();
+
+/* ============ JAMOA MARQUEE: TOUCH, SWIPE VA AUTO-SCROLL BOSHQARUVI ============ */
+(function initTeamMarqueeInteractive() {
+    var wrap = kaOne('.team-marquee-wrap');
+    var marquee = kaOne('#teamMarquee');
+    if (!wrap || !marquee) return;
+
+    marquee.classList.add('js-controlled');
+
+    var currentX = 0;
+    var halfWidth = marquee.scrollWidth / 2 || 1000;
+    var speed = 0.85; // px per frame (≈ 50px/sec)
+    var isDragging = false;
+    var isHovered = false;
+    var startX = 0;
+    var startY = 0;
+    var lastX = 0;
+    var lastTime = 0;
+    var velocityX = 0;
+    var isHorizontalSwipe = false;
+    var isGestureLocked = false;
+
+    function recalcBounds() {
+        if (marquee.scrollWidth > 0) {
+            halfWidth = marquee.scrollWidth / 2;
+        }
+    }
+    recalcBounds();
+    window.addEventListener('resize', recalcBounds);
+
+    function updateTransform() {
+        if (halfWidth > 0) {
+            while (currentX <= -halfWidth) currentX += halfWidth;
+            while (currentX > 0) currentX -= halfWidth;
+        }
+        marquee.style.transform = 'translate3d(' + currentX.toFixed(2) + 'px, 0, 0)';
+    }
+
+    // Auto-scroll loop
+    var lastFrameTime = performance.now();
+    function step(now) {
+        var dt = Math.min((now - lastFrameTime) / 16.67, 3);
+        lastFrameTime = now;
+
+        if (!isDragging) {
+            if (Math.abs(velocityX) > 0.05) {
+                currentX += velocityX * dt;
+                velocityX *= Math.pow(0.92, dt);
+                updateTransform();
+            } else {
+                velocityX = 0;
+                if (!isHovered) {
+                    currentX -= speed * dt;
+                    updateTransform();
+                }
+            }
+        }
+        requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // Pointer / Touch / Drag Events
+    function onPointerDown(e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        isDragging = true;
+        isGestureLocked = false;
+        isHorizontalSwipe = false;
+        startX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX) || 0;
+        startY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY) || 0;
+        lastX = startX;
+        lastTime = performance.now();
+        velocityX = 0;
+        wrap.classList.add('is-dragging');
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        var clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+        if (clientX === undefined) return;
+
+        var dx = clientX - lastX;
+        var totalDx = clientX - startX;
+        var totalDy = (clientY || 0) - startY;
+
+        if (!isGestureLocked) {
+            if (Math.abs(totalDx) > 6 || Math.abs(totalDy) > 6) {
+                isGestureLocked = true;
+                if (Math.abs(totalDx) >= Math.abs(totalDy)) {
+                    isHorizontalSwipe = true;
+                } else {
+                    isHorizontalSwipe = false;
+                    isDragging = false;
+                    wrap.classList.remove('is-dragging');
+                    return;
+                }
+            }
+        }
+
+        if (isHorizontalSwipe) {
+            if (e.cancelable) e.preventDefault();
+            var now = performance.now();
+            var dt = now - lastTime;
+            if (dt > 0) {
+                var v = (dx / dt) * 16.67;
+                velocityX = velocityX * 0.4 + v * 0.6;
+            }
+            lastX = clientX;
+            lastTime = now;
+            currentX += dx;
+            updateTransform();
+        }
+    }
+
+    function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        wrap.classList.remove('is-dragging');
+        if (velocityX > 35) velocityX = 35;
+        if (velocityX < -35) velocityX = -35;
+    }
+
+    // Touch events for mobile/tablets
+    wrap.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp, { passive: true });
+    window.addEventListener('touchcancel', onPointerUp, { passive: true });
+
+    // Mouse events for desktop drag
+    wrap.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    // Hover pause on desktop
+    wrap.addEventListener('mouseenter', function () { isHovered = true; });
+    wrap.addEventListener('mouseleave', function () { isHovered = false; });
+
+    // Recalc function on dynamic load
+    window._kaRecalcTeamMarquee = function () {
+        setTimeout(recalcBounds, 80);
+    };
 })();
 
 /* ============ BACKEND: Sayyoralar ma'lumotlarini yuklash (/api/website/planets) ============
