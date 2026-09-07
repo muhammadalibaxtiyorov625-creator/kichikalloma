@@ -3,11 +3,16 @@
 .env.local
 *.env
 
+# SQLite Database (Local DB)
+database.sqlite
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
 # Python
 __pycache__/
 *.py[cod]
 *.class
-*.sqlite-journal
 
 # Node
 node_modules/
