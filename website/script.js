@@ -1099,16 +1099,28 @@ if (yearEl) {
         }
     };
 
+    function enterPracticeMode() {
+        // Keep original planet gradient
+    }
+
+    function restoreModalPlanetBackground() {
+        // Keep original planet gradient
+    }
+
     function openPlanetModal(key) {
+        window.currentActivePlanetKey = key;
         var data = (window.planetData || planetData)[key];
         if (!data) return;
 
+        if (modalCard) {
+            modalCard.classList.remove('in-practice-mode');
+            modalCard.style.background = data.bg;
+        }
         if (modalImg) modalImg.src = data.img;
         if (modalTitle) modalTitle.textContent = data.title;
         if (modalSub) modalSub.textContent = data.subtitle;
         if (modalDesc) modalDesc.textContent = data.desc;
         if (modalFeatureHead) modalFeatureHead.textContent = data.featureHead;
-        if (modalCard) modalCard.style.background = data.bg;
 
         if (modalFeatureGrid) {
             modalFeatureGrid.innerHTML = '';
@@ -1205,7 +1217,13 @@ if (yearEl) {
     }
 
     window.playPlanetModalVideo = function (videoUrl, planetTitle) {
+        enterPracticeMode();
         window.closeUranPractice();
+        window.closeVeneraShop();
+        window.closeNeptunTree();
+        window.closeSaturnPractice();
+        window.closeYupiterSchedule();
+
         var box = kaOne('#modalVideoPlayerBox');
         var videoEl = kaOne('#modalPlanetVideoEl');
         var titleEl = kaOne('#modalVideoTitleText');
@@ -1239,6 +1257,7 @@ if (yearEl) {
             videoEl.currentTime = 0;
         }
         if (box) box.style.display = 'none';
+        restoreModalPlanetBackground();
     };
 
     /* ==========================================================================
@@ -1300,6 +1319,7 @@ if (yearEl) {
     }
 
     window.openUranPractice = function () {
+        enterPracticeMode();
         window.closePlanetModalVideo();
         window.closeVeneraShop();
         window.closeNeptunTree();
@@ -1320,6 +1340,7 @@ if (yearEl) {
         if ('speechSynthesis' in window) {
             try { window.speechSynthesis.cancel(); } catch(e) {}
         }
+        restoreModalPlanetBackground();
     };
 
     window.flipUranCard = function () {
@@ -1565,6 +1586,7 @@ if (yearEl) {
     }
 
     window.openSaturnPractice = function () {
+        enterPracticeMode();
         window.closePlanetModalVideo();
         window.closeUranPractice();
         window.closeVeneraShop();
@@ -1586,6 +1608,7 @@ if (yearEl) {
         if ('speechSynthesis' in window) {
             try { window.speechSynthesis.cancel(); } catch(e) {}
         }
+        restoreModalPlanetBackground();
     };
 
     window.flipSaturnCard = function () {
@@ -1936,6 +1959,7 @@ if (yearEl) {
     };
 
     window.openVeneraShop = function () {
+        enterPracticeMode();
         window.closePlanetModalVideo();
         window.closeUranPractice();
         window.closeNeptunTree();
@@ -1971,6 +1995,7 @@ if (yearEl) {
     window.closeVeneraShop = function () {
         var box = kaOne('#modalVeneraShopBox');
         if (box) box.style.display = 'none';
+        restoreModalPlanetBackground();
     };
 
     window.switchVeneraTab = function (catId) {
@@ -2170,6 +2195,7 @@ if (yearEl) {
     }
 
     window.openNeptunTree = function () {
+        enterPracticeMode();
         window.closePlanetModalVideo();
         window.closeUranPractice();
         window.closeVeneraShop();
@@ -2191,6 +2217,7 @@ if (yearEl) {
         var box = kaOne('#modalNeptunTreeBox');
         if (box) box.style.display = 'none';
         window.closeNeptunMoodDock();
+        restoreModalPlanetBackground();
     };
 
     window.toggleNeptunMoodDock = function (e) {
@@ -2361,6 +2388,7 @@ if (yearEl) {
     }
 
     window.openYupiterSchedule = function () {
+        enterPracticeMode();
         window.closePlanetModalVideo();
         window.closeUranPractice();
         window.closeVeneraShop();
@@ -2381,7 +2409,6 @@ if (yearEl) {
         }
 
         renderYupiterCalendar();
-        renderYupiterNotesPanel();
 
         fetch('/api/website/yupiter/calendar-presets')
             .then(function (res) {
@@ -2391,7 +2418,6 @@ if (yearEl) {
             .then(function (data) {
                 if (data && Array.isArray(data.presets)) {
                     yupiterState.presets = data.presets;
-                    renderYupiterPresets();
                 }
                 if (data && Array.isArray(data.mottoes) && data.mottoes.length > 0) {
                     yupiterState.mottoes = data.mottoes;
@@ -2402,9 +2428,7 @@ if (yearEl) {
                     }
                 }
             })
-            .catch(function () {
-                renderYupiterPresets();
-            });
+            .catch(function () {});
 
         setTimeout(function () {
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2414,6 +2438,35 @@ if (yearEl) {
     window.closeYupiterSchedule = function () {
         var box = kaOne('#modalYupiterScheduleBox');
         if (box) box.style.display = 'none';
+        window.closeYupiterNoteDialog();
+        restoreModalPlanetBackground();
+    };
+
+    window.openYupiterNoteDialog = function (dateKey) {
+        if (!dateKey) dateKey = yupiterState.selectedDate || formatDateYMD(new Date());
+        yupiterState.selectedDate = dateKey;
+
+        var overlay = kaOne('#yupiterNoteDialogOverlay');
+        if (overlay) overlay.style.display = 'flex';
+
+        var labelEl = kaOne('#yupiterDialogDateLabel');
+        if (labelEl) {
+            labelEl.textContent = formatUzbekDateFull(dateKey);
+        }
+
+        renderYupiterNotesPanel();
+
+        var input = kaOne('#yupiterNoteInput');
+        if (input) {
+            input.value = '';
+            setTimeout(function () { input.focus(); }, 80);
+        }
+    };
+
+    window.closeYupiterNoteDialog = function () {
+        var overlay = kaOne('#yupiterNoteDialogOverlay');
+        if (overlay) overlay.style.display = 'none';
+        renderYupiterCalendar();
     };
 
     window.goToTodayYupiter = function () {
@@ -2422,7 +2475,7 @@ if (yearEl) {
         yupiterState.currentMonth = now.getMonth();
         yupiterState.selectedDate = formatDateYMD(now);
         renderYupiterCalendar();
-        renderYupiterNotesPanel();
+        window.openYupiterNoteDialog(yupiterState.selectedDate);
     };
 
     window.changeYupiterMonth = function (delta) {
@@ -2486,7 +2539,7 @@ if (yearEl) {
             if (dayNotes.length > 0) {
                 var dot = document.createElement('span');
                 dot.className = 'yupiter-day-dot';
-                dot.title = dayNotes.length + " ta reja";
+                dot.title = dayNotes.length + " ta eslatma";
                 cell.appendChild(dot);
             }
 
@@ -2512,10 +2565,7 @@ if (yearEl) {
             }
         });
 
-        renderYupiterNotesPanel();
-
-        var input = kaOne('#yupiterNoteInput');
-        if (input) input.focus();
+        window.openYupiterNoteDialog(dateKey);
     }
 
     function formatUzbekDateFull(dateKey) {
@@ -2534,17 +2584,12 @@ if (yearEl) {
     }
 
     function renderYupiterNotesPanel() {
-        var labelEl = kaOne('#yupiterSelectedDateLabel');
+        var labelEl = kaOne('#yupiterDialogDateLabel');
         if (labelEl) {
-            labelEl.innerHTML = '📌 Tanlangan sana: <strong>' + formatUzbekDateFull(yupiterState.selectedDate) + '</strong>';
+            labelEl.textContent = formatUzbekDateFull(yupiterState.selectedDate);
         }
 
         var notes = yupiterState.notes[yupiterState.selectedDate] || [];
-        var countBadge = kaOne('#yupiterNotesCountBadge');
-        if (countBadge) {
-            countBadge.textContent = notes.length > 0 ? (notes.length + ' ta reja') : "Reja yo'q";
-        }
-
         var listEl = kaOne('#yupiterNotesList');
         if (!listEl) return;
         listEl.innerHTML = '';
@@ -2552,7 +2597,7 @@ if (yearEl) {
         if (notes.length === 0) {
             var empty = document.createElement('div');
             empty.className = 'yupiter-empty-notes';
-            empty.innerHTML = '✨ Ushbu sanaga hali reja belgilanmagan.<br>Yuqoridagi maydonga yozing yoki namunalardan birini tanlang!';
+            empty.innerHTML = '✨ Ushbu sanaga hali eslatma yozilmagan.<br>Yuqoridagi maydonga eslatma yoki rejangizni yozing!';
             listEl.appendChild(empty);
             return;
         }
@@ -2573,16 +2618,11 @@ if (yearEl) {
                 toggleYupiterNoteDone(item.id);
             };
 
-            var timeBadge = document.createElement('span');
-            timeBadge.className = 'yupiter-note-time';
-            timeBadge.textContent = item.time || '20 daq';
-
             var text = document.createElement('span');
             text.className = 'yupiter-note-text' + (item.done ? ' done' : '');
             text.textContent = item.text;
 
             left.appendChild(check);
-            left.appendChild(timeBadge);
             left.appendChild(text);
 
             var delBtn = document.createElement('button');
@@ -2601,43 +2641,8 @@ if (yearEl) {
         });
     }
 
-    function renderYupiterPresets() {
-        var container = kaOne('#yupiterPresetsList');
-        if (!container) return;
-        container.innerHTML = '';
-
-        var defaultPresets = [
-            { text: "Kitob mutolaasi 📖" },
-            { text: "Matematika mashqi 🧮" },
-            { text: "Badantarbiya & sport 🏃" },
-            { text: "Ingliz tili so'zlari 🇬🇧" },
-            { text: "Uy vazifasi ✍️" },
-            { text: "Rasm chizish 🎨" },
-            { text: "Xonani yig'ish 🧹" }
-        ];
-
-        var list = (yupiterState.presets && yupiterState.presets.length > 0)
-            ? yupiterState.presets
-            : defaultPresets;
-
-        list.forEach(function (p) {
-            var tag = document.createElement('span');
-            tag.className = 'yupiter-preset-tag';
-            tag.textContent = p.text || p;
-            tag.onclick = function () {
-                var input = kaOne('#yupiterNoteInput');
-                if (input) {
-                    input.value = p.text || p;
-                    input.focus();
-                }
-            };
-            container.appendChild(tag);
-        });
-    }
-
     window.saveYupiterNote = function () {
         var input = kaOne('#yupiterNoteInput');
-        var timeSelect = kaOne('#yupiterTimeSelect');
         if (!input) return;
 
         var val = (input.value || '').trim();
@@ -2648,7 +2653,6 @@ if (yearEl) {
             return;
         }
 
-        var timeVal = timeSelect ? timeSelect.value : '20 daqiqa';
         var dateKey = yupiterState.selectedDate;
 
         if (!yupiterState.notes[dateKey]) {
@@ -2658,7 +2662,6 @@ if (yearEl) {
         var newNote = {
             id: 'note_' + Date.now(),
             text: val,
-            time: timeVal,
             done: false
         };
 
@@ -2670,7 +2673,7 @@ if (yearEl) {
         renderYupiterCalendar();
 
         if (typeof showToast === 'function') {
-            showToast("Reja muvaffaqiyatli saqlandi! 🎯");
+            showToast("Eslatma saqlandi! ✍️");
         } else if (typeof playChimeEffect === 'function') {
             playChimeEffect(true);
         }
@@ -2704,6 +2707,10 @@ if (yearEl) {
         window.closeNeptunTree();
         window.closeSaturnPractice();
         window.closeYupiterSchedule();
+        window.closeYupiterNoteDialog();
+        if (modalCard) {
+            modalCard.classList.remove('in-practice-mode');
+        }
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
