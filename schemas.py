@@ -183,6 +183,9 @@ class VerifyOtpResponse(BaseModel):
     access_token: str = Field(..., description="JWT autentifikatsiya tokeni")
     token_type: str = Field("bearer", description="Token turi")
     is_new_user: bool = Field(..., description="Yangi foydalanuvchi bo'lsa True, mavjud bo'lsa False")
+    child_id: Optional[int] = Field(None, example=1, description="Eski foydalanuvchi bo'lsa asosiy farzand ID si, yangi bo'lsa null")
+    child: Optional[dict] = Field(None, description="Eski foydalanuvchi bo'lsa asosiy farzand ma'lumotlari")
+    children: Optional[List[dict]] = Field(default_factory=list, description="Foydalanuvchining barcha farzandlari ro'yxati")
     message: str = Field("Muvaffaqiyatli tasdiqlandi", description="Javob xabari")
 
 class CodeAccessRequest(BaseModel):
@@ -482,9 +485,32 @@ class UranCategoryDetailResponse(BaseModel):
     tests: List[UranQuizOption] = Field(..., description="So'zlar tugagach topshiriladigan test savollari (inglizcha so'z va 4 ta o'zbekcha variant)")
     quiz: List[UranQuizOption] = Field(..., description="Test savollari (tests ning muqobil nomi)")
 
+class UranPracticeStats(BaseModel):
+    total_planet_words: int = Field(0, description="Uran sayyorasidagi jami so'zlar soni")
+    total_learned_words: int = Field(0, description="Farzand jami o'rgangan so'zlar soni")
+    remaining_new_words: int = Field(0, description="Hali o'rganilmagan yangi so'zlar soni")
+    uran_total_coins: int = Field(0, description="Farzandning faqat Uran sayyorasida to'plagan jami coinlari")
+
+class UranPracticeSessionResponse(BaseModel):
+    mode: str = Field(..., example="learn", description="'learn' (yangi so'zlar) yoki 'review' (takrorlash)")
+    title: str = Field(..., example="Yangi so'zlarni o'rganish", description="Mashg'ulot sarlavhasi")
+    category_id: Optional[int] = Field(None, example=1, description="Kategoriya ID raqami (ixtiyoriy)")
+    category_name: Optional[str] = Field(None, example="Meva va Sabzavotlar", description="Kategoriya nomi")
+    is_review: bool = Field(False, example=False, description="Takrorlash rejimidami?")
+    auto_switched_to_review: bool = Field(False, example=False, description="Yangi so'zlar qolmagani uchun avtomatik takrorlashga o'tildimi?")
+    message: Optional[str] = Field(None, example="Yangi so'zlarni o'rganing va testdan o'ting!", description="Foydalanuvchi uchun xabar")
+    total_words: int = Field(..., example=15, description="Ushbu sessiyadagi so'zlar soni")
+    total_tests: int = Field(..., example=15, description="Imtihon/test savollari soni")
+    words: List[UranWordResponse] = Field(..., description="So'zlar ro'yxati (kamida 10-15 ta)")
+    tests: List[UranQuizOption] = Field(..., description="Imtihon/test savollari (kamida 10-15 ta)")
+    quiz: List[UranQuizOption] = Field(..., description="tests ning muqobil nomi")
+    stats: UranPracticeStats = Field(default_factory=UranPracticeStats, description="Farzandning umumiy progress statistikasi")
+
 class UranQuizSubmitRequest(BaseModel):
     child_id: Optional[int] = Field(None, example=1, description="Farzand ID raqami")
-    category_id: int = Field(..., example=1, description="Kategoriya ID raqami")
+    category_id: Optional[int] = Field(1, example=1, description="Kategoriya ID raqami")
+    mode: Optional[str] = Field("learn", example="learn", description="'learn' yoki 'review'")
+    word_ids: Optional[List[int]] = Field(None, example=[1, 2, 3], description="Testda qatnashgan so'zlar ID lari")
     score: int = Field(..., example=8, description="To'g'ri topilgan javoblar soni")
     total_questions: int = Field(..., example=10, description="Umumiy savollar soni")
     time_spent_seconds: Optional[int] = Field(60, example=60, description="Testga sarflangan vaqt (soniya)")
@@ -498,8 +524,15 @@ class UranQuizSubmitResponse(BaseModel):
     passed: bool
     stars_earned: int
     coins_earned: Optional[int] = Field(20, example=20, description="Test uchun berilgan tangalar (coin)")
+    uran_total_coins: Optional[int] = Field(0, example=60, description="Farzandning faqat Uran sayyorasida to'plagan jami tangalari")
     total_coins: Optional[int] = Field(150, example=150, description="Farzandning jami tangalari")
+    total_planet_words: Optional[int] = Field(104, example=104, description="Uran sayyorasidagi jami so'zlar soni")
+    total_learned_words: Optional[int] = Field(0, example=15, description="Farzand jami yod olgan so'zlar soni")
+    remaining_new_words: Optional[int] = Field(0, example=89, description="Hali yod olinmagan qolgan so'zlar soni")
+    mode: Optional[str] = Field("learn", example="learn", description="'learn' yoki 'review'")
     congratulation: str
+    next_learn_url: Optional[str] = Field("/mobile/planets/uran/learn", description="Keyingi yangi so'zlarni o'rganish URL manzili")
+    next_review_url: Optional[str] = Field("/mobile/planets/uran/review", description="Takrorlash URL manzili")
 
 class UranAiSuggestRequest(BaseModel):
     word_en: str = Field(..., example="Pineapple", description="Inglizcha so'z")

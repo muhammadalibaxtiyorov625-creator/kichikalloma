@@ -64,6 +64,7 @@ from schemas import (
     UranCategoryBase, UranCategoryCreate, UranCategoryUpdate, UranCategoryResponse,
     UranWordBase, UranWordCreate, UranWordUpdate, UranWordResponse,
     UranQuizOption, UranCategoryDetailResponse,
+    UranPracticeStats, UranPracticeSessionResponse,
     UranQuizSubmitRequest, UranQuizSubmitResponse,
     UranAiSuggestRequest, UranAiSuggestResponse,
     CoinBalanceResponse, CoinTransactionResponse,
@@ -250,16 +251,44 @@ async def lifespan(app: FastAPI):
 
 tags_metadata = [
     {
+        "name": "Mobil Ilova — Sayyoralar (Planets)",
+        "description": "Mobil ilova sayyoralari umumiy ro'yxati (Barcha sayyoralar, ovozli Alloma AI audiolari va holatlar)"
+    },
+    {
+        "name": "Mobil Ilova — Uran Sayyorasi (Nutq & Til)",
+        "description": "Uran sayyorasi (Nutq va Til) mobil API lari: Mavzular ro'yxati, So'zlar kartochkalari, Yangi so'zlarni o'rganish (/learn), Takrorlash (/review) va Test natijalarini topshirish (/submit-test)"
+    },
+    {
+        "name": "Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)",
+        "description": "Neptun sayyorasi (Hissiyotlar va Ruhiy salomatlik) mobil API lari: Emotsiyalar ro'yxati, Kayfiyatni belgilash, 7 kunlik tarix va Ota-ona uchun tahlil"
+    },
+    {
         "name": "Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)",
         "description": "Mobil ilova tangalar (coin) tizimi: Balans, Kunlik Bonuslar (Streak), Dars/Testlardan Coin ishlash (Earn), Kunlik Topshiriqlar (Missions), Do'kon (Shop), Sotib olingan buyumlar (Inventory) va Allomalar Reytingi (Leaderboard)"
     },
     {
-        "name": "Mobil Ilova (Mobile API)",
-        "description": "Mobil ilova uchun API lar: Sayyoralar (Planets), OTP Ro'yxatdan o'tish/Kirish, 4-xonali PIN kod va Farzandlar boshqaruvi"
+        "name": "Mobil Ilova — Alloma AI & Ovozli Yordamchi",
+        "description": "Alloma AI bilan matnli va ovozli suhbat (Chat), Ovozni matnga aylantirish (STT), Matndan bolalar ovozida nutq yaratish (TTS) va Suhbatlar tarixi"
+    },
+    {
+        "name": "Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi",
+        "description": "SMS OTP orqali kirish/ro'yxatdan o'tish, 4-xonali PIN kod, Farzand profillarini yaratish/tahrirlash, Faollik vaqtini kuzatish va FAQ"
+    },
+    {
+        "name": "Web & Admin — Uran Sayyorasi Boshqaruvi",
+        "description": "Uran sayyorasi kategoriyalari va so'zlarini admin panel orqali qo'shish, tahrirlash, o'chirish, AI orqali so'z tarjimalarini generatsiya qilish"
+    },
+    {
+        "name": "Web & Admin — Sayyoralar Interaktiv Mashqlari",
+        "description": "Web-sayt interaktiv sayyora mashqlari: Saturn (Matematika), Yupiter (Kun tartibi), Venera (Kiyimlar), Neptun (Hissiyotlar daraxti)"
     },
     {
         "name": "Web Sayt (Website)",
-        "description": "Bolalar ta'lim platformasi: Sayyoralar, Qulayliklar, Jamoa (Teams), Galereya (Gallery), Xabarlar va Statistika API lari"
+        "description": "Bolalar ta'lim platformasi web-sayti: Sayyoralar, Qulayliklar, Jamoa (Teams), Galereya (Gallery), Xabarlar va Statistika API lari"
+    },
+    {
+        "name": "Website & Admin API",
+        "description": "Admin boshqaruv paneli va Web portal tizimi uchun umumiy boshqaruv API lari"
     }
 ]
 
@@ -895,7 +924,7 @@ Sitemap: https://kichikalloma.uz/sitemap.xml
 # ==============================================================================
 
 # 1. SEND OTP (/mobile/send-otp/ va /api/website/send-otp/)
-@app.post("/mobile/send-otp/", tags=["Mobil Ilova (Mobile API)"], summary="1. SMS OTP Kod Yuborish (Register & Login bir xil)")
+@app.post("/mobile/send-otp/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="1. SMS OTP Kod Yuborish (Register & Login bir xil)")
 @app.post("/mobile/send-otp", include_in_schema=False)
 @app.post("/api/website/send-otp/", tags=["Web Sayt (Website)"], summary="Web: SMS OTP Kod Yuborish")
 @app.post("/api/website/send-otp", include_in_schema=False)
@@ -935,13 +964,13 @@ def mobile_send_otp(req: SendOtpRequest):
 
 
 # 2. VERIFY OTP (/mobile/verify-otp/ va /api/website/verify-otp/)
-@app.post("/mobile/verify-otp/", response_model=VerifyOtpResponse, tags=["Mobil Ilova (Mobile API)"], summary="2. SMS OTP Kodni Tasdiqlash (Access Token va is_new_user qaytaradi)")
+@app.post("/mobile/verify-otp/", response_model=VerifyOtpResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="2. SMS OTP Kodni Tasdiqlash (Access Token va is_new_user qaytaradi)")
 @app.post("/mobile/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
 @app.post("/api/website/verify-otp/", response_model=VerifyOtpResponse, tags=["Web Sayt (Website)"], summary="Web: SMS OTP Kodni Tasdiqlash")
 @app.post("/api/website/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
 @app.post("/api/verify-otp/", response_model=VerifyOtpResponse, include_in_schema=False)
 @app.post("/api/verify-otp", response_model=VerifyOtpResponse, include_in_schema=False)
-def mobile_verify_otp(req: VerifyOtpRequest):
+def mobile_verify_otp(req: VerifyOtpRequest, request: Request = None):
     phone = normalize_phone(req.phone)
     code = req.code.strip()
 
@@ -973,6 +1002,10 @@ def mobile_verify_otp(req: VerifyOtpRequest):
     existing_user = cursor.fetchone()
 
     is_new_user = True
+    primary_child_id = None
+    primary_child = None
+    children_list = []
+
     if not existing_user:
         cursor.execute("INSERT INTO users (phone, passcode) VALUES (?, NULL)", (phone,))
         conn.commit()
@@ -983,10 +1016,13 @@ def mobile_verify_otp(req: VerifyOtpRequest):
         # Foydalanuvchining bolalari sonini tekshirish:
         # Agar kamida 1 ta bola qo'shgan bo'lsa -> is_new_user = False
         # Agar hali 1 ta ham bola qo'shmagan bo'lsa -> is_new_user = True
-        cursor.execute("SELECT COUNT(*) as cnt FROM children WHERE user_id = ?", (user_id,))
-        child_cnt = cursor.fetchone()["cnt"]
-        if child_cnt > 0:
+        cursor.execute("SELECT * FROM children WHERE user_id = ? ORDER BY id ASC", (user_id,))
+        child_rows = cursor.fetchall()
+        if child_rows and len(child_rows) > 0:
             is_new_user = False
+            children_list = [format_child_row(r, request) for r in child_rows]
+            primary_child = children_list[0]
+            primary_child_id = primary_child["id"]
         else:
             is_new_user = True
 
@@ -1002,12 +1038,15 @@ def mobile_verify_otp(req: VerifyOtpRequest):
         "access_token": token,
         "token_type": "bearer",
         "is_new_user": is_new_user,
+        "child_id": primary_child_id,
+        "child": primary_child,
+        "children": children_list,
         "message": "Muvaffaqiyatli tasdiqlandi"
     }
 
 
 # 3. RESEND OTP (/mobile/resent-otp/ va /api/website/resent-otp/)
-@app.post("/mobile/resent-otp/", tags=["Mobil Ilova (Mobile API)"], summary="3. SMS OTP Kodni Qayta Yuborish (Resend OTP)")
+@app.post("/mobile/resent-otp/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="3. SMS OTP Kodni Qayta Yuborish (Resend OTP)")
 @app.post("/mobile/resent-otp", include_in_schema=False)
 @app.post("/mobile/resend-otp/", include_in_schema=False)
 @app.post("/mobile/resend-otp", include_in_schema=False)
@@ -1044,7 +1083,7 @@ def mobile_resend_otp(req: SendOtpRequest):
 
 
 # 4. CODE ACCESS (/mobile/code-access/ va /api/website/code-access/)
-@app.post("/mobile/code-access/", tags=["Mobil Ilova (Mobile API)"], summary="4. 4-Xonali Kod O'rnatish / Tekshirish (Token orqali)")
+@app.post("/mobile/code-access/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="4. 4-Xonali Kod O'rnatish / Tekshirish (Token orqali)")
 @app.post("/mobile/code-access", include_in_schema=False)
 @app.post("/api/website/code-access/", tags=["Web Sayt (Website)"], summary="Web: 4-Xonali Kod O'rnatish / Tekshirish")
 @app.post("/api/website/code-access", include_in_schema=False)
@@ -1123,8 +1162,8 @@ def mobile_code_access(req: CodeAccessRequest, request: Request, current_user: d
 
 
 # 5. CODE RE-GENERATE (/mobile/code-re-generate/ va /mobile/code-re-generate)
-@app.post("/mobile/code-re-generate/", tags=["Mobil Ilova (Mobile API)"], summary="5. Yangi Random 4-Xonali Parol Qo'yib Berish (SMS orqali)")
-@app.post("/mobile/code-re-generate", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/code-re-generate/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="5. Yangi Random 4-Xonali Parol Qo'yib Berish (SMS orqali)")
+@app.post("/mobile/code-re-generate", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], include_in_schema=False)
 def mobile_code_re_generate(current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     new_random_code = f"{random.randint(1000, 9999)}"
@@ -1160,7 +1199,7 @@ def mobile_code_re_generate(current_user: dict = Depends(get_current_user)):
 
 
 # 6. ADD CHILD (/mobile/add-child/ va /api/website/add-child/)
-@app.post("/mobile/add-child/", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="6. Yangi Farzand Qo'shish (Token orqali)")
+@app.post("/mobile/add-child/", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="6. Yangi Farzand Qo'shish (Token orqali)")
 @app.post("/mobile/add-child", response_model=dict, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/api/website/add-child/", response_model=dict, status_code=status.HTTP_201_CREATED, tags=["Web Sayt (Website)"], summary="Web: Yangi Farzand Qo'shish")
 @app.post("/api/website/add-child", response_model=dict, status_code=status.HTTP_201_CREATED, include_in_schema=False)
@@ -1208,7 +1247,7 @@ def mobile_add_child(child: AddChildRequest, request: Request, current_user: dic
 
 
 # 7. GET MY CHILDREN (/mobile/my-children/ va /api/website/my-children/)
-@app.get("/mobile/my-children/", response_model=List[ChildResponse], tags=["Mobil Ilova (Mobile API)"], summary="7. Foydalanuvchining Barcha Farzandlari Ro'yxati (Token orqali)")
+@app.get("/mobile/my-children/", response_model=List[ChildResponse], tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7. Foydalanuvchining Barcha Farzandlari Ro'yxati (Token orqali)")
 @app.get("/mobile/my-children", response_model=List[ChildResponse], include_in_schema=False)
 @app.get("/api/website/my-children/", response_model=List[ChildResponse], tags=["Web Sayt (Website)"], summary="Web: Barcha Farzandlar Ro'yxati")
 @app.get("/api/website/my-children", response_model=List[ChildResponse], include_in_schema=False)
@@ -1224,7 +1263,7 @@ def mobile_get_my_children(request: Request, current_user: dict = Depends(get_cu
 
 
 # 7.1 MAVJUD TILLAR RO'YXATI (/mobile/languages/ va /mobile/languages)
-@app.get("/mobile/languages/", response_model=List[LanguageOption], tags=["Mobil Ilova (Mobile API)"], summary="7.1. Mavjud Tillar Ro'yxati (uzb, rus, eng)")
+@app.get("/mobile/languages/", response_model=List[LanguageOption], tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.1. Mavjud Tillar Ro'yxati (uzb, rus, eng)")
 @app.get("/mobile/languages", response_model=List[LanguageOption], include_in_schema=False)
 @app.get("/api/website/languages/", response_model=List[LanguageOption], include_in_schema=False)
 @app.get("/api/website/languages", response_model=List[LanguageOption], include_in_schema=False)
@@ -1237,7 +1276,7 @@ def get_supported_languages():
 
 
 # 7.2 FARZAND PROFILI TAFSILOTLARI (/mobile/child-profile/{child_id})
-@app.get("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.2. Farzand Profili Tafsilotlari (Token orqali)")
+@app.get("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.2. Farzand Profili Tafsilotlari (Token orqali)")
 @app.get("/api/website/child-profile/{child_id}", response_model=ChildResponse, include_in_schema=False)
 def get_child_profile(child_id: int, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
@@ -1253,7 +1292,7 @@ def get_child_profile(child_id: int, request: Request, current_user: dict = Depe
 
 
 # 7.3 FARZAND PROFILINI TAHRIRLASH (/mobile/child-profile/{child_id})
-@app.put("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.3. Farzand Profilini Tahrirlash / Yangilash (Token orqali)")
+@app.put("/mobile/child-profile/{child_id}", response_model=ChildResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.3. Farzand Profilini Tahrirlash / Yangilash (Token orqali)")
 @app.put("/api/website/child-profile/{child_id}", response_model=ChildResponse, include_in_schema=False)
 def update_child_profile(child_id: int, req: UpdateChildProfileRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
@@ -1289,7 +1328,7 @@ def update_child_profile(child_id: int, req: UpdateChildProfileRequest, request:
 
 
 # 7.4 FARZAND TILINI O'ZGARTIRISH (/mobile/child-profile/{child_id}/set-language/)
-@app.post("/mobile/child-profile/{child_id}/set-language/", response_model=dict, tags=["Mobil Ilova (Mobile API)"], summary="7.4. Farzand Tilini O'zgartirish (uzb, rus, eng)")
+@app.post("/mobile/child-profile/{child_id}/set-language/", response_model=dict, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.4. Farzand Tilini O'zgartirish (uzb, rus, eng)")
 @app.put("/mobile/child-profile/{child_id}/set-language/", response_model=dict, include_in_schema=False)
 @app.post("/mobile/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
 @app.put("/mobile/child-profile/{child_id}/set-language", response_model=dict, include_in_schema=False)
@@ -1321,7 +1360,7 @@ def set_child_language(child_id: int, req: SetLanguageRequest, current_user: dic
 
 
 # 7.5 OTA-ONA PROFILI (/mobile/parent/profile/ va /api/website/parent/profile/)
-@app.get("/mobile/parent/profile/", response_model=ParentProfileResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.5. Ota-ona Profili va Farzandlar Ro'yxati (Token orqali)")
+@app.get("/mobile/parent/profile/", response_model=ParentProfileResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.5. Ota-ona Profili va Farzandlar Ro'yxati (Token orqali)")
 @app.get("/mobile/parent/profile", response_model=ParentProfileResponse, include_in_schema=False)
 @app.get("/mobile/profile/", response_model=ParentProfileResponse, include_in_schema=False)
 @app.get("/mobile/profile", response_model=ParentProfileResponse, include_in_schema=False)
@@ -1348,7 +1387,7 @@ def get_parent_profile(request: Request, current_user: dict = Depends(get_curren
 
 
 # 7.6 OTA-ONA PANELIDAN 4-XONALI PAROLNI O'ZGARTIRISH (/mobile/parent/change-passcode/)
-@app.post("/mobile/parent/change-passcode/", tags=["Mobil Ilova (Mobile API)"], summary="7.6. Ota-ona Panelidan 4-Xonali Parolni O'zgartirish (Token orqali)")
+@app.post("/mobile/parent/change-passcode/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.6. Ota-ona Panelidan 4-Xonali Parolni O'zgartirish (Token orqali)")
 @app.post("/mobile/parent/change-passcode", include_in_schema=False)
 @app.post("/mobile/change-passcode/", include_in_schema=False)
 @app.post("/mobile/change-passcode", include_in_schema=False)
@@ -1394,7 +1433,7 @@ def mobile_change_passcode(req: ChangePasscodeRequest, request: Request, current
 
 
 # 7.7 FARZAND PROFILINI O'CHIRISH (/mobile/child-profile/{child_id})
-@app.delete("/mobile/child-profile/{child_id}", tags=["Mobil Ilova (Mobile API)"], summary="7.7. Farzand Profilini O'chirish (Token orqali)")
+@app.delete("/mobile/child-profile/{child_id}", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.7. Farzand Profilini O'chirish (Token orqali)")
 @app.delete("/mobile/child-profile/{child_id}/", include_in_schema=False)
 @app.delete("/mobile/child/{child_id}", include_in_schema=False)
 @app.delete("/api/website/child-profile/{child_id}", include_in_schema=False)
@@ -1418,7 +1457,7 @@ def delete_child_profile(child_id: int, current_user: dict = Depends(get_current
 
 
 # 7.8 FARZANDNING AI DA O'TKAZGAN VAQTINI SAQLASH (/mobile/child/{child_id}/track-time/)
-@app.post("/mobile/child/{child_id}/track-time/", tags=["Mobil Ilova (Mobile API)"], summary="7.8. Farzandning AI da O'tkazgan Vaqtini Saqlash (Token orqali)")
+@app.post("/mobile/child/{child_id}/track-time/", tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.8. Farzandning AI da O'tkazgan Vaqtini Saqlash (Token orqali)")
 @app.post("/mobile/child/{child_id}/track-time", include_in_schema=False)
 @app.post("/api/website/child/{child_id}/track-time/", include_in_schema=False)
 @app.post("/api/website/child/{child_id}/track-time", include_in_schema=False)
@@ -1688,7 +1727,7 @@ def calculate_child_activity_stats(child_id: int, user_id: int, request: Request
     }
 
 
-@app.get("/mobile/child/{child_id}/activity-stats/", response_model=ChildActivityStatsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.9. Farzandning AI Faollik Statistikasi — Kunlik, Haftalik, Oylik (Token orqali)")
+@app.get("/mobile/child/{child_id}/activity-stats/", response_model=ChildActivityStatsResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.9. Farzandning AI Faollik Statistikasi — Kunlik, Haftalik, Oylik (Token orqali)")
 @app.get("/mobile/child/{child_id}/activity-stats", response_model=ChildActivityStatsResponse, include_in_schema=False)
 @app.get("/mobile/child-activity/{child_id}", response_model=ChildActivityStatsResponse, include_in_schema=False)
 @app.get("/mobile/child/{child_id}/stats", response_model=ChildActivityStatsResponse, include_in_schema=False)
@@ -1700,7 +1739,7 @@ def get_child_activity_stats_endpoint(child_id: int, request: Request, current_u
 
 
 # 7.10 FARZANDNING AI BILAN SUHBAT TARIXI (CHAT HISTORY)
-@app.get("/mobile/child/{child_id}/ai-history/", response_model=List[AiChatHistoryItemResponse], tags=["Mobil Ilova (Mobile API)"], summary="7.10. Farzandning AI Bilan Suhbat Tarixi (Token orqali)")
+@app.get("/mobile/child/{child_id}/ai-history/", response_model=List[AiChatHistoryItemResponse], tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="7.10. Farzandning AI Bilan Suhbat Tarixi (Token orqali)")
 @app.get("/mobile/child/{child_id}/ai-history", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
 @app.get("/mobile/ai/history/{child_id}", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
 @app.get("/mobile/ai/history/", response_model=List[AiChatHistoryItemResponse], include_in_schema=False)
@@ -1736,7 +1775,7 @@ def get_child_ai_history(child_id: Optional[int] = None, request: Request = None
     return result
 
 
-@app.delete("/mobile/child/{child_id}/ai-history/", tags=["Mobil Ilova (Mobile API)"], summary="7.11. Farzandning AI Suhbat Tarixini Tozalash (Token orqali)")
+@app.delete("/mobile/child/{child_id}/ai-history/", tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], summary="7.11. Farzandning AI Suhbat Tarixini Tozalash (Token orqali)")
 @app.delete("/mobile/child/{child_id}/ai-history", include_in_schema=False)
 @app.delete("/api/website/child/{child_id}/ai-history/", tags=["Web Sayt (Website)"], summary="Web: Farzand AI Suhbat Tarixini Tozalash")
 @app.delete("/api/website/child/{child_id}/ai-history", include_in_schema=False)
@@ -1844,7 +1883,7 @@ def _get_day_name(date_str: str, lang: str = "uzb") -> str:
 
 
 # 7.12.1. MAVJUD EMOTSIYALAR RO'YXATI
-@app.get("/mobile/planets/neptune/options/", response_model=List[EmotionOption], tags=["Mobil Ilova (Mobile API)"], summary="7.12.1. Neptune / Emotsiyalar Sayyorasi — Mavjud Emotsiyalar Ro'yxati")
+@app.get("/mobile/planets/neptune/options/", response_model=List[EmotionOption], tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.1. Neptune / Emotsiyalar Sayyorasi — Mavjud Emotsiyalar Ro'yxati")
 @app.get("/mobile/planets/neptune/options", response_model=List[EmotionOption], include_in_schema=False)
 @app.get("/mobile/planets/neptun/options/", response_model=List[EmotionOption], include_in_schema=False)
 @app.get("/mobile/planets/neptun/options", response_model=List[EmotionOption], include_in_schema=False)
@@ -1866,7 +1905,7 @@ def get_neptune_emotion_options(request: Request):
 
 
 # 7.12.2. BOLANING YANGI EMOTSIYASINI SAQLASH (BOLA & NEPTUNE UCHUN)
-@app.post("/mobile/planets/neptune/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="7.12.2. Farzand Emotsiyasini Belgilash / Saqlash (Token orqali)")
+@app.post("/mobile/planets/neptune/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.2. Farzand Emotsiyasini Belgilash / Saqlash (Token orqali)")
 @app.post("/mobile/planets/neptune/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/mobile/planets/neptun/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @app.post("/mobile/planets/neptun/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
@@ -1941,7 +1980,7 @@ def record_child_emotion(
 
 
 # Farzand ID si URL path orqali berilganda qo'llab-quvvatlash
-@app.post("/mobile/child/{child_id}/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="7.12.2.1. Farzand Emotsiyasini Belgilash (Path ID orqali)")
+@app.post("/mobile/child/{child_id}/emotions/", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.2.1. Farzand Emotsiyasini Belgilash (Path ID orqali)")
 @app.post("/mobile/child/{child_id}/emotions", response_model=EmotionItemResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def record_child_emotion_by_path(
     child_id: int,
@@ -1955,7 +1994,7 @@ def record_child_emotion_by_path(
 
 # 7.12.3. BOLA UCHUN: OXIRGI 7 KUNLIK (1 HAFTALIK) EMOTSIYALAR
 # (7 kundan eski emotsiyalar bola panelida ko'rinmaydi — avtomatik o'chadi/filtrlanadi)
-@app.get("/mobile/planets/neptune/emotions/", response_model=WeeklyChildEmotionsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.12.3. Neptune / Bola Paneli — Oxirgi 7 Kunlik Emotsiyalar (Token orqali)")
+@app.get("/mobile/planets/neptune/emotions/", response_model=WeeklyChildEmotionsResponse, tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.3. Neptune / Bola Paneli — Oxirgi 7 Kunlik Emotsiyalar (Token orqali)")
 @app.get("/mobile/planets/neptune/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
 @app.get("/mobile/planets/neptun/emotions/", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
 @app.get("/mobile/planets/neptun/emotions", response_model=WeeklyChildEmotionsResponse, include_in_schema=False)
@@ -2059,7 +2098,7 @@ def get_child_weekly_emotions(
 
 # 7.12.4. OTA-ONA UCHUN: FARZANDNING TO'LIQ EMOTSIYALAR TARIXI VA ANALITIKASI
 # (Ota-ona uchun barcha tarixlar, shu jumladan 7 kundan oldingilar ham o'chmasdan turadi!)
-@app.get("/mobile/parent/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.12.4. Ota-ona Paneli — Farzandning To'liq Emotsiyalar Tarixi & Tahlili (Token orqali)")
+@app.get("/mobile/parent/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.4. Ota-ona Paneli — Farzandning To'liq Emotsiyalar Tarixi & Tahlili (Token orqali)")
 @app.get("/mobile/parent/child/{child_id}/emotions", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
 @app.get("/mobile/parents/child/{child_id}/emotions/", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
 @app.get("/mobile/parents/child/{child_id}/emotions", response_model=ParentChildEmotionsAnalyticsResponse, include_in_schema=False)
@@ -2182,7 +2221,7 @@ def get_parent_child_emotions_analytics(
 
 
 # 7.12.5. EMOTSIYANI O'CHIRISH
-@app.delete("/mobile/planets/neptune/emotions/{emotion_id}", tags=["Mobil Ilova (Mobile API)"], summary="7.12.5. Emotsiya Yozuvini O'chirish (Token orqali)")
+@app.delete("/mobile/planets/neptune/emotions/{emotion_id}", tags=["Mobil Ilova — Neptun Sayyorasi (Hissiyotlar & Emotsiyalar)"], summary="7.12.5. Emotsiya Yozuvini O'chirish (Token orqali)")
 @app.delete("/mobile/planets/neptun/emotions/{emotion_id}", include_in_schema=False)
 @app.delete("/mobile/child/emotions/{emotion_id}", include_in_schema=False)
 def delete_child_emotion(emotion_id: int, current_user: dict = Depends(get_current_user)):
@@ -2199,7 +2238,7 @@ def delete_child_emotion(emotion_id: int, current_user: dict = Depends(get_curre
 # ==============================================================================
 
 # 7.13.1. URAN KATEGORIYALARI RO'YXATI (/mobile/planets/uran/category/)
-@app.get("/mobile/planets/uran/category/", response_model=List[UranCategoryResponse], tags=["Mobil Ilova (Mobile API)"], summary="7.13.1. Uran / Nutq va Til Sayyorasi — Kategoriyalar Ro'yxati (name, image, words_count)")
+@app.get("/mobile/planets/uran/category/", response_model=List[UranCategoryResponse], tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.1. Uran / Nutq va Til Sayyorasi — Kategoriyalar Ro'yxati (name, image, words_count)")
 @app.get("/mobile/planets/uran/category", response_model=List[UranCategoryResponse], include_in_schema=False)
 @app.get("/mobile/planets/uranus/category/", response_model=List[UranCategoryResponse], include_in_schema=False)
 @app.get("/mobile/planets/uranus/category", response_model=List[UranCategoryResponse], include_in_schema=False)
@@ -2237,7 +2276,7 @@ def get_uran_categories(request: Request):
 
 
 # 7.13.2. URAN KATEGORIYA SO'ZLARI VA TEST SAVOLLARI (/mobile/planets/uran/category/{category_id})
-@app.get("/mobile/planets/uran/category/{category_id}", response_model=UranCategoryDetailResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.13.2. Uran / Kategoriya So'zlari va Test Savollari (Inglizcha-O'zbekcha va 4 Variantli Test)")
+@app.get("/mobile/planets/uran/category/{category_id}", response_model=UranCategoryDetailResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.2. Uran / Kategoriya So'zlari va Test Savollari (Inglizcha-O'zbekcha va 4 Variantli Test)")
 @app.get("/mobile/planets/uran/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
 @app.get("/mobile/planets/uranus/category/{category_id}", response_model=UranCategoryDetailResponse, include_in_schema=False)
 @app.get("/mobile/planets/uranus/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
@@ -2345,12 +2384,55 @@ def get_uran_category_detail(category_id: int, request: Request):
     }
 
 
+# Yordamchi funksiya: Uran test savollari va 4 ta variantlarini tuzish
+def build_uran_quiz_questions(selected_words: list, all_uz_pool: list, request: Request = None) -> list:
+    tests_list = []
+    for idx, w in enumerate(selected_words):
+        word_img = to_full_image_url(w["image"], request) if request else w["image"]
+        correct_ans = w["word_uz"]
+
+        cat_distractors = [u for u in all_uz_pool if u != correct_ans]
+        distractors = []
+        if len(cat_distractors) >= 3:
+            distractors = random.sample(cat_distractors, 3)
+        else:
+            distractors = list(cat_distractors)
+            fallback = ["Olma", "Kitob", "Quyosh", "Sher", "Mashina", "Doira", "Qizil", "Banan", "Non", "Suv", "Oy", "Daraxt"]
+            for fb in fallback:
+                if len(distractors) >= 3:
+                    break
+                if fb != correct_ans and fb not in distractors:
+                    distractors.append(fb)
+
+        options = [correct_ans] + distractors[:3]
+        random.shuffle(options)
+
+        test_item = {
+            "id": idx + 1,
+            "word_id": w["id"],
+            "word_en": w["word_en"],
+            "question": w["word_en"],
+            "prompt": f"'{w['word_en']}' so'zining o'zbekcha tarjimasi qaysi?",
+            "correct_answer": correct_ans,
+            "options": options,
+            "image": word_img,
+            "explanation": f"'{w['word_en']}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
+        }
+        tests_list.append(test_item)
+    return tests_list
+
+
 # 7.13.3. URAN TEST NATIJASINI TOPSHIRISH VA SAQLASH
-@app.post("/mobile/planets/uran/category/{category_id}/submit-test", response_model=UranQuizSubmitResponse, tags=["Mobil Ilova (Mobile API)"], summary="7.13.3. Uran / Test Natijasini Saqlash va Baholash")
+@app.post("/mobile/planets/uran/category/{category_id}/submit-test", response_model=UranQuizSubmitResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.3. Uran / Test Natijasini Saqlash va Baholash")
 @app.post("/mobile/planets/uran/category/{category_id}/submit-test/", response_model=UranQuizSubmitResponse, include_in_schema=False)
+@app.post("/mobile/planets/uran/submit-test", response_model=UranQuizSubmitResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.3. Uran / Test Natijasini Saqlash va Baholash (Kategoriyasiz)")
+@app.post("/mobile/planets/uran/submit-test/", response_model=UranQuizSubmitResponse, include_in_schema=False)
 @app.post("/mobile/planets/uran/submit-quiz", response_model=UranQuizSubmitResponse, include_in_schema=False)
 @app.post("/mobile/planets/uran/submit-quiz/", response_model=UranQuizSubmitResponse, include_in_schema=False)
-def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_user: Optional[dict] = Depends(get_current_user_optional)):
+@app.post("/mobile/planets/uranus/submit-test", response_model=UranQuizSubmitResponse, include_in_schema=False)
+@app.post("/mobile/uran/submit-test", response_model=UranQuizSubmitResponse, include_in_schema=False)
+def submit_uran_quiz(payload: UranQuizSubmitRequest, category_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    effective_category_id = category_id if category_id is not None else (payload.category_id or 1)
     total = max(payload.total_questions, 1)
     score = min(max(payload.score, 0), total)
     percentage = round((score / total) * 100, 1)
@@ -2359,33 +2441,53 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
     if percentage >= 90.0:
         stars = 3
         coins_earned = 30
-        congrat = "Barakalla! Sen barcha so'zlarni a'lo darajada o'rganding! 🌟🌟🌟 (+30 Coin)"
     elif percentage >= 70.0:
         stars = 2
         coins_earned = 20
-        congrat = "Juda yaxshi natija! Yangi so'zlarni puxta o'zlashtirding! 🌟🌟 (+20 Coin)"
     elif percentage >= 50.0:
         stars = 1
         coins_earned = 10
-        congrat = "Yaxshi! Yana bir bor mashq qilib, 100% natijaga erishishing mumkin! 🌟 (+10 Coin)"
     else:
         stars = 0
         coins_earned = 5
-        congrat = "Harakatdan to'xtama! So'zlarni qaytadan takrorlab ko'r, albatta uddalaysan! 💪 (+5 Coin)"
 
     user_id = current_user["id"] if current_user else 1
     child_id = payload.child_id or resolve_child_id(None, current_user)
 
     total_coins = 0
+    uran_total_coins = 0
+    total_planet_words = 0
+    total_learned_words = 0
+    remaining_new_words = 0
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # 1. Test natijasini saqlash
         cursor.execute("""
             INSERT INTO child_uran_quiz_results (user_id, child_id, category_id, score, total_questions, percentage)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (user_id, child_id, category_id, score, total, percentage))
+        """, (user_id, child_id, effective_category_id, score, total, percentage))
 
-        # Vaqt statistikasini yangilash
+        # 2. O'rganilgan so'zlarni saqlash (child_uran_learned_words)
+        learned_words_to_mark = []
+        if payload.word_ids and len(payload.word_ids) > 0:
+            learned_words_to_mark = payload.word_ids
+        else:
+            cursor.execute("SELECT id FROM uran_words WHERE category_id = ?", (effective_category_id,))
+            learned_words_to_mark = [r["id"] for r in cursor.fetchall()]
+
+        for wid in learned_words_to_mark:
+            cursor.execute("""
+                INSERT INTO child_uran_learned_words (user_id, child_id, word_id, correct_count, wrong_count, review_count, last_learned_at)
+                VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+                ON CONFLICT(child_id, word_id) DO UPDATE SET
+                    review_count = child_uran_learned_words.review_count + 1,
+                    last_learned_at = CURRENT_TIMESTAMP
+            """, (user_id, child_id, wid, 1 if passed else 0, 0 if passed else 1))
+
+        # 3. Vaqt statistikasini yangilash
         spent_mins = max(1, (payload.time_spent_seconds or 60) // 60)
         today = datetime.now().strftime("%Y-%m-%d")
         cursor.execute("SELECT id, minutes_spent FROM child_activities WHERE child_id = ? AND date = ?", (child_id, today))
@@ -2399,9 +2501,8 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
             """, (user_id, child_id, today, spent_mins))
 
         conn.commit()
-        conn.close()
 
-        # Coin qo'shish va missiyani yangilash
+        # 4. Coin qo'shish va missiyani yangilash
         coin_res = add_child_coins(
             child_id=child_id,
             user_id=user_id,
@@ -2413,8 +2514,41 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
         )
         total_coins = coin_res["total_coins"]
         update_daily_mission_progress(child_id, user_id, "uran_quiz", 1)
+
+        # 5. Uran sayyorasidagi jami so'zlar va bolaning o'rgangan so'zlarini hisoblash
+        cursor.execute("SELECT COUNT(*) as cnt FROM uran_words")
+        total_planet_words = cursor.fetchone()["cnt"] or 0
+
+        cursor.execute("SELECT COUNT(DISTINCT word_id) as cnt FROM child_uran_learned_words WHERE child_id = ?", (child_id,))
+        total_learned_words = cursor.fetchone()["cnt"] or 0
+
+        remaining_new_words = max(0, total_planet_words - total_learned_words)
+
+        # 6. Bolaning faqat Uran sayyorasining o'zida yutib olgan jami coinlari
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount), 0) as uran_coins 
+            FROM coin_transactions 
+            WHERE child_id = ? AND source = 'uran_quiz' AND transaction_type = 'earn'
+        """, (child_id,))
+        uran_total_coins = cursor.fetchone()["uran_coins"] or 0
+
+        conn.close()
     except Exception as e:
         print("Quiz natijasini saqlashda xatolik:", e)
+
+    # 7. Barakalla xabari: so'zlar statistikasi va Uran coinlari bilan
+    if passed:
+        congrat = (
+            f"Barakalla! Sen Uran sayyorasidagi jami {total_planet_words} ta so'zdan "
+            f"{total_learned_words} tasini muvaffaqiyatli yod olding! 🌟🌟🌟 "
+            f"Ushbu testda +{coins_earned} Coin yutding! Uran sayyorasida to'plagan jami tangalaring: {uran_total_coins} Coin! 🚀"
+        )
+    else:
+        congrat = (
+            f"Harakatdan to'xtama! Uran sayyorasida hozirgacha {total_learned_words}/{total_planet_words} ta so'zni yod olding. "
+            f"Ushbu testda +{coins_earned} Coin olding! Uran sayyorasidagi jami tangalaring: {uran_total_coins} Coin. "
+            f"So'zlarni yana bir bor takrorlab ko'r, albatta uddalaysan! 💪"
+        )
 
     return {
         "success": True,
@@ -2425,8 +2559,290 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
         "passed": passed,
         "stars_earned": stars,
         "coins_earned": coins_earned,
+        "uran_total_coins": uran_total_coins,
         "total_coins": total_coins,
-        "congratulation": congrat
+        "total_planet_words": total_planet_words,
+        "total_learned_words": total_learned_words,
+        "remaining_new_words": remaining_new_words,
+        "mode": payload.mode or "learn",
+        "congratulation": congrat,
+        "next_learn_url": "/mobile/planets/uran/learn",
+        "next_review_url": "/mobile/planets/uran/review"
+    }
+
+
+# 7.13.4. URAN / YANGI SO'ZLARNI O'RGANISH VA IMTIHON TESTLARI (10-15 TA)
+@app.get("/mobile/planets/uran/learn", response_model=UranPracticeSessionResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.4. Uran / Yangi So'zlarni O'rganish va Imtihon Testi (10-15 ta)")
+@app.get("/mobile/planets/uran/learn/", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/planets/uran/category/{category_id}/learn", response_model=UranPracticeSessionResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.4. Uran / Kategoriya Bo'yicha Yangi So'zlarni O'rganish va Test")
+@app.get("/mobile/planets/uran/category/{category_id}/learn/", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/planets/uranus/learn", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/uran/learn", response_model=UranPracticeSessionResponse, include_in_schema=False)
+def get_uran_learn_session(category_id: Optional[int] = None, child_id: Optional[int] = None, count: int = 15, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    effective_child_id = child_id or resolve_child_id(None, current_user)
+    safe_count = max(10, min(count, 25))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Jami so'zlar va farzand o'rgangan so'zlar
+    cursor.execute("SELECT COUNT(*) as cnt FROM uran_words")
+    total_planet_words = cursor.fetchone()["cnt"] or 0
+
+    cursor.execute("SELECT DISTINCT word_id FROM child_uran_learned_words WHERE child_id = ?", (effective_child_id,))
+    learned_ids = [r["word_id"] for r in cursor.fetchall()]
+    total_learned_words = len(learned_ids)
+    remaining_new_words = max(0, total_planet_words - total_learned_words)
+
+    # Bolaning faqat Uran sayyorasida to'plagan jami coinlari
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0) as uran_coins 
+        FROM coin_transactions 
+        WHERE child_id = ? AND source = 'uran_quiz' AND transaction_type = 'earn'
+    """, (effective_child_id,))
+    uran_total_coins = cursor.fetchone()["uran_coins"] or 0
+
+    # Variantlar uchun hamma o'zbekcha so'zlar
+    cursor.execute("SELECT word_uz FROM uran_words")
+    all_uz_pool = [r["word_uz"] for r in cursor.fetchall()]
+
+    # Yangi so'zlarni tanlash
+    selected_word_rows = []
+    cat_name = None
+    if category_id:
+        cursor.execute("SELECT name FROM uran_categories WHERE id = ?", (category_id,))
+        cat_row = cursor.fetchone()
+        if cat_row:
+            cat_name = cat_row["name"]
+
+        if learned_ids:
+            placeholders = ",".join("?" for _ in learned_ids)
+            cursor.execute(f"SELECT * FROM uran_words WHERE category_id = ? AND id NOT IN ({placeholders}) ORDER BY order_num ASC, id ASC", [category_id] + learned_ids)
+        else:
+            cursor.execute("SELECT * FROM uran_words WHERE category_id = ? ORDER BY order_num ASC, id ASC", (category_id,))
+        selected_word_rows = cursor.fetchall()
+
+        # Agar kategoriyada yangi so'zlar kam bo'lsa (masalan 10 tadan kam), 10-15 ta qilish uchun boshqa yangi so'zlardan to'ldiramiz
+        if len(selected_word_rows) < safe_count:
+            needed = safe_count - len(selected_word_rows)
+            existing_ids = [r["id"] for r in selected_word_rows] + learned_ids
+            if existing_ids:
+                ex_placeholders = ",".join("?" for _ in existing_ids)
+                cursor.execute(f"SELECT * FROM uran_words WHERE id NOT IN ({ex_placeholders}) ORDER BY RANDOM() LIMIT ?", existing_ids + [needed])
+            else:
+                cursor.execute("SELECT * FROM uran_words ORDER BY RANDOM() LIMIT ?", (needed,))
+            supplement = cursor.fetchall()
+            selected_word_rows = list(selected_word_rows) + list(supplement)
+    else:
+        # Barcha kategoriyalar bo'yicha yangi so'zlar
+        if learned_ids:
+            placeholders = ",".join("?" for _ in learned_ids)
+            cursor.execute(f"SELECT * FROM uran_words WHERE id NOT IN ({placeholders}) ORDER BY category_id ASC, order_num ASC, id ASC LIMIT ?", learned_ids + [safe_count])
+        else:
+            cursor.execute("SELECT * FROM uran_words ORDER BY category_id ASC, order_num ASC, id ASC LIMIT ?", (safe_count,))
+        selected_word_rows = cursor.fetchall()
+
+    is_review = False
+    auto_switched_to_review = False
+    mode = "learn"
+
+    # AGAR YANGI SO'ZLAR QOLMAGAN BO'LSA -> AVTOMATIK TAKRORLASH BO'LIB KETADI!
+    if not selected_word_rows or len(selected_word_rows) == 0:
+        is_review = True
+        auto_switched_to_review = True
+        mode = "review"
+        message = (
+            f"Barakalla! Uran sayyorasidagi barcha {total_planet_words} ta yangi so'zni o'rganib bo'ldingiz! "
+            f"Endi o'rganilgan so'zlarni mustahkamlash uchun avtomatik takrorlash rejimi ishga tushdi."
+        )
+        # O'rganilgan so'zlardan eng kam takrorlanganlarini olamiz
+        cursor.execute("""
+            SELECT w.* FROM uran_words w
+            JOIN child_uran_learned_words lw ON w.id = lw.word_id
+            WHERE lw.child_id = ?
+            ORDER BY lw.review_count ASC, lw.last_learned_at ASC
+            LIMIT ?
+        """, (effective_child_id, safe_count))
+        selected_word_rows = cursor.fetchall()
+
+        # Agar bazada biror sabab bilan o'rganilgan so'zlar topilmasa, istalgan 10-15 ta so'z
+        if not selected_word_rows:
+            cursor.execute("SELECT * FROM uran_words ORDER BY RANDOM() LIMIT ?", (safe_count,))
+            selected_word_rows = cursor.fetchall()
+    else:
+        message = f"Yangi so'zlarni o'rganing va testdan o'ting! ({len(selected_word_rows)} ta yangi so'z)"
+
+    conn.close()
+
+    # So'zlar va testlar ro'yxatini shakllantirish
+    words_list = []
+    for w in selected_word_rows:
+        words_list.append({
+            "id": w["id"],
+            "category_id": w["category_id"],
+            "word_uz": w["word_uz"],
+            "word_en": w["word_en"],
+            "word_ru": w["word_ru"] or "",
+            "transcription": w["transcription"] or "",
+            "image": to_full_image_url(w["image"], request) if request else w["image"],
+            "audio_url": to_full_image_url(w["audio_url"], request) if (w["audio_url"] and request) else w["audio_url"],
+            "example_sentence": w["example_sentence"] or "",
+            "example_translation": w["example_translation"] or "",
+            "order_num": w["order_num"] or 0,
+            "created_at": str(w["created_at"]) if w["created_at"] else None
+        })
+
+    tests_list = build_uran_quiz_questions(words_list, all_uz_pool, request)
+
+    return {
+        "mode": mode,
+        "title": "Uran: Yangi So'zlarni O'rganish" if mode == "learn" else "Uran: So'zlarni Takrorlash (Review)",
+        "category_id": category_id,
+        "category_name": cat_name,
+        "is_review": is_review,
+        "auto_switched_to_review": auto_switched_to_review,
+        "message": message,
+        "total_words": len(words_list),
+        "total_tests": len(tests_list),
+        "words": words_list,
+        "tests": tests_list,
+        "quiz": tests_list,
+        "stats": {
+            "total_planet_words": total_planet_words,
+            "total_learned_words": total_learned_words,
+            "remaining_new_words": remaining_new_words,
+            "uran_total_coins": uran_total_coins
+        }
+    }
+
+
+# 7.13.5. URAN / O'RGANILGAN SO'ZLARNI TAKRORLASH VA IMTIHON TESTLARI (10-15 TA)
+@app.get("/mobile/planets/uran/review", response_model=UranPracticeSessionResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.5. Uran / O'rganilgan So'zlarni Takrorlash va Imtihon Testi (10-15 ta)")
+@app.get("/mobile/planets/uran/review/", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/planets/uran/category/{category_id}/review", response_model=UranPracticeSessionResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.5. Uran / Kategoriya Bo'yicha So'zlarni Takrorlash va Test")
+@app.get("/mobile/planets/uran/category/{category_id}/review/", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/planets/uranus/review", response_model=UranPracticeSessionResponse, include_in_schema=False)
+@app.get("/mobile/uran/review", response_model=UranPracticeSessionResponse, include_in_schema=False)
+def get_uran_review_session(category_id: Optional[int] = None, child_id: Optional[int] = None, count: int = 15, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    effective_child_id = child_id or resolve_child_id(None, current_user)
+    safe_count = max(10, min(count, 25))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Jami so'zlar va farzand o'rgangan so'zlar
+    cursor.execute("SELECT COUNT(*) as cnt FROM uran_words")
+    total_planet_words = cursor.fetchone()["cnt"] or 0
+
+    cursor.execute("SELECT DISTINCT word_id FROM child_uran_learned_words WHERE child_id = ?", (effective_child_id,))
+    learned_ids = [r["word_id"] for r in cursor.fetchall()]
+    total_learned_words = len(learned_ids)
+    remaining_new_words = max(0, total_planet_words - total_learned_words)
+
+    # Bolaning faqat Uran sayyorasida to'plagan jami coinlari
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0) as uran_coins 
+        FROM coin_transactions 
+        WHERE child_id = ? AND source = 'uran_quiz' AND transaction_type = 'earn'
+    """, (effective_child_id,))
+    uran_total_coins = cursor.fetchone()["uran_coins"] or 0
+
+    # Variantlar uchun hamma o'zbekcha so'zlar
+    cursor.execute("SELECT word_uz FROM uran_words")
+    all_uz_pool = [r["word_uz"] for r in cursor.fetchall()]
+
+    selected_word_rows = []
+    cat_name = None
+
+    if category_id:
+        cursor.execute("SELECT name FROM uran_categories WHERE id = ?", (category_id,))
+        cat_row = cursor.fetchone()
+        if cat_row:
+            cat_name = cat_row["name"]
+
+        cursor.execute("""
+            SELECT w.* FROM uran_words w
+            JOIN child_uran_learned_words lw ON w.id = lw.word_id
+            WHERE lw.child_id = ? AND w.category_id = ?
+            ORDER BY lw.review_count ASC, lw.last_learned_at ASC
+            LIMIT ?
+        """, (effective_child_id, category_id, safe_count))
+        selected_word_rows = cursor.fetchall()
+    else:
+        cursor.execute("""
+            SELECT w.* FROM uran_words w
+            JOIN child_uran_learned_words lw ON w.id = lw.word_id
+            WHERE lw.child_id = ?
+            ORDER BY lw.review_count ASC, lw.last_learned_at ASC
+            LIMIT ?
+        """, (effective_child_id, safe_count))
+        selected_word_rows = cursor.fetchall()
+
+    # Agar o'rganilgan so'zlar safe_count dan kam bo'lsa (yoki yangi foydalanuvchi bo'lsa):
+    # kamida 10-15 ta test bo'lishi uchun bazadagi boshqa so'zlar bilan to'ldiramiz!
+    if len(selected_word_rows) < safe_count:
+        needed = safe_count - len(selected_word_rows)
+        existing_ids = [r["id"] for r in selected_word_rows]
+        if existing_ids:
+            placeholders = ",".join("?" for _ in existing_ids)
+            if category_id:
+                cursor.execute(f"SELECT * FROM uran_words WHERE category_id = ? AND id NOT IN ({placeholders}) ORDER BY order_num ASC, id ASC LIMIT ?", [category_id] + existing_ids + [needed])
+            else:
+                cursor.execute(f"SELECT * FROM uran_words WHERE id NOT IN ({placeholders}) ORDER BY RANDOM() LIMIT ?", existing_ids + [needed])
+        else:
+            if category_id:
+                cursor.execute("SELECT * FROM uran_words WHERE category_id = ? ORDER BY order_num ASC, id ASC LIMIT ?", (category_id, needed))
+            else:
+                cursor.execute("SELECT * FROM uran_words ORDER BY RANDOM() LIMIT ?", (needed,))
+        supp_rows = cursor.fetchall()
+        selected_word_rows = list(selected_word_rows) + list(supp_rows)
+
+    conn.close()
+
+    words_list = []
+    for w in selected_word_rows:
+        words_list.append({
+            "id": w["id"],
+            "category_id": w["category_id"],
+            "word_uz": w["word_uz"],
+            "word_en": w["word_en"],
+            "word_ru": w["word_ru"] or "",
+            "transcription": w["transcription"] or "",
+            "image": to_full_image_url(w["image"], request) if request else w["image"],
+            "audio_url": to_full_image_url(w["audio_url"], request) if (w["audio_url"] and request) else w["audio_url"],
+            "example_sentence": w["example_sentence"] or "",
+            "example_translation": w["example_translation"] or "",
+            "order_num": w["order_num"] or 0,
+            "created_at": str(w["created_at"]) if w["created_at"] else None
+        })
+
+    tests_list = build_uran_quiz_questions(words_list, all_uz_pool, request)
+
+    message = (
+        f"Avval o'rganilgan so'zlarni takrorlang va xotirangizni mustahkamlang! ({len(words_list)} ta so'z va test)"
+        if total_learned_words > 0
+        else f"Uran sayyorasidagi so'zlarni takrorlash mashqi. ({len(words_list)} ta so'z va test)"
+    )
+
+    return {
+        "mode": "review",
+        "title": "Uran: So'zlarni Takrorlash",
+        "category_id": category_id,
+        "category_name": cat_name,
+        "is_review": True,
+        "auto_switched_to_review": False,
+        "message": message,
+        "total_words": len(words_list),
+        "total_tests": len(tests_list),
+        "words": words_list,
+        "tests": tests_list,
+        "quiz": tests_list,
+        "stats": {
+            "total_planet_words": total_planet_words,
+            "total_learned_words": total_learned_words,
+            "remaining_new_words": remaining_new_words,
+            "uran_total_coins": uran_total_coins
+        }
     }
 
 
@@ -3091,11 +3507,11 @@ def get_coins_leaderboard(limit: int = Query(20, ge=1, le=100), request: Request
 # ==============================================================================
 # 7.13.4. ADMIN PANEL — URAN KATEGORIYALARI VA SO'ZLARI CRUD
 # ==============================================================================
-@app.get("/api/website/uran/categories", response_model=List[UranCategoryResponse], tags=["Website & Admin API"], summary="Admin: Uran Kategoriyalar Ro'yxati")
+@app.get("/api/website/uran/categories", response_model=List[UranCategoryResponse], tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran Kategoriyalar Ro'yxati")
 def admin_get_uran_categories(request: Request):
     return get_uran_categories(request)
 
-@app.post("/api/website/uran/categories", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, tags=["Website & Admin API"], summary="Admin: Yangi Uran Kategoriyasi Qo'shish")
+@app.post("/api/website/uran/categories", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Yangi Uran Kategoriyasi Qo'shish")
 def admin_create_uran_category(payload: UranCategoryCreate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3121,7 +3537,7 @@ def admin_create_uran_category(payload: UranCategoryCreate, request: Request):
         "created_at": str(row["created_at"])
     }
 
-@app.put("/api/website/uran/categories/{cat_id}", response_model=UranCategoryResponse, tags=["Website & Admin API"], summary="Admin: Uran Kategoriyasini Tahrirlash")
+@app.put("/api/website/uran/categories/{cat_id}", response_model=UranCategoryResponse, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran Kategoriyasini Tahrirlash")
 def admin_update_uran_category(cat_id: int, payload: UranCategoryUpdate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3165,7 +3581,7 @@ def admin_update_uran_category(cat_id: int, payload: UranCategoryUpdate, request
         "created_at": str(updated_row["created_at"])
     }
 
-@app.delete("/api/website/uran/categories/{cat_id}", tags=["Website & Admin API"], summary="Admin: Uran Kategoriyasini O'chirish")
+@app.delete("/api/website/uran/categories/{cat_id}", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran Kategoriyasini O'chirish")
 def admin_delete_uran_category(cat_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3174,7 +3590,7 @@ def admin_delete_uran_category(cat_id: int):
     conn.close()
     return {"success": True, "message": "Kategoriya va uning barcha so'zlari muvaffaqiyatli o'chirildi", "id": cat_id}
 
-@app.get("/api/website/uran/words", response_model=List[UranWordResponse], tags=["Website & Admin API"], summary="Admin: Uran So'zlar Ro'yxati")
+@app.get("/api/website/uran/words", response_model=List[UranWordResponse], tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran So'zlar Ro'yxati")
 def admin_get_uran_words(category_id: Optional[int] = None, request: Request = None):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3202,7 +3618,7 @@ def admin_get_uran_words(category_id: Optional[int] = None, request: Request = N
         for r in rows
     ]
 
-@app.get("/api/website/uran/practice", tags=["Website & Admin API"], summary="Uran: Random 3-4 ta so'z kartochkalari va test")
+@app.get("/api/website/uran/practice", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Uran: Random 3-4 ta so'z kartochkalari va test")
 def get_uran_practice(count: int = 3, request: Request = None):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3255,7 +3671,7 @@ def get_uran_practice(count: int = 3, request: Request = None):
 
     return {"cards": cards, "quiz": quiz}
 
-@app.get("/api/website/saturn/practice", tags=["Website & Admin API"], summary="Saturn: 2-3 ta matematika mashqi va test")
+@app.get("/api/website/saturn/practice", tags=["Web & Admin — Sayyoralar Interaktiv Mashqlari"], summary="Saturn: 2-3 ta matematika mashqi va test")
 def get_saturn_practice(count: int = 3):
     pool_cards = [
         {
@@ -3360,7 +3776,7 @@ def get_saturn_practice(count: int = 3):
 
     return {"cards": selected_cards, "quiz": quiz_data}
 
-@app.get("/api/website/yupiter/calendar-presets", tags=["Website & Admin API"], summary="Yupiter: Taym-menejment taqvimi va kunlik reja shablonlari")
+@app.get("/api/website/yupiter/calendar-presets", tags=["Web & Admin — Sayyoralar Interaktiv Mashqlari"], summary="Yupiter: Taym-menejment taqvimi va kunlik reja shablonlari")
 def get_yupiter_calendar_presets():
     return {
         "presets": [
@@ -3380,7 +3796,7 @@ def get_yupiter_calendar_presets():
         ]
     }
 
-@app.get("/api/website/venera/wardrobe", tags=["Website & Admin API"], summary="Venera: Virtual Do'kon va Kiyintirish ma'lumotlari")
+@app.get("/api/website/venera/wardrobe", tags=["Web & Admin — Sayyoralar Interaktiv Mashqlari"], summary="Venera: Virtual Do'kon va Kiyintirish ma'lumotlari")
 def get_venera_wardrobe():
     return {
         "character": {
@@ -3466,7 +3882,7 @@ def get_venera_wardrobe():
         ]
     }
 
-@app.get("/api/website/neptun/tree", tags=["Website & Admin API"], summary="Neptun: Sehrli Hissiyotlar Daraxti ma'lumotlari")
+@app.get("/api/website/neptun/tree", tags=["Web & Admin — Sayyoralar Interaktiv Mashqlari"], summary="Neptun: Sehrli Hissiyotlar Daraxti ma'lumotlari")
 def get_neptun_tree():
     return {
         "title": "Sehrli Hissiyotlar Daraxti",
@@ -3527,7 +3943,7 @@ def get_neptun_tree():
         ]
     }
 
-@app.post("/api/website/uran/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Website & Admin API"], summary="Admin: Yangi So'z Qo'shish")
+@app.post("/api/website/uran/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Yangi So'z Qo'shish")
 def admin_create_uran_word(payload: UranWordCreate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3555,7 +3971,7 @@ def admin_create_uran_word(payload: UranWordCreate, request: Request):
         "created_at": str(row["created_at"])
     }
 
-@app.put("/api/website/uran/words/{word_id}", response_model=UranWordResponse, tags=["Website & Admin API"], summary="Admin: So'zni Tahrirlash")
+@app.put("/api/website/uran/words/{word_id}", response_model=UranWordResponse, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: So'zni Tahrirlash")
 def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3601,7 +4017,7 @@ def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Reque
         "created_at": str(updated_row["created_at"])
     }
 
-@app.delete("/api/website/uran/words/{word_id}", tags=["Website & Admin API"], summary="Admin: So'zni O'chirish")
+@app.delete("/api/website/uran/words/{word_id}", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: So'zni O'chirish")
 def admin_delete_uran_word(word_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -3611,7 +4027,7 @@ def admin_delete_uran_word(word_id: int):
     return {"success": True, "message": "So'z muvaffaqiyatli o'chirildi", "id": word_id}
 
 
-@app.post("/api/website/uran/ai-suggest", response_model=UranAiSuggestResponse, tags=["Website & Admin API"], summary="Admin: AI orqali so'z tarjimasi va misolini avtomatik to'ldirish")
+@app.post("/api/website/uran/ai-suggest", response_model=UranAiSuggestResponse, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: AI orqali so'z tarjimasi va misolini avtomatik to'ldirish")
 def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
     word = payload.word_en.strip()
     if not word:
@@ -3656,7 +4072,7 @@ def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
 
 
 # 8. MOBIL SAYYORALAR RO'YXATI (/mobile/planets/ va /mobile/planets)
-@app.get("/mobile/planets/", response_model=List[PlanetResponse], tags=["Mobil Ilova (Mobile API)"], summary="8. Mobil Ilova Uchun Barcha Sayyoralar Ro'yxati — is_blocked maydoni bilan (Token orqali)")
+@app.get("/mobile/planets/", response_model=List[PlanetResponse], tags=["Mobil Ilova — Sayyoralar (Planets)"], summary="8. Mobil Ilova Uchun Barcha Sayyoralar Ro'yxati — is_blocked maydoni bilan (Token orqali)")
 @app.get("/mobile/planets", response_model=List[PlanetResponse], include_in_schema=False)
 def mobile_get_planets(request: Request, current_user: dict = Depends(get_current_user)):
     lang = get_accept_language(request)
@@ -3670,7 +4086,7 @@ def mobile_get_planets(request: Request, current_user: dict = Depends(get_curren
 
 
 # 9. MOBIL SAYYORA BATAFSIL (/mobile/planets/{planet_id})
-@app.get("/mobile/planets/{planet_id}", response_model=PlanetResponse, tags=["Mobil Ilova (Mobile API)"], summary="9. Mobil Ilova Uchun Bitta Sayyora Tafsilotlari (Token orqali)")
+@app.get("/mobile/planets/{planet_id}", response_model=PlanetResponse, tags=["Mobil Ilova — Sayyoralar (Planets)"], summary="9. Mobil Ilova Uchun Bitta Sayyora Tafsilotlari (Token orqali)")
 def mobile_get_planet_detail(planet_id: int, request: Request, current_user: dict = Depends(get_current_user)):
     lang = get_accept_language(request)
     conn = get_db_connection()
@@ -3687,7 +4103,7 @@ def mobile_get_planet_detail(planet_id: int, request: Request, current_user: dic
 
 
 # 9.1 MOBIL FAQ SAVOLLAR RO'YXATI (/mobile/faqs/ va /mobile/faqs)
-@app.get("/mobile/faqs/", response_model=List[FaqResponse], tags=["Mobil Ilova (Mobile API)"], summary="9.1. Mobil Ilova Uchun FAQ (Ko'p So'raladigan Savollar) Ro'yxati")
+@app.get("/mobile/faqs/", response_model=List[FaqResponse], tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="9.1. Mobil Ilova Uchun FAQ (Ko'p So'raladigan Savollar) Ro'yxati")
 @app.get("/mobile/faqs", response_model=List[FaqResponse], include_in_schema=False)
 def mobile_get_faqs(request: Request):
     lang = get_accept_language(request)
@@ -3699,7 +4115,7 @@ def mobile_get_faqs(request: Request):
     return [format_faq_row(r, lang=lang) for r in rows]
 
 
-@app.get("/mobile/faqs/{faq_id}", response_model=FaqResponse, tags=["Mobil Ilova (Mobile API)"], summary="9.2. Mobil Ilova Uchun Bitta FAQ Savol Tafsilotlari")
+@app.get("/mobile/faqs/{faq_id}", response_model=FaqResponse, tags=["Mobil Ilova — Autentifikatsiya & Farzandlar Boshqaruvi"], summary="9.2. Mobil Ilova Uchun Bitta FAQ Savol Tafsilotlari")
 def mobile_get_faq_detail(faq_id: int, request: Request):
     lang = get_accept_language(request)
     conn = get_db_connection()
@@ -3832,10 +4248,10 @@ async def process_audio_speech_to_text(audio_bytes: bytes, mime_type: str = "aud
 
 
 # 10. GEMINI AI SUHBAT VA TAVSIYALAR (/mobile/ai/chat/ va /mobile/ai/chat)
-@app.post("/mobile/ai/chat/", response_model=AiChatResponse, tags=["Mobil Ilova (Mobile API)"], summary="10. Bolalar & Ota-onalar Uchun Gemini AI Chatbot (Token orqali)")
-@app.post("/mobile/ai/chat", response_model=AiChatResponse, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/api/ai/chat/", response_model=AiChatResponse, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/api/ai/chat", response_model=AiChatResponse, tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/ai/chat/", response_model=AiChatResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], summary="10. Bolalar & Ota-onalar Uchun Gemini AI Chatbot (Token orqali)")
+@app.post("/mobile/ai/chat", response_model=AiChatResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], include_in_schema=False)
+@app.post("/api/ai/chat/", response_model=AiChatResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], include_in_schema=False)
+@app.post("/api/ai/chat", response_model=AiChatResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], include_in_schema=False)
 async def mobile_ai_chat(req: AiChatRequest, request: Request, current_user: dict = Depends(get_current_user)):
     user_prompt = req.message.strip()
     if not user_prompt:
@@ -4150,7 +4566,7 @@ async def _build_ai_response(req: AiChatRequest, user_prompt: str, request: Requ
 
 
 # 10.1 OVOZLI SUHBAT (VOICE-CHAT: OVOZ YUBORIB, OVOZ VA MATN OLISH)
-@app.post("/mobile/ai/voice-chat/", response_model=AiVoiceChatResponse, tags=["Mobil Ilova (Mobile API)"], summary="10.1. Ovozli AI Suhbat (Voice-in -> Voice-out)")
+@app.post("/mobile/ai/voice-chat/", response_model=AiVoiceChatResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], summary="10.1. Ovozli AI Suhbat (Voice-in -> Voice-out)")
 @app.post("/mobile/ai/voice-chat", response_model=AiVoiceChatResponse, include_in_schema=False)
 @app.post("/api/ai/voice-chat/", response_model=AiVoiceChatResponse, include_in_schema=False)
 @app.post("/api/ai/voice-chat", response_model=AiVoiceChatResponse, include_in_schema=False)
@@ -4241,7 +4657,7 @@ async def mobile_ai_voice_chat(
 
 
 # 10.2 SOF SPEECH-TO-TEXT (STT) ENDPOINT
-@app.post("/mobile/ai/stt/", response_model=AiSttResponse, tags=["Mobil Ilova (Mobile API)"], summary="10.2. Sof Ovozni Matnga Aylantirish (Speech-to-Text)")
+@app.post("/mobile/ai/stt/", response_model=AiSttResponse, tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], summary="10.2. Sof Ovozni Matnga Aylantirish (Speech-to-Text)")
 @app.post("/mobile/ai/stt", response_model=AiSttResponse, include_in_schema=False)
 @app.post("/api/ai/stt/", response_model=AiSttResponse, include_in_schema=False)
 @app.post("/api/ai/stt", response_model=AiSttResponse, include_in_schema=False)
@@ -4272,8 +4688,8 @@ async def mobile_ai_stt(
 @app.post("/api/website/ai/tts/", tags=["Web Sayt (Website)"], include_in_schema=False)
 @app.post("/api/ai/tts", tags=["Web Sayt (Website)"], include_in_schema=False)
 @app.post("/api/ai/tts/", tags=["Web Sayt (Website)"], include_in_schema=False)
-@app.post("/mobile/ai/tts/", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
-@app.post("/mobile/ai/tts", tags=["Mobil Ilova (Mobile API)"], include_in_schema=False)
+@app.post("/mobile/ai/tts/", tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], include_in_schema=False)
+@app.post("/mobile/ai/tts", tags=["Mobil Ilova — Alloma AI & Ovozli Yordamchi"], include_in_schema=False)
 async def ai_tts_endpoint(req: AiTtsRequest, request: Request):
     audio_url = await generate_edge_tts_audio(req.text, req.language or "uzb", request)
     if not audio_url:
@@ -4327,7 +4743,7 @@ def get_planets(request: Request):
 
 @app.post("/api/website/planets", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED, tags=["Web Sayt (Website)"], summary="Yangi sayyora qo'shish (To'liq rasmli URL)")
 @app.post("/api/planets", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
-@app.post("/mobile/planets/", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova (Mobile API)"], summary="9.3. Mobil Ilova Orqali Yangi Sayyora Qo'shish")
+@app.post("/mobile/planets/", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Sayyoralar (Planets)"], summary="9.3. Mobil Ilova Orqali Yangi Sayyora Qo'shish")
 @app.post("/mobile/planets", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_planet(planet: PlanetCreate, request: Request):
     title = (planet.title or planet.name or "").strip()

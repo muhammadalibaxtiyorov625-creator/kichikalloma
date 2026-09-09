@@ -341,6 +341,23 @@ def init_db():
         )
     """)
 
+    # 14.1. Uran / Farzand O'rgangan So'zlari (Child Uran Learned Words)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_uran_learned_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            word_id INTEGER NOT NULL,
+            correct_count INTEGER DEFAULT 0,
+            wrong_count INTEGER DEFAULT 0,
+            review_count INTEGER DEFAULT 1,
+            last_learned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (word_id) REFERENCES uran_words (id) ON DELETE CASCADE,
+            UNIQUE(child_id, word_id)
+        )
+    """)
+
     # Uran kategoriyalari bo'shmi? Bo'lsa boyitilgan boshlang'ich ma'lumotlar bilan to'ldiramiz
     cursor.execute("SELECT COUNT(*) as cnt FROM uran_categories")
     uran_cat_cnt = cursor.fetchone()["cnt"]
