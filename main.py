@@ -807,6 +807,37 @@ def format_child_row(row, request: Request, lang: str = "uzb") -> dict:
     else:
         d["gender_label"] = _t("ogil_bola", lang)
 
+    # Tangalar (coins) ma'lumotlarini qo'shish
+    child_id = d.get("id")
+    total_coins = 50
+    level = 1
+    streak_days = 1
+    if child_id:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT total_coins, level, streak_days FROM child_coins WHERE child_id = ?", (child_id,))
+            c_row = cursor.fetchone()
+            if c_row:
+                total_coins = c_row["total_coins"] or 0
+                level = c_row["level"] or 1
+                streak_days = c_row["streak_days"] or 1
+            else:
+                uid = d.get("user_id") or 1
+                cursor.execute("""
+                    INSERT OR IGNORE INTO child_coins (child_id, user_id, total_coins, lifetime_coins, streak_days, last_daily_bonus_date, level)
+                    VALUES (?, ?, 50, 50, 1, '', 1)
+                """, (child_id, uid))
+                conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+    d["coins"] = total_coins
+    d["total_coins"] = total_coins
+    d["level"] = level
+    d["streak_days"] = streak_days
+
     return d
 
 

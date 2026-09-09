@@ -265,6 +265,10 @@ class ChildResponse(BaseModel):
     gender_label: Optional[str] = Field("O'g'il bola", description="O'zbekcha jins nomi: 'O'g'il bola' yoki 'Qiz bola'")
     language: str = "uzb"
     avatar: Optional[str] = "/images/avatars/boy1.png"
+    coins: Optional[int] = Field(50, example=50, description="Farzandning jami tangalari (Coins)")
+    total_coins: Optional[int] = Field(50, example=50, description="Farzandning jami tangalari (Coins)")
+    level: Optional[int] = Field(1, example=1, description="Farzand darajasi")
+    streak_days: Optional[int] = Field(1, example=1, description="Ketma-ket kirish kunlari (Streak)")
     created_at: str
 
 class ParentProfileResponse(BaseModel):
