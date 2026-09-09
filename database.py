@@ -520,9 +520,150 @@ def init_db():
             )
         print("Boshlang'ich Uran (Nutq va Til) kategoriyalari va so'zlari muvaffaqiyatli kiritildi.")
 
+    # 15. Farzand Tangalari va Balansi (Child Coins & Balance)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_coins (
+            child_id INTEGER PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            total_coins INTEGER DEFAULT 0,
+            lifetime_coins INTEGER DEFAULT 0,
+            streak_days INTEGER DEFAULT 1,
+            last_daily_bonus_date TEXT DEFAULT '',
+            level INTEGER DEFAULT 1,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
+    # 16. Tangalar Tranzaksiyalari Tarixi (Coin Transactions Ledger)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS coin_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            amount INTEGER NOT NULL,
+            transaction_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            source TEXT DEFAULT 'general',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
+    # 17. Tangalar Do'koni Mahsulotlari (Coin Shop Items)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS coin_shop_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            title_en TEXT DEFAULT '',
+            title_ru TEXT DEFAULT '',
+            description TEXT DEFAULT '',
+            category TEXT NOT NULL DEFAULT 'avatar',
+            cost_coins INTEGER NOT NULL DEFAULT 50,
+            image TEXT DEFAULT '',
+            icon TEXT DEFAULT '🎁',
+            is_active INTEGER DEFAULT 1,
+            order_num INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 18. Bolaning Sotib Olgan Buyumlari va Nishonlari (Child Purchased Items / Inventory)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_purchased_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            item_id INTEGER NOT NULL,
+            is_equipped INTEGER DEFAULT 0,
+            purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (item_id) REFERENCES coin_shop_items (id) ON DELETE CASCADE,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
+    # 19. Kunlik Topshiriqlar va Missiyalar (Daily Missions / Quests)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_missions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            title_en TEXT DEFAULT '',
+            title_ru TEXT DEFAULT '',
+            description TEXT DEFAULT '',
+            reward_coins INTEGER NOT NULL DEFAULT 10,
+            icon TEXT DEFAULT '🎯',
+            action_type TEXT NOT NULL,
+            target_count INTEGER DEFAULT 1,
+            order_num INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 20. Bolaning Kunlik Missiya Jarayoni (Child Mission Progress)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS child_mission_progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER NOT NULL,
+            mission_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            current_count INTEGER DEFAULT 0,
+            is_completed INTEGER DEFAULT 0,
+            is_claimed INTEGER DEFAULT 0,
+            claimed_at DATETIME DEFAULT NULL,
+            FOREIGN KEY (mission_id) REFERENCES daily_missions (id) ON DELETE CASCADE,
+            FOREIGN KEY (child_id) REFERENCES children (id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    """)
+
+    # Do'kon mahsulotlari bo'shmi? Bo'lsa boshlang'ich qiziqarli mukofotlar bilan to'ldiramiz
+    cursor.execute("SELECT COUNT(*) as cnt FROM coin_shop_items")
+    shop_cnt = cursor.fetchone()["cnt"]
+    if shop_cnt == 0:
+        initial_shop_items = [
+            ("Kosmik Astronavt Shlemi", "Space Astronaut Helmet", "Космический Шлем Астронавта", "Koinot bo'ylab sayohat uchun maxsus yaltiroq himoya shlemi", "avatar", 50, "/images/shop/astronaut_helmet.png", "🧑‍🚀", 1, 1),
+            ("Oltin Alloma Toji", "Golden Alloma Crown", "Золотая Корона Алломы", "Eng ko'p kitob o'qigan va darslarni yaxshi o'zlashtirgan alloma toji", "avatar", 80, "/images/shop/gold_crown.png", "👑", 1, 2),
+            ("Sehrli Bilimdon Ko'zoynagi", "Magic Scholar Glasses", "Волшебные Очки Знатока", "Barcha jumboqlarni bir zumda yechishga yordam beruvchi sehrli ko'zoynak", "avatar", 40, "/images/shop/smart_glasses.png", "👓", 1, 3),
+            ("Kichik Qahramon Qanotlari", "Little Hero Wings", "Крылья Маленького Героя", "Yulduzlararo parvoz qilish uchun quvnoq nurli qanotlar", "avatar", 70, "/images/shop/hero_wings.png", "🪽", 1, 4),
+            ("Koinot Bilimdoni Nishoni", "Space Explorer Badge", "Значок Космического Исследователя", "Barcha sayyoralarni ziyorat qilganlik uchun beriladigan maxsus nishon", "badge", 30, "/images/shop/badge_explorer.png", "🎖️", 1, 5),
+            ("Nutq Ustasi Oltin Medali", "Speech Master Gold Medal", "Золотая Медаль Мастера Речи", "Uran sayyorasida 50 dan ortiq so'zni to'liq yod olganlik uchun medal", "badge", 60, "/images/shop/badge_speech.png", "🥇", 1, 6),
+            ("Tezkor Mars Raketasi", "Super Mars Rocket", "Скоростная Ракета Марс", "Mobil ilova bosh sahifasida uchib yuruvchi interaktiv kosmik kema", "toy", 90, "/images/shop/toy_rocket.png", "🚀", 1, 7),
+            ("Neon Yulduzli Koinot Mavzusi", "Neon Stars Space Theme", "Неоновая Космическая Тема", "Mobil ilova interfeysini yorqin neon yulduzli koinot ko'rinishiga o'tkazish", "planet_theme", 100, "/images/shop/theme_neon.png", "🌌", 1, 8),
+            ("Sehrli Musiqiy Chodir", "Magic Musical Tent", "Волшебный Музыкальный Шатёр", "Darslarni quvnoq va sehrli kosmik kuylar jo'rligida bajarish effekti", "sound", 45, "/images/shop/sound_magic.png", "🎵", 1, 9)
+        ]
+        cursor.executemany(
+            "INSERT INTO coin_shop_items (title, title_en, title_ru, description, category, cost_coins, image, icon, is_active, order_num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            initial_shop_items
+        )
+        print("Boshlang'ich 9 ta tangalar do'koni mahsulotlari kiritildi.")
+
+    # Kunlik topshiriqlar (Daily Missions) bo'shmi? Bo'lsa kiritamiz
+    cursor.execute("SELECT COUNT(*) as cnt FROM daily_missions")
+    mission_cnt = cursor.fetchone()["cnt"]
+    if mission_cnt == 0:
+        initial_missions = [
+            ("Bugun ilovaga kirish", "Daily Login", "Ежедневный вход в приложение", "Har kuni mobil ilovani ochib ilm o'rganing va bonus tangalarga ega bo'ling", 10, "✨", "login", 1, 1, 1),
+            ("Alloma AI bilan suhbatlashish", "Chat with Alloma AI", "Пообщаться с Аллома AI", "Sun'iy intellektga bitta qiziqarli savol bering yoki ovozli gaplashing", 15, "🤖", "chat_ai", 1, 2, 1),
+            ("Uran sayyorasida test topshirish", "Complete Uran Quiz", "Пройти тест на планете Уран", "Ingliz tili so'z boyligi bo'yicha 1 ta testni a'lo bahoga yeching", 25, "🏆", "uran_quiz", 1, 3, 1),
+            ("Bugungi kayfiyatni belgilash", "Record Daily Emotion", "Отметить сегодняшнее настроение", "Neptun sayyorasida bugungi hissiyotingizni qayd eting", 10, "😊", "emotion", 1, 4, 1),
+            ("5 ta yangi so'z o'rganish", "Learn 5 New Words", "Выучить 5 новых слов", "Lug'atdan yangi 5 ta so'zning ovozli talaffuzini eshiting", 20, "📚", "learn_words", 5, 5, 1)
+        ]
+        cursor.executemany(
+            "INSERT INTO daily_missions (title, title_en, title_ru, description, reward_coins, icon, action_type, target_count, order_num, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            initial_missions
+        )
+        print("Boshlang'ich 5 ta kunlik missiyalar kiritildi.")
+
     conn.commit()
     conn.close()
 
 if __name__ == "__main__":
     init_db()
+
 

@@ -497,6 +497,8 @@ class UranQuizSubmitResponse(BaseModel):
     percentage: float
     passed: bool
     stars_earned: int
+    coins_earned: Optional[int] = Field(20, example=20, description="Test uchun berilgan tangalar (coin)")
+    total_coins: Optional[int] = Field(150, example=150, description="Farzandning jami tangalari")
     congratulation: str
 
 class UranAiSuggestRequest(BaseModel):
@@ -509,5 +511,124 @@ class UranAiSuggestResponse(BaseModel):
     transcription: str
     example_sentence: str
     example_translation: str
+
+
+# ==========================================
+# COIN & MUKOFOTLAR TIZIMI (COINS & REWARDS) SCHEMAS
+# ==========================================
+
+class CoinBalanceResponse(BaseModel):
+    child_id: int = Field(..., example=1, description="Farzand ID raqami")
+    child_name: str = Field("Samir", example="Samir", description="Farzand ismi")
+    total_coins: int = Field(150, example=150, description="Joriy mavjud tangalar (coin) soni")
+    lifetime_coins: int = Field(320, example=320, description="Umumiy to'plangan barcha tangalar soni")
+    level: int = Field(2, example=2, description="Farzand darajasi (Level)")
+    level_title: str = Field("Kichik Alloma", example="Kichik Alloma", description="Daraja unvoni")
+    next_level_coins: int = Field(200, example=200, description="Keyingi darajaga o'tish uchun zarur bo'lgan tangalar")
+    progress_percentage: float = Field(75.0, example=75.0, description="Keyingi darajaga yetish foizi")
+    streak_days: int = Field(3, example=3, description="Ketma-ket kirish kunlari (Streak)")
+    daily_bonus_available: bool = Field(True, example=True, description="Bugungi kunlik bonusni olish mumkinmi")
+    daily_bonus_amount: int = Field(15, example=15, description="Bugun beriladigan kunlik bonus miqdori")
+
+class CoinTransactionResponse(BaseModel):
+    id: int = Field(..., example=1)
+    amount: int = Field(..., example=25, description="Tangalar miqdori (ijobiy + yoki manfiy -)")
+    transaction_type: str = Field(..., example="earn", description="Tranzaksiya turi: 'earn', 'spend', 'bonus', 'mission'")
+    title: str = Field(..., example="Test a'lo yechildi", description="Tranzaksiya sarlavhasi")
+    description: Optional[str] = Field("", example="Uran sayyorasida 10 ta so'z testi muvaffaqiyatli topshirildi", description="Tavsif")
+    source: str = Field("uran_quiz", example="uran_quiz", description="Manba: quiz, chat_ai, daily_bonus, shop_purchase va h.k.")
+    created_at: str = Field(..., example="2026-09-09 12:00:00")
+
+class EarnCoinRequest(BaseModel):
+    child_id: Optional[int] = Field(None, example=1, description="Farzand ID (bo'sh bo'lsa avtomatik birinchi farzand tanlanadi)")
+    amount: int = Field(10, example=10, description="Qo'shiladigan coin miqdori")
+    title: str = Field("Dars yakunlandi", example="Dars yakunlandi", description="Tranzaksiya sarlavhasi")
+    description: Optional[str] = Field("", example="Kognitiv sayyorasi darsi bajarildi", description="Tavsif")
+    source: Optional[str] = Field("lesson", example="lesson", description="Manba: lesson, game, quiz, ai_chat")
+
+class EarnCoinResponse(BaseModel):
+    success: bool = True
+    message: str = "Tangalar muvaffaqiyatli qo'shildi! 🪙"
+    added_coins: int = 10
+    total_coins: int = 160
+    level: int = 2
+    level_up: bool = False
+
+class DailyBonusResponse(BaseModel):
+    success: bool = True
+    message: str = "Kunlik bonus tangalari qabul qilindi! 🎉"
+    bonus_coins: int = 15
+    total_coins: int = 175
+    streak_days: int = 4
+    streak_reward_multiplier: float = 1.2
+
+class DailyMissionResponse(BaseModel):
+    id: int
+    title: str = Field(..., example="Uran sayyorasida test topshirish")
+    description: str = Field(..., example="Ingliz tili so'z boyligi bo'yicha 1 ta testni a'lo bahoga yeching")
+    reward_coins: int = Field(..., example=25)
+    icon: str = Field("🎯", example="🏆")
+    action_type: str = Field("uran_quiz", example="uran_quiz")
+    target_count: int = Field(1, example=1)
+    current_count: int = Field(1, example=1)
+    is_completed: bool = Field(True, example=True)
+    is_claimed: bool = Field(False, example=False)
+
+class ClaimMissionResponse(BaseModel):
+    success: bool = True
+    message: str = "Topshiriq mukofoti muvaffaqiyatli olindi! 🪙"
+    claimed_coins: int = 25
+    total_coins: int = 200
+
+class ShopItemResponse(BaseModel):
+    id: int
+    title: str = Field(..., example="Kosmik Astronavt Shlemi")
+    description: str = Field("", example="Koinot bo'ylab sayohat uchun maxsus yaltiroq himoya shlemi")
+    category: str = Field("avatar", example="avatar", description="Kategoriya: avatar, badge, planet_theme, toy, sound")
+    cost_coins: int = Field(50, example=50)
+    image: str = Field("", example="http://localhost:3000/images/shop/astronaut_helmet.png")
+    icon: str = Field("🧑‍🚀", example="🧑‍🚀")
+    is_owned: bool = Field(False, example=False, description="Ushbu buyum allaqachon sotib olinganmi")
+    is_equipped: bool = Field(False, example=False, description="Ayni paytda taqilgan/faollashtirilganmi")
+
+class BuyShopItemRequest(BaseModel):
+    child_id: Optional[int] = Field(None, example=1, description="Farzand ID (bo'sh bo'lsa token egasining farzandi)")
+    item_id: int = Field(..., example=1, description="Sotib olinayotgan mahsulot ID raqami")
+
+class BuyShopItemResponse(BaseModel):
+    success: bool = True
+    message: str = "Buyum muvaffaqiyatli xarid qilindi! 🎁"
+    remaining_coins: int = 150
+    item: ShopItemResponse
+
+class InventoryItemResponse(BaseModel):
+    id: int
+    item_id: int
+    title: str
+    category: str
+    image: str
+    icon: str
+    is_equipped: bool
+    purchased_at: str
+
+class EquipItemRequest(BaseModel):
+    child_id: Optional[int] = Field(None, example=1)
+    item_id: int = Field(..., example=1)
+
+class EquipItemResponse(BaseModel):
+    success: bool = True
+    message: str = "Buyum muvaffaqiyatli taqildi / faollashtirildi! ✨"
+    item_id: int
+    is_equipped: bool
+
+class LeaderboardItemResponse(BaseModel):
+    rank: int = Field(..., example=1)
+    child_id: int = Field(..., example=1)
+    child_name: str = Field("Samir Ibrohimov", example="Samir Ibrohimov")
+    avatar: str = Field("/images/avatars/boy1.png", example="/images/avatars/boy1.png")
+    total_coins: int = Field(350, example=350)
+    level: int = Field(3, example=3)
+    level_title: str = Field("Katta Alloma", example="Katta Alloma")
+
 
 

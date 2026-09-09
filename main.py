@@ -65,7 +65,14 @@ from schemas import (
     UranWordBase, UranWordCreate, UranWordUpdate, UranWordResponse,
     UranQuizOption, UranCategoryDetailResponse,
     UranQuizSubmitRequest, UranQuizSubmitResponse,
-    UranAiSuggestRequest, UranAiSuggestResponse
+    UranAiSuggestRequest, UranAiSuggestResponse,
+    CoinBalanceResponse, CoinTransactionResponse,
+    EarnCoinRequest, EarnCoinResponse,
+    DailyBonusResponse,
+    DailyMissionResponse, ClaimMissionResponse,
+    ShopItemResponse, BuyShopItemRequest, BuyShopItemResponse,
+    InventoryItemResponse, EquipItemRequest, EquipItemResponse,
+    LeaderboardItemResponse
 )
 
 # Gemini AI Konfiguratsiyasi
@@ -242,6 +249,10 @@ async def lifespan(app: FastAPI):
     yield
 
 tags_metadata = [
+    {
+        "name": "Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)",
+        "description": "Mobil ilova tangalar (coin) tizimi: Balans, Kunlik Bonuslar (Streak), Dars/Testlardan Coin ishlash (Earn), Kunlik Topshiriqlar (Missions), Do'kon (Shop), Sotib olingan buyumlar (Inventory) va Allomalar Reytingi (Leaderboard)"
+    },
     {
         "name": "Mobil Ilova (Mobile API)",
         "description": "Mobil ilova uchun API lar: Sayyoralar (Planets), OTP Ro'yxatdan o'tish/Kirish, 4-xonali PIN kod va Farzandlar boshqaruvi"
@@ -2347,20 +2358,25 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
 
     if percentage >= 90.0:
         stars = 3
-        congrat = "Barakalla! Sen barcha so'zlarni a'lo darajada o'rganding! 🌟🌟🌟"
+        coins_earned = 30
+        congrat = "Barakalla! Sen barcha so'zlarni a'lo darajada o'rganding! 🌟🌟🌟 (+30 Coin)"
     elif percentage >= 70.0:
         stars = 2
-        congrat = "Juda yaxshi natija! Yangi so'zlarni puxta o'zlashtirding! 🌟🌟"
+        coins_earned = 20
+        congrat = "Juda yaxshi natija! Yangi so'zlarni puxta o'zlashtirding! 🌟🌟 (+20 Coin)"
     elif percentage >= 50.0:
         stars = 1
-        congrat = "Yaxshi! Yana bir bor mashq qilib, 100% natijaga erishishing mumkin! 🌟"
+        coins_earned = 10
+        congrat = "Yaxshi! Yana bir bor mashq qilib, 100% natijaga erishishing mumkin! 🌟 (+10 Coin)"
     else:
         stars = 0
-        congrat = "Harakatdan to'xtama! So'zlarni qaytadan takrorlab ko'r, albatta uddalaysan! 💪"
+        coins_earned = 5
+        congrat = "Harakatdan to'xtama! So'zlarni qaytadan takrorlab ko'r, albatta uddalaysan! 💪 (+5 Coin)"
 
     user_id = current_user["id"] if current_user else 1
-    child_id = payload.child_id or 1
+    child_id = payload.child_id or resolve_child_id(None, current_user)
 
+    total_coins = 0
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -2384,6 +2400,19 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
 
         conn.commit()
         conn.close()
+
+        # Coin qo'shish va missiyani yangilash
+        coin_res = add_child_coins(
+            child_id=child_id,
+            user_id=user_id,
+            amount=coins_earned,
+            transaction_type="earn",
+            title="Uran Testi Mukofoti 🏆",
+            description=f"Uran sayyorasi testida {score}/{total} ({percentage}%) natija ko'rsatildi.",
+            source="uran_quiz"
+        )
+        total_coins = coin_res["total_coins"]
+        update_daily_mission_progress(child_id, user_id, "uran_quiz", 1)
     except Exception as e:
         print("Quiz natijasini saqlashda xatolik:", e)
 
@@ -2395,8 +2424,668 @@ def submit_uran_quiz(category_id: int, payload: UranQuizSubmitRequest, current_u
         "percentage": percentage,
         "passed": passed,
         "stars_earned": stars,
+        "coins_earned": coins_earned,
+        "total_coins": total_coins,
         "congratulation": congrat
     }
+
+
+# ==============================================================================
+# 7.14. COIN & MUKOFOTLAR TIZIMI (COINS, MISSIONS, SHOP & LEADERBOARD)
+# ==============================================================================
+
+def get_or_create_child_coins(child_id: int, user_id: int = 1, conn = None) -> dict:
+    """Farzand tangalari hisobini olish yoki bo'sh bo'lsa 50 ta boshlang'ich bonus bilan yaratish"""
+    should_close = False
+    if conn is None:
+        conn = get_db_connection()
+        should_close = True
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM child_coins WHERE child_id = ?", (child_id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        total_coins = 50
+        lifetime_coins = 50
+        streak_days = 1
+        level = 1
+        cursor.execute("""
+            INSERT OR REPLACE INTO child_coins (child_id, user_id, total_coins, lifetime_coins, streak_days, last_daily_bonus_date, level)
+            VALUES (?, ?, ?, ?, ?, '', ?)
+        """, (child_id, user_id, total_coins, lifetime_coins, streak_days, level))
+        
+        cursor.execute("""
+            INSERT INTO coin_transactions (user_id, child_id, amount, transaction_type, title, description, source)
+            VALUES (?, ?, ?, 'bonus', 'Xush kelibsiz bonusi!', 'Kichik Alloma ilovasiga qo''shilganingiz uchun 50 ta boshlang''ich tanga sovg''a qilindi! 🪙', 'welcome')
+        """, (user_id, child_id, 50))
+        conn.commit()
+        cursor.execute("SELECT * FROM child_coins WHERE child_id = ?", (child_id,))
+        row = cursor.fetchone()
+
+    d = dict(row)
+    
+    cursor.execute("SELECT name, surname, avatar FROM children WHERE id = ?", (child_id,))
+    child_row = cursor.fetchone()
+    child_name = f"{child_row['name']} {child_row['surname']}".strip() if child_row else f"Bola #{child_id}"
+    
+    lifetime = d.get("lifetime_coins", 0) or 0
+    if lifetime >= 1000:
+        level = 5
+        level_title = "Buyuk Alloma 👑"
+        next_level_coins = 2000
+    elif lifetime >= 500:
+        level = 4
+        level_title = "Koinot Ustasi 🚀"
+        next_level_coins = 1000
+    elif lifetime >= 250:
+        level = 3
+        level_title = "Kichik Alloma 🌟"
+        next_level_coins = 500
+    elif lifetime >= 100:
+        level = 2
+        level_title = "Kichik Bilimdon 📚"
+        next_level_coins = 250
+    else:
+        level = 1
+        level_title = "Kichik Sayyoh 🪐"
+        next_level_coins = 100
+        
+    prev_level_floor = 0 if level == 1 else (100 if level == 2 else (250 if level == 3 else (500 if level == 4 else 1000)))
+    level_range = max(1, next_level_coins - prev_level_floor)
+    progress_percentage = min(100.0, round(((lifetime - prev_level_floor) / level_range) * 100.0, 1))
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    last_bonus = d.get("last_daily_bonus_date") or ""
+    daily_bonus_available = (last_bonus != today)
+    streak = d.get("streak_days", 1) or 1
+    daily_bonus_amount = min(50, 10 + (streak * 2))
+
+    if should_close:
+        conn.close()
+
+    return {
+        "child_id": child_id,
+        "child_name": child_name,
+        "total_coins": d.get("total_coins", 0) or 0,
+        "lifetime_coins": lifetime,
+        "level": level,
+        "level_title": level_title,
+        "next_level_coins": next_level_coins,
+        "progress_percentage": progress_percentage,
+        "streak_days": streak,
+        "daily_bonus_available": daily_bonus_available,
+        "daily_bonus_amount": daily_bonus_amount
+    }
+
+
+def add_child_coins(child_id: int, user_id: int, amount: int, transaction_type: str, title: str, description: str = "", source: str = "general") -> dict:
+    """Farzandga tangalar qo'shish yoki yechish (tranzaksiya bilan)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    get_or_create_child_coins(child_id, user_id, conn=conn)
+    
+    cursor.execute("SELECT total_coins, lifetime_coins, level FROM child_coins WHERE child_id = ?", (child_id,))
+    row = cursor.fetchone()
+    current_total = row["total_coins"] if row else 0
+    current_lifetime = row["lifetime_coins"] if row else 0
+    old_level = row["level"] if row else 1
+    
+    new_total = max(0, current_total + amount)
+    new_lifetime = current_lifetime + (amount if amount > 0 else 0)
+    
+    if new_lifetime >= 1000:
+        new_level = 5
+    elif new_lifetime >= 500:
+        new_level = 4
+    elif new_lifetime >= 250:
+        new_level = 3
+    elif new_lifetime >= 100:
+        new_level = 2
+    else:
+        new_level = 1
+        
+    cursor.execute("""
+        UPDATE child_coins 
+        SET total_coins = ?, lifetime_coins = ?, level = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE child_id = ?
+    """, (new_total, new_lifetime, new_level, child_id))
+    
+    cursor.execute("""
+        INSERT INTO coin_transactions (user_id, child_id, amount, transaction_type, title, description, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (user_id, child_id, amount, transaction_type, title, description, source))
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "success": True,
+        "message": f"{abs(amount)} ta coin muvaffaqiyatli {'qo''shildi! 🪙' if amount >= 0 else 'sarflandi! 🛍️'}",
+        "added_coins": amount,
+        "total_coins": new_total,
+        "level": new_level,
+        "level_up": (new_level > old_level)
+    }
+
+
+def update_daily_mission_progress(child_id: int, user_id: int, action_type: str, increment: int = 1):
+    """Kunlik topshiriqlar bajarilishini hisoblab borish"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        today = datetime.now().strftime("%Y-%m-%d")
+        
+        cursor.execute("SELECT * FROM daily_missions WHERE action_type = ? AND is_active = 1", (action_type,))
+        missions = cursor.fetchall()
+        for m in missions:
+            mid = m["id"]
+            target = m["target_count"]
+            cursor.execute("""
+                SELECT * FROM child_mission_progress WHERE child_id = ? AND mission_id = ? AND date = ?
+            """, (child_id, mid, today))
+            p_row = cursor.fetchone()
+            if p_row:
+                new_count = p_row["current_count"] + increment
+                is_comp = 1 if new_count >= target else 0
+                cursor.execute("""
+                    UPDATE child_mission_progress SET current_count = ?, is_completed = ?
+                    WHERE id = ?
+                """, (new_count, is_comp, p_row["id"]))
+            else:
+                new_count = increment
+                is_comp = 1 if new_count >= target else 0
+                cursor.execute("""
+                    INSERT INTO child_mission_progress (user_id, child_id, mission_id, date, current_count, is_completed, is_claimed)
+                    VALUES (?, ?, ?, ?, ?, ?, 0)
+                """, (user_id, child_id, mid, today, new_count, is_comp))
+                
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("[MISSION_PROGRESS] Xato:", e)
+
+
+def resolve_child_id(explicit_child_id: Optional[int], current_user: Optional[dict]) -> int:
+    """Farzand ID raqamini aniqlash (explicit bo'lsa o'zi, bo'lmasa userning 1-bolasi, bo'lmasa 1)"""
+    if explicit_child_id and explicit_child_id > 0:
+        return explicit_child_id
+    if current_user:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM children WHERE user_id = ? ORDER BY id ASC LIMIT 1", (current_user["id"],))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return row["id"]
+    return 1
+
+
+# 7.14.1. FARZANDNING COIN BALANSI VA DARAJASI (BALANCE)
+@app.get("/mobile/coins/balance/", response_model=CoinBalanceResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.1. Farzandning Tangalar (Coin) Balansi, Darajasi va Kunlik Bonus Holati")
+@app.get("/mobile/coins/balance", response_model=CoinBalanceResponse, include_in_schema=False)
+@app.get("/mobile/child/{child_id}/coins/balance/", response_model=CoinBalanceResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.1.1. Farzandning Tangalar Balansi (ID orqali)")
+@app.get("/mobile/child/{child_id}/coins/balance", response_model=CoinBalanceResponse, include_in_schema=False)
+@app.get("/api/website/coins/balance/", response_model=CoinBalanceResponse, tags=["Web Sayt (Website)"], summary="Web: Farzand Coin Balansi")
+def get_child_coin_balance(child_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    uid = current_user["id"] if current_user else 1
+    cid = resolve_child_id(child_id, current_user)
+    return get_or_create_child_coins(cid, uid)
+
+
+# 7.14.2. KUNLIK BONUSNI QABUL QILISH (DAILY STREAK BONUS)
+@app.post("/mobile/coins/daily-bonus/", response_model=DailyBonusResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.2. Kunlik Kirish Bonusi (Daily Streak Bonus) Qabul Qilish")
+@app.post("/mobile/coins/daily-bonus", response_model=DailyBonusResponse, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/coins/daily-bonus/", response_model=DailyBonusResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.2.1. Kunlik Bonus Qabul Qilish (ID orqali)")
+@app.post("/mobile/child/{child_id}/coins/daily-bonus", response_model=DailyBonusResponse, include_in_schema=False)
+def claim_daily_bonus(child_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    uid = current_user["id"] if current_user else 1
+    cid = resolve_child_id(child_id, current_user)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    get_or_create_child_coins(cid, uid, conn=conn)
+    
+    cursor.execute("SELECT * FROM child_coins WHERE child_id = ?", (cid,))
+    row = cursor.fetchone()
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    last_bonus_date = row["last_daily_bonus_date"] or ""
+    
+    if last_bonus_date == today:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Siz bugungi kunlik bonusni allaqachon qabul qilgansiz! Ertaga yana kiring. 😊")
+    
+    streak = row["streak_days"] or 1
+    if last_bonus_date == yesterday:
+        streak += 1
+    elif last_bonus_date != "":
+        streak = 1
+        
+    bonus_coins = min(50, 10 + (streak * 2))
+    new_total = (row["total_coins"] or 0) + bonus_coins
+    new_lifetime = (row["lifetime_coins"] or 0) + bonus_coins
+    
+    cursor.execute("""
+        UPDATE child_coins 
+        SET total_coins = ?, lifetime_coins = ?, streak_days = ?, last_daily_bonus_date = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE child_id = ?
+    """, (new_total, new_lifetime, streak, today, cid))
+    
+    cursor.execute("""
+        INSERT INTO coin_transactions (user_id, child_id, amount, transaction_type, title, description, source)
+        VALUES (?, ?, ?, 'bonus', ?, ?, 'daily_login')
+    """, (uid, cid, bonus_coins, f"Kunlik kirish bonusi ({streak}-kun streak) 🔥", f"Har kungi muntazam o'rganish uchun +{bonus_coins} ta coin berildi!"))
+    
+    conn.commit()
+    conn.close()
+    
+    # Kunlik login missiyasini avtomatik yakunlash
+    update_daily_mission_progress(cid, uid, "login", 1)
+    
+    return {
+        "success": True,
+        "message": f"Tabriklaymiz! {streak}-kunlik faollik uchun {bonus_coins} ta bonus coin berildi! 🎉",
+        "bonus_coins": bonus_coins,
+        "total_coins": new_total,
+        "streak_days": streak,
+        "streak_reward_multiplier": round(1.0 + (streak * 0.1), 1)
+    }
+
+
+# 7.14.3. TANGALAR ISHLASH / QO'SHISH (EARN COINS)
+@app.post("/mobile/coins/earn/", response_model=EarnCoinResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.3. Farzandga Tangalar (Coin) Qo'shish (Dars, O'yin yoki Topshiriq uchun)")
+@app.post("/mobile/coins/earn", response_model=EarnCoinResponse, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/coins/earn/", response_model=EarnCoinResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.3.1. Tangalar Qo'shish (ID orqali)")
+@app.post("/mobile/child/{child_id}/coins/earn", response_model=EarnCoinResponse, include_in_schema=False)
+def earn_child_coins(payload: EarnCoinRequest, child_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    uid = current_user["id"] if current_user else 1
+    cid = resolve_child_id(child_id or payload.child_id, current_user)
+    amount = max(1, min(payload.amount, 500))
+    
+    res = add_child_coins(
+        child_id=cid,
+        user_id=uid,
+        amount=amount,
+        transaction_type="earn",
+        title=payload.title or "Dars muvaffaqiyatli yakunlandi",
+        description=payload.description or "Topshiriq va darslarni muvaffaqiyatli bajarganlik uchun tangalar",
+        source=payload.source or "activity"
+    )
+    return res
+
+
+# 7.14.4. TANGALAR TRANZAKSIYALARI TARIXI (HISTORY / LEDGER)
+@app.get("/mobile/coins/history/", response_model=List[CoinTransactionResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.4. Farzand Tangalari Kirim-Chiqim Tarixi (Coin Transactions History)")
+@app.get("/mobile/coins/history", response_model=List[CoinTransactionResponse], include_in_schema=False)
+@app.get("/mobile/child/{child_id}/coins/history/", response_model=List[CoinTransactionResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.4.1. Tangalar Tarixi (ID orqali)")
+@app.get("/mobile/child/{child_id}/coins/history", response_model=List[CoinTransactionResponse], include_in_schema=False)
+def get_coin_transactions_history(child_id: Optional[int] = None, limit: int = Query(50, ge=1, le=200), current_user: Optional[dict] = Depends(get_current_user_optional)):
+    cid = resolve_child_id(child_id, current_user)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM coin_transactions 
+        WHERE child_id = ? 
+        ORDER BY id DESC LIMIT ?
+    """, (cid, limit))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    history = []
+    for r in rows:
+        history.append({
+            "id": r["id"],
+            "amount": r["amount"],
+            "transaction_type": r["transaction_type"],
+            "title": r["title"],
+            "description": r["description"] or "",
+            "source": r["source"] or "general",
+            "created_at": str(r["created_at"])
+        })
+    return history
+
+
+# 7.14.5. KUNLIK TOPSHIRIQLAR VA MISSIYALAR (DAILY MISSIONS)
+@app.get("/mobile/coins/missions/", response_model=List[DailyMissionResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.5. Kunlik Missiyalar va Topshiriqlar Ro'yxati (Daily Quests)")
+@app.get("/mobile/coins/missions", response_model=List[DailyMissionResponse], include_in_schema=False)
+@app.get("/mobile/child/{child_id}/coins/missions/", response_model=List[DailyMissionResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.5.1. Kunlik Missiyalar Ro'yxati (ID orqali)")
+@app.get("/mobile/child/{child_id}/coins/missions", response_model=List[DailyMissionResponse], include_in_schema=False)
+def get_daily_missions(child_id: Optional[int] = None, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    cid = resolve_child_id(child_id, current_user)
+    lang = get_accept_language(request) if request else "uzb"
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM daily_missions WHERE is_active = 1 ORDER BY order_num ASC, id ASC")
+    missions = cursor.fetchall()
+    
+    result = []
+    for m in missions:
+        mid = m["id"]
+        title = m["title"]
+        desc = m["description"] or ""
+        if lang == "rus" and m["title_ru"]:
+            title = m["title_ru"]
+            desc = m["description"]
+        elif lang == "eng" and m["title_en"]:
+            title = m["title_en"]
+            desc = m["description"]
+            
+        cursor.execute("""
+            SELECT * FROM child_mission_progress 
+            WHERE child_id = ? AND mission_id = ? AND date = ?
+        """, (cid, mid, today))
+        p_row = cursor.fetchone()
+        
+        current_count = p_row["current_count"] if p_row else 0
+        is_completed = bool(p_row["is_completed"]) if p_row else False
+        is_claimed = bool(p_row["is_claimed"]) if p_row else False
+        
+        result.append({
+            "id": mid,
+            "title": title,
+            "description": desc,
+            "reward_coins": m["reward_coins"],
+            "icon": m["icon"] or "🎯",
+            "action_type": m["action_type"],
+            "target_count": m["target_count"],
+            "current_count": min(current_count, m["target_count"]),
+            "is_completed": is_completed,
+            "is_claimed": is_claimed
+        })
+    conn.close()
+    return result
+
+
+# 7.14.6. BAJARILGAN KUNLIK MISSIYA MUKOFOTINI OLISH (CLAIM MISSION REWARD)
+@app.post("/mobile/coins/missions/{mission_id}/claim/", response_model=ClaimMissionResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.6. Bajarilgan Kunlik Topshiriq Mukofotini Yig'ib Olish")
+@app.post("/mobile/coins/missions/{mission_id}/claim", response_model=ClaimMissionResponse, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/coins/missions/{mission_id}/claim/", response_model=ClaimMissionResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.6.1. Topshiriq Mukofotini Olish (ID orqali)")
+@app.post("/mobile/child/{child_id}/coins/missions/{mission_id}/claim", response_model=ClaimMissionResponse, include_in_schema=False)
+def claim_mission_reward(mission_id: int, child_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    uid = current_user["id"] if current_user else 1
+    cid = resolve_child_id(child_id, current_user)
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM daily_missions WHERE id = ?", (mission_id,))
+    mission = cursor.fetchone()
+    if not mission:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Bunday topshiriq topilmadi")
+        
+    cursor.execute("""
+        SELECT * FROM child_mission_progress 
+        WHERE child_id = ? AND mission_id = ? AND date = ?
+    """, (cid, mission_id, today))
+    p_row = cursor.fetchone()
+    
+    if not p_row or not p_row["is_completed"]:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Ushbu topshiriq hali to'liq bajarilmagan!")
+        
+    if p_row["is_claimed"]:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Siz bu topshiriq mukofotini allaqachon qabul qilgansiz!")
+        
+    cursor.execute("""
+        UPDATE child_mission_progress 
+        SET is_claimed = 1, claimed_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+    """, (p_row["id"],))
+    conn.commit()
+    conn.close()
+    
+    reward = mission["reward_coins"]
+    coin_res = add_child_coins(
+        child_id=cid,
+        user_id=uid,
+        amount=reward,
+        transaction_type="mission",
+        title=f"Missiya mukofoti: {mission['title']} 🎯",
+        description=f"Kunlik topshiriq bajarilganligi uchun +{reward} coin berildi.",
+        source="daily_mission"
+    )
+    
+    return {
+        "success": True,
+        "message": f"Tabriklaymiz! Topshiriq uchun {reward} ta coin balansingizga qo'shildi! 🪙",
+        "claimed_coins": reward,
+        "total_coins": coin_res["total_coins"]
+    }
+
+
+# 7.14.7. MUKOFOTLAR DO'KONI (COIN SHOP)
+@app.get("/mobile/coins/shop/", response_model=List[ShopItemResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.7. Tangalar Do'koni — Mukofotlar, Avatarlar va Nishonlar (Shop)")
+@app.get("/mobile/coins/shop", response_model=List[ShopItemResponse], include_in_schema=False)
+@app.get("/mobile/child/{child_id}/coins/shop/", response_model=List[ShopItemResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.7.1. Tangalar Do'koni (ID orqali)")
+@app.get("/mobile/child/{child_id}/coins/shop", response_model=List[ShopItemResponse], include_in_schema=False)
+def get_coin_shop_items(child_id: Optional[int] = None, category: Optional[str] = None, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    cid = resolve_child_id(child_id, current_user)
+    lang = get_accept_language(request) if request else "uzb"
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM coin_shop_items WHERE is_active = 1"
+    params = []
+    if category:
+        query += " AND category = ?"
+        params.append(category)
+    query += " ORDER BY order_num ASC, id ASC"
+    cursor.execute(query, params)
+    items = cursor.fetchall()
+    
+    # Farzand sotib olgan buyumlar ro'yxati
+    cursor.execute("SELECT item_id, is_equipped FROM child_purchased_items WHERE child_id = ?", (cid,))
+    purchased_map = {r["item_id"]: bool(r["is_equipped"]) for r in cursor.fetchall()}
+    conn.close()
+    
+    result = []
+    for it in items:
+        iid = it["id"]
+        title = it["title"]
+        desc = it["description"] or ""
+        if lang == "rus" and it["title_ru"]:
+            title = it["title_ru"]
+        elif lang == "eng" and it["title_en"]:
+            title = it["title_en"]
+            
+        result.append({
+            "id": iid,
+            "title": title,
+            "description": desc,
+            "category": it["category"],
+            "cost_coins": it["cost_coins"],
+            "image": to_full_image_url(it["image"], request) if it["image"] else "",
+            "icon": it["icon"] or "🎁",
+            "is_owned": iid in purchased_map,
+            "is_equipped": purchased_map.get(iid, False)
+        })
+    return result
+
+
+# 7.14.8. DO'KONDAN BUYUM SOTIB OLISH (BUY SHOP ITEM)
+@app.post("/mobile/coins/shop/buy/{item_id}", response_model=BuyShopItemResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.8. Tangalar Do'konidan Mahsulot Sotib Olish")
+@app.post("/mobile/coins/shop/buy/{item_id}/", response_model=BuyShopItemResponse, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/coins/shop/buy/{item_id}", response_model=BuyShopItemResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.8.1. Mahsulot Sotib Olish (ID orqali)")
+@app.post("/mobile/child/{child_id}/coins/shop/buy/{item_id}/", response_model=BuyShopItemResponse, include_in_schema=False)
+def buy_shop_item(item_id: int, payload: Optional[BuyShopItemRequest] = None, child_id: Optional[int] = None, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    uid = current_user["id"] if current_user else 1
+    req_cid = payload.child_id if payload else None
+    cid = resolve_child_id(child_id or req_cid, current_user)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM coin_shop_items WHERE id = ? AND is_active = 1", (item_id,))
+    item = cursor.fetchone()
+    if not item:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Do'konda bunday mahsulot topilmadi")
+        
+    cursor.execute("SELECT * FROM child_purchased_items WHERE child_id = ? AND item_id = ?", (cid, item_id))
+    already_owned = cursor.fetchone()
+    if already_owned:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Siz ushbu mahsulotni allaqachon sotib olgansiz!")
+        
+    cost = item["cost_coins"]
+    cursor.execute("SELECT total_coins FROM child_coins WHERE child_id = ?", (cid,))
+    coins_row = cursor.fetchone()
+    total_coins = coins_row["total_coins"] if coins_row else 0
+    
+    if total_coins < cost:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Tangalar yetarli emas! Sizda {total_coins} coin bor, mahsulot narxi esa {cost} coin.")
+        
+    # Xaridni rasmiylashtirish
+    cursor.execute("""
+        INSERT INTO child_purchased_items (user_id, child_id, item_id, is_equipped)
+        VALUES (?, ?, ?, 1)
+    """, (uid, cid, item_id))
+    conn.commit()
+    conn.close()
+    
+    coin_res = add_child_coins(
+        child_id=cid,
+        user_id=uid,
+        amount=-cost,
+        transaction_type="spend",
+        title=f"Do'kondan xarid: {item['title']} 🛍️",
+        description=f"{cost} ta coin evaziga xarid qilindi",
+        source="shop_purchase"
+    )
+    
+    shop_item_resp = {
+        "id": item["id"],
+        "title": item["title"],
+        "description": item["description"] or "",
+        "category": item["category"],
+        "cost_coins": item["cost_coins"],
+        "image": to_full_image_url(item["image"], request) if item["image"] else "",
+        "icon": item["icon"] or "🎁",
+        "is_owned": True,
+        "is_equipped": True
+    }
+    
+    return {
+        "success": True,
+        "message": f"Tabriklaymiz! '{item['title']}' muvaffaqiyatli xarid qilindi va faollashtirildi! 🎉",
+        "remaining_coins": coin_res["total_coins"],
+        "item": shop_item_resp
+    }
+
+
+# 7.14.9. SOTIB OLINGAN BUYUMLAR VA NISHONLAR (INVENTORY)
+@app.get("/mobile/coins/inventory/", response_model=List[InventoryItemResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.9. Farzandning Sotib Olingan Buyumlari va Nishonlari (Inventory)")
+@app.get("/mobile/coins/inventory", response_model=List[InventoryItemResponse], include_in_schema=False)
+@app.get("/mobile/child/{child_id}/coins/inventory/", response_model=List[InventoryItemResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.9.1. Sotib Olingan Buyumlar Ro'yxati (ID orqali)")
+@app.get("/mobile/child/{child_id}/coins/inventory", response_model=List[InventoryItemResponse], include_in_schema=False)
+def get_child_inventory(child_id: Optional[int] = None, request: Request = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    cid = resolve_child_id(child_id, current_user)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.id as purchase_id, p.is_equipped, p.purchased_at, s.* 
+        FROM child_purchased_items p
+        JOIN coin_shop_items s ON p.item_id = s.id
+        WHERE p.child_id = ?
+        ORDER BY p.id DESC
+    """, (cid,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    inventory = []
+    for r in rows:
+        inventory.append({
+            "id": r["purchase_id"],
+            "item_id": r["id"],
+            "title": r["title"],
+            "category": r["category"],
+            "image": to_full_image_url(r["image"], request) if r["image"] else "",
+            "icon": r["icon"] or "🎁",
+            "is_equipped": bool(r["is_equipped"]),
+            "purchased_at": str(r["purchased_at"])
+        })
+    return inventory
+
+
+# 7.14.10. BUYUMNI TAQISH / FAOLLASHTIRISH (EQUIP ITEM)
+@app.post("/mobile/coins/inventory/{item_id}/equip", response_model=EquipItemResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.10. Sotib Olingan Avatar yoki Mavzuni Taqish / Faollashtirish (Equip)")
+@app.post("/mobile/coins/inventory/{item_id}/equip/", response_model=EquipItemResponse, include_in_schema=False)
+@app.post("/mobile/child/{child_id}/coins/inventory/{item_id}/equip", response_model=EquipItemResponse, tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.10.1. Buyumni Taqish / Faollashtirish (ID orqali)")
+@app.post("/mobile/child/{child_id}/coins/inventory/{item_id}/equip/", response_model=EquipItemResponse, include_in_schema=False)
+def equip_inventory_item(item_id: int, payload: Optional[EquipItemRequest] = None, child_id: Optional[int] = None, current_user: Optional[dict] = Depends(get_current_user_optional)):
+    req_cid = payload.child_id if payload else None
+    cid = resolve_child_id(child_id or req_cid, current_user)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM child_purchased_items WHERE child_id = ? AND item_id = ?", (cid, item_id))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Siz bu buyumni hali sotib olmagansiz!")
+        
+    # Holatni almashtirish (Toggle: equip/unequip)
+    new_status = 0 if row["is_equipped"] else 1
+    cursor.execute("UPDATE child_purchased_items SET is_equipped = ? WHERE id = ?", (new_status, row["id"]))
+    conn.commit()
+    conn.close()
+    
+    msg = "Buyum muvaffaqiyatli taqildi / faollashtirildi! ✨" if new_status == 1 else "Buyum taqishdan olindi."
+    return {
+        "success": True,
+        "message": msg,
+        "item_id": item_id,
+        "is_equipped": bool(new_status)
+    }
+
+
+# 7.14.11. ENG KO'P TANGALAR REYTINGI (LEADERBOARD)
+@app.get("/mobile/coins/leaderboard/", response_model=List[LeaderboardItemResponse], tags=["Mobil Ilova — Coin & Mukofotlar Tizimi (Coins & Rewards)"], summary="7.14.11. Eng Ko'p Tangalar Yig'gan Allomalar Reytingi (Leaderboard)")
+@app.get("/mobile/coins/leaderboard", response_model=List[LeaderboardItemResponse], include_in_schema=False)
+@app.get("/api/website/coins/leaderboard/", response_model=List[LeaderboardItemResponse], tags=["Web Sayt (Website)"], summary="Web: Allomalar Tangalar Reytingi")
+def get_coins_leaderboard(limit: int = Query(20, ge=1, le=100), request: Request = None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT c.id as child_id, c.name, c.surname, c.avatar, 
+               COALESCE(cc.total_coins, 50) as total_coins,
+               COALESCE(cc.lifetime_coins, 50) as lifetime_coins,
+               COALESCE(cc.level, 1) as level
+        FROM children c
+        LEFT JOIN child_coins cc ON c.id = cc.child_id
+        ORDER BY COALESCE(cc.total_coins, 50) DESC, c.id ASC
+        LIMIT ?
+    """, (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    result = []
+    for idx, r in enumerate(rows, start=1):
+        fullname = f"{r['name']} {r['surname']}".strip()
+        lvl = r["level"] or 1
+        level_title = "Buyuk Alloma 👑" if lvl >= 5 else ("Koinot Ustasi 🚀" if lvl == 4 else ("Kichik Alloma 🌟" if lvl == 3 else ("Kichik Bilimdon 📚" if lvl == 2 else "Kichik Sayyoh 🪐")))
+        
+        avatar = r["avatar"] or "/images/avatars/boy1.png"
+        result.append({
+            "rank": idx,
+            "child_id": r["child_id"],
+            "child_name": fullname,
+            "avatar": to_full_image_url(avatar, request) if request else avatar,
+            "total_coins": r["total_coins"],
+            "level": lvl,
+            "level_title": level_title
+        })
+    return result
+
 
 
 # ==============================================================================
