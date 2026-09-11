@@ -431,9 +431,12 @@
                 <input type="text" id="uran-cat-search" placeholder="Mavzu yoki so'z bo'yicha qidiruv..." oninput="renderUranCategories()">
               </div>
 
-              <div class="toolbar-actions">
-                <button class="btn btn-yellow" onclick="openUranWordModal()" style="display: inline-flex; align-items: center; gap: 8px;">
-                  <i class="bi bi-plus-circle-fill"></i> <span>Yangi So'z Qo'shish</span>
+              <div class="toolbar-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-yellow" onclick="openUranCategoryModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-folder-plus"></i> <span>Yangi Kategoriya Qo'shish</span>
+                </button>
+                <button class="btn btn-secondary" onclick="openUranWordModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-plus-circle"></i> <span>Yangi So'z Qo'shish</span>
                 </button>
               </div>
             </div>
@@ -451,16 +454,24 @@
                 <i class="bi bi-arrow-left"></i> <span>Barcha Mavzularga Qaytish</span>
               </button>
               
-              <button id="uran-detail-add-btn" class="btn btn-yellow" onclick="openUranWordModal()" style="padding: 10px 18px; font-weight: 700; border-radius: 10px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
-                <i class="bi bi-plus-circle-fill"></i> <span>Yangi So'z Qo'shish</span>
-              </button>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button class="btn btn-secondary" onclick="openUranCategoryModal(currentOpenCatId)" style="padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.2);">
+                  <i class="bi bi-pencil-square text-yellow"></i> <span>Mavzuni Tahrirlash</span>
+                </button>
+                <button class="btn btn-secondary" onclick="handleDeleteUranCategory(currentOpenCatId, currentOpenCatName)" style="padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(239,68,68,0.3); color: #f87171;">
+                  <i class="bi bi-trash"></i> <span>Mavzuni O'chirish</span>
+                </button>
+                <button id="uran-detail-add-btn" class="btn btn-yellow" onclick="openUranWordModal(currentOpenCatId, currentOpenCatName)" style="padding: 10px 18px; font-weight: 700; border-radius: 10px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-plus-circle-fill"></i> <span>Yangi So'z Qo'shish</span>
+                </button>
+              </div>
             </div>
 
             <!-- Selected Category Hero Header -->
             <div class="card" style="padding: 20px; margin-bottom: 20px; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border-left: 4px solid #eab308; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
               <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                 <div style="width: 70px; height: 70px; border-radius: 16px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; padding: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                  <img id="uran-detail-img" src="/images/categories/fruits.svg" alt="" style="max-height: 54px; max-width: 54px; object-fit: contain;">
+                  <img id="uran-detail-img" src="/images/categories/fruits.png" alt="" style="max-height: 54px; max-width: 54px; object-fit: contain;">
                 </div>
                 <div style="flex: 1;">
                   <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px;">
@@ -1165,9 +1176,104 @@
     </div>
   </div>
 
+  <!-- URAN CATEGORY ADD/EDIT MODAL -->
+  <div id="uran-category-modal" class="modal-overlay" onclick="handleOverlayClick(event, 'uran-category-modal')">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 id="uran-category-modal-title"><i class="bi bi-folder-plus text-yellow"></i> Yangi Kategoriya Qo'shish</h3>
+          <p style="font-size:13px; color:#64748b; margin:4px 0 0 0;">Uran sayyorasidagi lug'at mavzusi ma'lumotlari</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeUranCategoryModal()" title="Yopish (Esc)">&times;</button>
+      </div>
+      <form id="uran-category-form" onsubmit="handleSaveUranCategory(event)">
+        <input type="hidden" id="uran-cat-id">
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-cat-name">O'zbekcha Nomi: <span class="required">*</span></label>
+              <input type="text" id="uran-cat-name" class="form-control" placeholder="Masalan: Koinot va Sayyoralar" required>
+            </div>
+            <div class="form-group">
+              <label for="uran-cat-name-en">Inglizcha Nomi: <span class="required">*</span></label>
+              <input type="text" id="uran-cat-name-en" class="form-control" placeholder="Masalan: Space & Planets" required>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-cat-name-ru">Ruscha Nomi:</label>
+              <input type="text" id="uran-cat-name-ru" class="form-control" placeholder="Masalan: Космос и Планеты">
+            </div>
+            <div class="form-group">
+              <label for="uran-cat-order">Tartib Raqami:</label>
+              <input type="number" id="uran-cat-order" class="form-control" placeholder="1, 2, 3..." value="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="uran-cat-desc">Mavzu Tavsifi:</label>
+            <textarea id="uran-cat-desc" class="form-control" rows="2" placeholder="Ushbu mavzu haqida qisqacha ma'lumot..."></textarea>
+          </div>
+
+          <!-- Rasm tanlash yoki yuklash -->
+          <div class="form-group" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px;">
+            <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span><i class="bi bi-image"></i> Kategoriya Rasmi (PNG):</span>
+              <span id="uran-cat-img-preview-label" style="font-size: 12px; color: #38bdf8;">fruits.png</span>
+            </label>
+            
+            <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px;">
+              <div style="width: 60px; height: 60px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0;">
+                <img id="uran-cat-preview-img" src="/images/categories/fruits.png" alt="Preview" style="max-height: 48px; max-width: 48px; object-fit: contain;">
+              </div>
+              <div style="flex: 1;">
+                <input type="text" id="uran-cat-image" class="form-control" placeholder="/images/categories/fruits.png" style="font-size: 12px; margin-bottom: 6px;" oninput="updateUranCatImagePreview(this.value)">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <label class="btn btn-sm btn-secondary" style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 10px;">
+                    <i class="bi bi-cloud-arrow-up-fill text-yellow"></i> Yangi Rasm Yuklash (PNG)
+                    <input type="file" id="uran-cat-file-input" accept="image/png,image/jpeg,image/svg+xml" style="display: none;" onchange="handleUploadUranCatImage(this)">
+                  </label>
+                  <span id="uran-cat-upload-status" style="font-size: 11px; color: var(--text-muted);"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tezkor tayyor rasmlar -->
+            <div>
+              <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Standart rasmlardan birini tanlang:</span>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="uran-preset-images">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="uran-cat-status">Holati:</label>
+            <select id="uran-cat-status" class="form-control">
+              <option value="active">Faol (Active)</option>
+              <option value="inactive">Nofaol (Inactive)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" id="uran-cat-delete-btn" class="btn btn-danger" style="display: none;" onclick="handleDeleteCurrentCatFromModal()">
+            <i class="bi bi-trash"></i> Mavzuni O'chirish
+          </button>
+          <div style="display: flex; gap: 10px; margin-left: auto;">
+            <button type="button" class="btn btn-secondary" onclick="closeUranCategoryModal()">Bekor qilish</button>
+            <button type="submit" class="btn btn-yellow" id="save-uran-cat-btn">
+              <i class="bi bi-check2-circle"></i> Kategoriyani Saqlash
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- URAN WORD ADD/EDIT MODAL -->
   <div id="uran-word-modal" class="modal-overlay" onclick="handleOverlayClick(event, 'uran-word-modal')">
-    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 720px;">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 760px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
         <div>
           <h3 id="uran-word-modal-title"><i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish</h3>
@@ -1178,8 +1284,16 @@
       <form id="uran-word-form" onsubmit="handleSaveUranWord(event)">
         <input type="hidden" id="uran-word-id">
         <input type="hidden" id="uran-word-category-id">
-        <div class="modal-body">
-          <input type="hidden" id="uran-word-category-select" value="">
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          
+          <!-- Category selector -->
+          <div class="form-group">
+            <label for="uran-word-category-select">Lug'at Mavzusi (Kategoriya): <span class="required">*</span></label>
+            <select id="uran-word-category-select" class="form-control" required style="background: rgba(15, 23, 42, 0.8);">
+              <option value="" disabled selected>-- Mavzuni tanlang --</option>
+            </select>
+          </div>
+
           <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -1202,17 +1316,50 @@
             </div>
           </div>
 
-          <input type="hidden" id="uran-word-ru" value="">
-          <input type="hidden" id="uran-word-transcription" value="">
-          <input type="hidden" id="uran-word-example" value="">
-          <input type="hidden" id="uran-word-example-uz" value="">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-word-ru">Ruscha Tarjima:</label>
+              <input type="text" id="uran-word-ru" class="form-control" placeholder="Masalan: Клубника">
+            </div>
+            <div class="form-group">
+              <label for="uran-word-transcription">Transkripsiya (Talaffuz belgisi):</label>
+              <input type="text" id="uran-word-transcription" class="form-control" placeholder="Masalan: [ˈstrɔː.bər.i]">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-word-example">Misol Jumla (Inglizcha):</label>
+              <textarea id="uran-word-example" class="form-control" rows="2" placeholder="Masalan: Strawberries are red and very sweet."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="uran-word-example-uz">Misol Jumla Tarjimasi (O'zbekcha):</label>
+              <textarea id="uran-word-example-uz" class="form-control" rows="2" placeholder="Masalan: Qulupnaylar qizil va juda shirin."></textarea>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="uran-word-image">Maxsus Rasm URL (bo'sh qolsa kategoriya rasmi olinadi):</label>
+              <input type="text" id="uran-word-image" class="form-control" placeholder="/images/categories/fruits.png">
+            </div>
+            <div class="form-group">
+              <label for="uran-word-order">Tartib Raqami:</label>
+              <input type="number" id="uran-word-order" class="form-control" value="0" placeholder="1, 2, 3...">
+            </div>
+          </div>
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeUranWordModal()">Bekor qilish</button>
-          <button type="submit" class="btn btn-yellow" id="save-uran-word-btn">
-            <i class="bi bi-check2-circle"></i> So'zni Saqlash
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" id="uran-word-delete-btn" class="btn btn-danger" style="display: none;" onclick="handleDeleteCurrentWordFromModal()">
+            <i class="bi bi-trash"></i> So'zni O'chirish
           </button>
+          <div style="display: flex; gap: 10px; margin-left: auto;">
+            <button type="button" class="btn btn-secondary" onclick="closeUranWordModal()">Bekor qilish</button>
+            <button type="submit" class="btn btn-yellow" id="save-uran-word-btn">
+              <i class="bi bi-check2-circle"></i> So'zni Saqlash
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -2262,11 +2262,31 @@ function renderUranCategories() {
     return;
   }
 
-  container.innerHTML = filtered.map(cat => `
-    <div class="card item-card" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;" onclick="openUranCategoryDetail(${cat.id})">
+  container.innerHTML = filtered.map(cat => {
+    const isActive = (cat.status === 'active');
+    const statusBadge = isActive 
+      ? `<span class="badge" style="position: absolute; top: 8px; left: 8px; background: rgba(16, 185, 129, 0.25); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.5); font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><i class="bi bi-unlock-fill"></i> #${cat.order_num || 0} Faol</span>`
+      : `<span class="badge" style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.25); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><i class="bi bi-lock-fill"></i> #${cat.order_num || 0} Qulflangan</span>`;
+
+    const cardStyle = isActive 
+      ? `cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;`
+      : `cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative; border: 1px dashed rgba(239, 68, 68, 0.4); opacity: 0.9;`;
+
+    return `
+    <div class="card item-card" style="${cardStyle}" onclick="openUranCategoryDetail(${cat.id})">
       <div>
-        <div class="card-image-box" style="background: rgba(15, 23, 42, 0.6); height: 130px; display: flex; align-items: center; justify-content: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-          <img src="${cat.image || '/images/categories/fruits.svg'}" alt="${escapeHtml(cat.name)}" style="max-height: 85px; max-width: 85px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));" onerror="this.src='/images/categories/fruits.svg'">
+        <div class="card-image-box" style="background: rgba(15, 23, 42, 0.6); height: 130px; display: flex; align-items: center; justify-content: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); position: relative;">
+          ${statusBadge}
+          <img src="${cat.image || '/images/categories/fruits.png'}" alt="${escapeHtml(cat.name)}" style="max-height: 85px; max-width: 85px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));" onerror="this.src='/images/categories/fruits.png'">
+          
+          <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;" onclick="event.stopPropagation()">
+            <button class="action-btn-sm" title="Mavzuni Tahrirlash" onclick="openUranCategoryModal(${cat.id})">
+              <i class="bi bi-pencil-fill text-yellow"></i>
+            </button>
+            <button class="action-btn-sm delete-btn" title="Mavzuni O'chirish" onclick="handleDeleteUranCategory(${cat.id}, '${escapeHtml(cat.name)}')">
+              <i class="bi bi-trash-fill text-danger"></i>
+            </button>
+          </div>
         </div>
         <div class="card-content" style="padding: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
@@ -2280,16 +2300,17 @@ function renderUranCategories() {
         </div>
       </div>
       
-      <div style="padding: 0 16px 16px 16px; display: flex; gap: 8px;" onclick="event.stopPropagation()">
-        <button class="btn btn-yellow" style="flex: 1; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="openUranCategoryDetail(${cat.id})">
+      <div style="padding: 0 16px 16px 16px; display: flex; gap: 8px; flex-wrap: wrap;" onclick="event.stopPropagation()">
+        <button class="btn btn-yellow" style="flex: 1; padding: 8px 10px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700;" onclick="openUranCategoryDetail(${cat.id})">
           <i class="bi bi-book-half"></i> So'zlar & Test
         </button>
-        <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px; display: flex; align-items: center; gap: 5px;" onclick="openUranWordModal(${cat.id}, '${escapeHtml(cat.name)}')">
-          <i class="bi bi-plus-lg"></i> So'z Qo'sh
+        <button class="btn btn-secondary" style="padding: 8px 10px; font-size: 13px; display: flex; align-items: center; gap: 5px;" onclick="openUranWordModal(${cat.id}, '${escapeHtml(cat.name)}')">
+          <i class="bi bi-plus-lg text-yellow"></i> So'z Qo'sh
         </button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ------------------------------------------------------------------------------
@@ -2316,10 +2337,13 @@ async function openUranCategoryDetail(catId) {
   const searchInput = document.getElementById('uran-detail-search');
 
   if (titleEl) titleEl.innerText = cat.name || '';
-  if (subEl) subEl.innerText = cat.name_en || '';
-  if (descEl) descEl.innerText = cat.description || '';
-  if (badgeEl) badgeEl.innerText = `${cat.words_count || 0} ta so'z`;
-  if (imgEl) imgEl.src = cat.image || '/images/categories/fruits.svg';
+  const isCatActive = (cat.status === 'active');
+  const statusHtml = isCatActive
+    ? `<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px;"><i class="bi bi-unlock-fill"></i> Faol</span>`
+    : `<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 8px; border-radius: 6px; font-weight: 700; margin-right: 6px;"><i class="bi bi-lock-fill"></i> Qulflangan</span>`;
+
+  if (badgeEl) badgeEl.innerHTML = `${statusHtml} ${cat.words_count || 0} ta so'z`;
+  if (imgEl) imgEl.src = cat.image || '/images/categories/fruits.png';
   if (searchInput) searchInput.value = '';
 
   if (grid) {
@@ -2331,7 +2355,8 @@ async function openUranCategoryDetail(catId) {
     if (!res.ok) throw new Error("Mavzu ma'lumotlarini olishda xatolik");
     currentCatDetailData = await res.json();
     
-    if (badgeEl) badgeEl.innerText = `${currentCatDetailData.words_count || (currentCatDetailData.words || []).length} ta so'z`;
+    const count = currentCatDetailData.words_count || (currentCatDetailData.words || []).length;
+    if (badgeEl) badgeEl.innerHTML = `${statusHtml} ${count} ta so'z`;
     renderUranDetailWords();
   } catch (err) {
     console.error("openUranCategoryDetail error:", err);
@@ -2451,12 +2476,298 @@ function closeUranModal() {
   if (modal) modal.classList.remove('active');
 }
 
+// ------------------------------------------------------------------------------
+// URAN KATEGORIYA BOSHQARUVI (ADD / EDIT / DELETE / IMAGE UPLOAD)
+// ------------------------------------------------------------------------------
+
+const PRESET_URAN_CATEGORY_IMAGES = [
+  { name: "fruits.png", label: "Mevalar", path: "/images/categories/fruits.png" },
+  { name: "animals.png", label: "Hayvonlar", path: "/images/categories/animals.png" },
+  { name: "colors.png", label: "Ranglar", path: "/images/categories/colors.png" },
+  { name: "family.png", label: "Oila", path: "/images/categories/family.png" },
+  { name: "school.png", label: "Maktab", path: "/images/categories/school.png" },
+  { name: "clothes.png", label: "Kiyimlar", path: "/images/categories/clothes.png" },
+  { name: "nature.png", label: "Tabiat", path: "/images/categories/nature.png" },
+  { name: "transport.png", label: "Transport", path: "/images/categories/transport.png" },
+  { name: "home.png", label: "Uy", path: "/images/categories/home.png" },
+  { name: "professions.png", label: "Kasblar", path: "/images/categories/professions.png" }
+];
+
+function updateUranCatImagePreview(path) {
+  const clean = (path || '').trim() || '/images/categories/fruits.png';
+  const previewImg = document.getElementById('uran-cat-preview-img');
+  const previewLabel = document.getElementById('uran-cat-img-preview-label');
+  if (previewImg) previewImg.src = clean;
+  if (previewLabel) {
+    const parts = clean.split('/');
+    previewLabel.innerText = parts[parts.length - 1] || clean;
+  }
+}
+
+function selectUranPresetImage(path) {
+  const input = document.getElementById('uran-cat-image');
+  if (input) input.value = path;
+  updateUranCatImagePreview(path);
+  renderUranPresetImages(path);
+}
+
+function renderUranPresetImages(activePath) {
+  const container = document.getElementById('uran-preset-images');
+  if (!container) return;
+  container.innerHTML = PRESET_URAN_CATEGORY_IMAGES.map(p => {
+    const isSelected = activePath && activePath.includes(p.name);
+    return `
+      <button type="button" class="btn btn-sm ${isSelected ? 'btn-yellow' : 'btn-secondary'}" 
+        style="padding: 4px 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; cursor: pointer;" 
+        onclick="selectUranPresetImage('${p.path}')">
+        <img src="${p.path}" alt="${p.label}" style="width: 16px; height: 16px; object-fit: contain;">
+        <span>${p.label}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+async function handleUploadUranCatImage(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('uran-cat-upload-status');
+  if (statusEl) statusEl.innerText = "Yuklanmoqda...";
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/website/uran/upload-image', {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) throw new Error("Rasm yuklashda xatolik");
+    const data = await res.json();
+    const uploadedUrl = data.relative_url || data.url;
+    const imgInput = document.getElementById('uran-cat-image');
+    if (imgInput) imgInput.value = uploadedUrl;
+    updateUranCatImagePreview(uploadedUrl);
+    if (statusEl) statusEl.innerHTML = `<span style="color: #10b981;">✅ ${file.name}</span>`;
+    showToast("Kategoriya rasmi muvaffaqiyatli yuklandi!", "success");
+  } catch (err) {
+    console.error("handleUploadUranCatImage error:", err);
+    if (statusEl) statusEl.innerHTML = `<span style="color: #ef4444;">❌ Xatolik</span>`;
+    showToast(err.message || "Rasm yuklashda xatolik", "error");
+  }
+}
+
+function openUranCategoryModal(catId = null) {
+  const modal = document.getElementById('uran-category-modal');
+  const titleEl = document.getElementById('uran-category-modal-title');
+  const deleteBtn = document.getElementById('uran-cat-delete-btn');
+  const statusEl = document.getElementById('uran-cat-upload-status');
+  if (statusEl) statusEl.innerText = '';
+
+  const idInput = document.getElementById('uran-cat-id');
+  const nameInput = document.getElementById('uran-cat-name');
+  const nameEnInput = document.getElementById('uran-cat-name-en');
+  const nameRuInput = document.getElementById('uran-cat-name-ru');
+  const orderInput = document.getElementById('uran-cat-order');
+  const descInput = document.getElementById('uran-cat-desc');
+  const imgInput = document.getElementById('uran-cat-image');
+  const statusSelect = document.getElementById('uran-cat-status');
+
+  if (catId) {
+    const cat = uranCategoriesList.find(c => c.id === catId);
+    if (cat) {
+      if (idInput) idInput.value = cat.id;
+      if (nameInput) nameInput.value = cat.name || '';
+      if (nameEnInput) nameEnInput.value = cat.name_en || '';
+      if (nameRuInput) nameRuInput.value = cat.name_ru || '';
+      if (orderInput) orderInput.value = cat.order_num || 0;
+      if (descInput) descInput.value = cat.description || '';
+      const catImg = cat.image || '/images/categories/fruits.png';
+      if (imgInput) imgInput.value = catImg;
+      if (statusSelect) statusSelect.value = cat.status || 'active';
+      updateUranCatImagePreview(catImg);
+      renderUranPresetImages(catImg);
+
+      if (titleEl) titleEl.innerHTML = `<i class="bi bi-pencil-square text-yellow"></i> "${escapeHtml(cat.name)}" Kategoriyasini Tahrirlash`;
+      if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+    }
+  } else {
+    // New category
+    if (idInput) idInput.value = '';
+    if (nameInput) nameInput.value = '';
+    if (nameEnInput) nameEnInput.value = '';
+    if (nameRuInput) nameRuInput.value = '';
+    if (orderInput) orderInput.value = (uranCategoriesList.length + 1);
+    if (descInput) descInput.value = '';
+    const defaultImg = '/images/categories/fruits.png';
+    if (imgInput) imgInput.value = defaultImg;
+    if (statusSelect) statusSelect.value = 'active';
+    updateUranCatImagePreview(defaultImg);
+    renderUranPresetImages(defaultImg);
+
+    if (titleEl) titleEl.innerHTML = `<i class="bi bi-folder-plus text-yellow"></i> Yangi Kategoriya Qo'shish`;
+    if (deleteBtn) deleteBtn.style.display = 'none';
+  }
+
+  if (modal) {
+    modal.classList.add('show', 'active');
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
+    modal.style.display = 'flex';
+  }
+}
+
+function closeUranCategoryModal() {
+  const modal = document.getElementById('uran-category-modal');
+  if (modal) {
+    modal.classList.remove('show', 'active');
+    modal.style.opacity = '';
+    modal.style.pointerEvents = '';
+    modal.style.display = 'none';
+  }
+}
+
+async function handleSaveUranCategory(event) {
+  event.preventDefault();
+  const catId = document.getElementById('uran-cat-id').value;
+  const name = document.getElementById('uran-cat-name').value.trim();
+  const name_en = document.getElementById('uran-cat-name-en').value.trim();
+  const name_ru = document.getElementById('uran-cat-name-ru').value.trim();
+  const order_num = parseInt(document.getElementById('uran-cat-order').value, 10) || 0;
+  const description = document.getElementById('uran-cat-desc').value.trim();
+  let image = (document.getElementById('uran-cat-image').value || '').trim() || '/images/categories/fruits.png';
+  if (image.endsWith('.svg') && image.includes('/images/categories/')) {
+    image = image.replace('.svg', '.png');
+  }
+  const status = document.getElementById('uran-cat-status').value;
+
+  if (!name) {
+    showToast("Kategoriya o'zbekcha nomini kiriting!", "error");
+    return;
+  }
+  if (!name_en) {
+    showToast("Kategoriya inglizcha nomini kiriting!", "error");
+    return;
+  }
+
+  const payload = {
+    name,
+    name_en,
+    name_ru,
+    image,
+    description,
+    order_num,
+    status
+  };
+
+  const saveBtn = document.getElementById('save-uran-cat-btn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    let res;
+    if (catId) {
+      res = await fetch(`/api/website/uran/categories/${catId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch('/api/website/uran/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || "Kategoriyani saqlashda xatolik yuz berdi");
+    }
+
+    showToast(catId ? `"${name}" kategoriyasi muvaffaqiyatli yangilandi!` : `Yangi "${name}" kategoriyasi yaratildi! ✅`, "success");
+    closeUranCategoryModal();
+
+    await fetchUranCategories();
+
+    // If inside detail view of this category, refresh header
+    if (currentOpenCatId && String(currentOpenCatId) === String(catId)) {
+      currentOpenCatName = name;
+      const titleEl = document.getElementById('uran-detail-title');
+      const subEl = document.getElementById('uran-detail-subtitle');
+      const descEl = document.getElementById('uran-detail-desc');
+      const imgEl = document.getElementById('uran-detail-img');
+      if (titleEl) titleEl.innerText = name;
+      if (subEl) subEl.innerText = name_en;
+      if (descEl) descEl.innerText = description;
+      if (imgEl) imgEl.src = image;
+    }
+  } catch (err) {
+    console.error("handleSaveUranCategory error:", err);
+    showToast(err.message || "Xatolik yuz berdi", "error");
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+async function handleDeleteUranCategory(catId, catName) {
+  if (!catId) return;
+  const nameStr = catName || `ID #${catId}`;
+  if (!confirm(`Haqiqatan ham "${nameStr}" kategoriyasini va uning barcha so'zlarini o'chirmoqchimisiz?\nBu amalni qaytarib bo'lmaydi!`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/website/uran/categories/${catId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || "Kategoriyani o'chirishda xatolik");
+    }
+
+    showToast(`"${nameStr}" kategoriyasi muvaffaqiyatli o'chirildi! 🗑️`, "success");
+    closeUranCategoryModal();
+
+    if (currentOpenCatId && String(currentOpenCatId) === String(catId)) {
+      closeUranCategoryDetail();
+    }
+
+    await Promise.all([fetchUranCategories(), fetchUranWords()]);
+  } catch (err) {
+    console.error("handleDeleteUranCategory error:", err);
+    showToast(err.message || "O'chirishda xatolik yuz berdi", "error");
+  }
+}
+
+function handleDeleteCurrentCatFromModal() {
+  const catId = document.getElementById('uran-cat-id').value;
+  const name = document.getElementById('uran-cat-name').value;
+  if (catId) {
+    handleDeleteUranCategory(catId, name);
+  }
+}
+
+function handleDeleteCurrentWordFromModal() {
+  const wordId = document.getElementById('uran-word-id').value;
+  const wordEn = document.getElementById('uran-word-en').value;
+  const catId = document.getElementById('uran-word-category-id').value || currentOpenCatId;
+  if (wordId) {
+    closeUranWordModal();
+    handleDeleteUranWord(wordId, wordEn, catId);
+  }
+}
+
+// ------------------------------------------------------------------------------
+// URAN SO'ZLAR BOSHQARUVI (ADD / EDIT / DELETE)
+// ------------------------------------------------------------------------------
+
 function openUranWordModal(categoryId = null, categoryName = null, wordId = null) {
   const modal = document.getElementById('uran-word-modal');
   const form = document.getElementById('uran-word-form');
   const catLabel = document.getElementById('uran-word-modal-cat');
   const titleEl = document.getElementById('uran-word-modal-title');
   const catSelect = document.getElementById('uran-word-category-select');
+  const deleteBtn = document.getElementById('uran-word-delete-btn');
 
   if (form) form.reset();
   populateUranCategoryDropdowns();
@@ -2470,27 +2781,28 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
   if (document.getElementById('uran-word-category-id')) {
     document.getElementById('uran-word-category-id').value = targetCatId || '';
   }
-
-  // Set hidden category select value
-  const catSelectHidden = document.getElementById('uran-word-category-select');
-  if (catSelectHidden && targetCatId) {
-    catSelectHidden.value = String(targetCatId);
+  if (catSelect && targetCatId) {
+    catSelect.value = String(targetCatId);
   }
 
   if (wordId) {
     const item = uranWordsList.find(w => w.id === wordId) || (currentCatDetailData && currentCatDetailData.words ? currentCatDetailData.words.find(w => w.id === wordId) : null);
     if (item) {
-      if (catSelectHidden) catSelectHidden.value = String(item.category_id);
+      if (catSelect) catSelect.value = String(item.category_id);
       if (document.getElementById('uran-word-en')) document.getElementById('uran-word-en').value = item.word_en || '';
       if (document.getElementById('uran-word-uz')) document.getElementById('uran-word-uz').value = item.word_uz || '';
       if (document.getElementById('uran-word-ru')) document.getElementById('uran-word-ru').value = item.word_ru || '';
       if (document.getElementById('uran-word-transcription')) document.getElementById('uran-word-transcription').value = item.transcription || '';
       if (document.getElementById('uran-word-example')) document.getElementById('uran-word-example').value = item.example_sentence || '';
       if (document.getElementById('uran-word-example-uz')) document.getElementById('uran-word-example-uz').value = item.example_translation || '';
-      if (titleEl) titleEl.innerHTML = `<i class="bi bi-pencil-square text-yellow"></i> So'zni Tahrirlash`;
+      if (document.getElementById('uran-word-image')) document.getElementById('uran-word-image').value = item.image || '';
+      if (document.getElementById('uran-word-order')) document.getElementById('uran-word-order').value = item.order_num || 0;
+      if (titleEl) titleEl.innerHTML = `<i class="bi bi-pencil-square text-yellow"></i> "${escapeHtml(item.word_en)}" So'zini Tahrirlash`;
+      if (deleteBtn) deleteBtn.style.display = 'inline-flex';
     }
   } else {
     if (titleEl) titleEl.innerHTML = `<i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish`;
+    if (deleteBtn) deleteBtn.style.display = 'none';
   }
 
   if (catLabel) {
@@ -2528,6 +2840,8 @@ async function handleSaveUranWord(event) {
   const transcription = document.getElementById('uran-word-transcription').value.trim();
   const example_sentence = document.getElementById('uran-word-example').value.trim();
   const example_translation = document.getElementById('uran-word-example-uz').value.trim();
+  const image = document.getElementById('uran-word-image') ? document.getElementById('uran-word-image').value.trim() : '';
+  const order_num = document.getElementById('uran-word-order') ? parseInt(document.getElementById('uran-word-order').value, 10) || 0 : 0;
 
   if (!categoryId) {
     showToast("Iltimos, so'z tegishli bo'lgan mavzuni (kategoriyani) tanlang!", "error");
@@ -2545,7 +2859,9 @@ async function handleSaveUranWord(event) {
     word_ru: word_ru || null,
     transcription: transcription || null,
     example_sentence: example_sentence || null,
-    example_translation: example_translation || null
+    example_translation: example_translation || null,
+    image: image || null,
+    order_num: order_num
   };
 
   const saveBtn = document.getElementById('save-uran-word-btn');

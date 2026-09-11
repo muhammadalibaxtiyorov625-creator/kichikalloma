@@ -434,6 +434,12 @@ class UranCategoryResponse(UranCategoryBase):
     id: int
     words_count: int = Field(0, example=10, description="Ushbu kategoriyadagi so'zlar soni")
     created_at: Optional[str] = None
+    is_unlocked: Optional[bool] = Field(True, example=True, description="Kategoriya ochiqmi yoki qulflanganmi")
+    is_blocked: Optional[bool] = Field(False, example=False, description="Kategoriya bloklanganmi")
+    is_block: Optional[bool] = Field(False, example=False, description="Kategoriya bloklanganmi (is_blocked bilan bir xil)")
+    passed: Optional[bool] = Field(False, example=False, description="Testdan muvaffaqiyatli o'tilganmi (>=60%)")
+    best_score: Optional[int] = Field(0, example=8, description="Kategoriya testidan eng yuqori ball")
+    best_percentage: Optional[float] = Field(0.0, example=80.0, description="Kategoriya testidan eng yuqori foiz")
 
 class UranWordBase(BaseModel):
     category_id: int = Field(..., example=1, description="Kategoriya ID si")
@@ -484,6 +490,10 @@ class UranCategoryDetailResponse(BaseModel):
     name_ru: Optional[str] = Field("", example="Фрукты и Овощи")
     image: str = Field(..., example="/images/categories/fruits.png")
     description: Optional[str] = Field("", example="Meva va sabzavotlar nomlarini o'rganamiz")
+    status: Optional[str] = Field("active", example="active", description="'active' yoki 'inactive'")
+    is_unlocked: Optional[bool] = Field(True, example=True, description="Kategoriya ochiqmi")
+    is_blocked: Optional[bool] = Field(False, example=False, description="Kategoriya bloklanganmi")
+    is_block: Optional[bool] = Field(False, example=False, description="Kategoriya bloklanganmi")
     words_count: int = Field(0, example=12)
     words: List[UranWordResponse] = Field(..., description="Kategoriya ichidagi so'zlar ro'yxati (o'zbekcha va inglizcha)")
     tests: List[UranQuizOption] = Field(..., description="So'zlar tugagach topshiriladigan test savollari (inglizcha so'z va 4 ta o'zbekcha variant)")
@@ -537,6 +547,9 @@ class UranQuizSubmitResponse(BaseModel):
     congratulation: str
     next_learn_url: Optional[str] = Field("/mobile/planets/uran/learn", description="Keyingi yangi so'zlarni o'rganish URL manzili")
     next_review_url: Optional[str] = Field("/mobile/planets/uran/review", description="Takrorlash URL manzili")
+    next_category_unlocked: Optional[bool] = Field(False, example=True, description="Keyingi kategoriya ochildimi?")
+    next_category_id: Optional[int] = Field(None, example=2, description="Ochilgan keyingi kategoriya ID raqami")
+    next_category_name: Optional[str] = Field(None, example="Hayvonlar olami", description="Ochilgan keyingi kategoriya nomi")
 
 class UranAiSuggestRequest(BaseModel):
     word_en: str = Field(..., example="Pineapple", description="Inglizcha so'z")

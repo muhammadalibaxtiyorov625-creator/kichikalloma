@@ -2279,22 +2279,67 @@ def delete_child_emotion(emotion_id: int, current_user: dict = Depends(get_curre
 @app.get("/mobile/planets/uranus/category", response_model=List[UranCategoryResponse], include_in_schema=False)
 @app.get("/mobile/uran/categories/", response_model=List[UranCategoryResponse], include_in_schema=False)
 @app.get("/mobile/uran/categories", response_model=List[UranCategoryResponse], include_in_schema=False)
-def get_uran_categories(request: Request):
+def get_uran_categories(
+    request: Request,
+    status: Optional[str] = None,
+    child_id: Optional[int] = None,
+    current_user: Optional[dict] = Depends(get_current_user_optional)
+):
+    user_dict = current_user if isinstance(current_user, dict) else None
+    effective_child_id = child_id or resolve_child_id(None, user_dict)
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT c.*, COUNT(w.id) as words_count 
         FROM uran_categories c 
         LEFT JOIN uran_words w ON c.id = w.category_id 
-        WHERE c.status = 'active' 
         GROUP BY c.id 
         ORDER BY c.order_num ASC, c.id ASC
     """)
     rows = cursor.fetchall()
+
+    # Bolaning topshirgan test natijalari
+    cursor.execute("""
+        SELECT category_id, MAX(percentage) as max_pct, MAX(score) as max_score
+        FROM child_uran_quiz_results
+        WHERE child_id = ?
+        GROUP BY category_id
+    """, (effective_child_id,))
+    quiz_results = {r["category_id"]: r for r in cursor.fetchall()}
     conn.close()
 
     result = []
-    for row in rows:
+    # 1-chi chiqqan kategoriya (idx == 0) har doim ochiq (active)
+    # Keyingilari esa avvalgi mavzuning testi >= 60% topshirilsa (yoki bazada active bo'lsa) ochiq
+    prev_cat_passed = False
+
+    for idx, row in enumerate(rows):
+        cid = row["id"]
+        q_res = quiz_results.get(cid)
+        best_pct = round(q_res["max_pct"], 1) if q_res and q_res["max_pct"] is not None else 0.0
+        best_sc = q_res["max_score"] if q_res and q_res["max_score"] is not None else 0
+        cat_passed = best_pct >= 60.0
+
+        db_status = (row["status"] or "active").lower()
+
+        if idx == 0:
+            is_unlocked = True
+            cat_status = "active"
+        else:
+            if prev_cat_passed or db_status == "active":
+                is_unlocked = True
+                cat_status = "active"
+            else:
+                is_unlocked = False
+                cat_status = "inactive"
+
+        # Keyingi kategoriya ochilishi uchun ushbu kategoriyaning o'zi testdan >= 60% o'tgan bo'lishi kerak
+        prev_cat_passed = cat_passed
+
+        if status and cat_status != status:
+            continue
+
         result.append({
             "id": row["id"],
             "name": row["name"],
@@ -2302,10 +2347,16 @@ def get_uran_categories(request: Request):
             "name_ru": row["name_ru"] or "",
             "image": to_full_image_url(row["image"], request),
             "description": row["description"] or "",
-            "status": row["status"] or "active",
+            "status": cat_status,
             "order_num": row["order_num"] or 0,
             "words_count": row["words_count"] or 0,
-            "created_at": str(row["created_at"]) if row["created_at"] else None
+            "created_at": str(row["created_at"]) if row["created_at"] else None,
+            "is_unlocked": is_unlocked,
+            "is_blocked": not is_unlocked,
+            "is_block": not is_unlocked,
+            "passed": cat_passed,
+            "best_score": best_sc,
+            "best_percentage": best_pct
         })
     return result
 
@@ -2405,6 +2456,9 @@ def get_uran_category_detail(category_id: int, request: Request):
         }
         tests_list.append(test_item)
 
+    cat_status = (cat_row["status"] or "active").lower()
+    is_unlocked = cat_status == "active"
+
     return {
         "id": cat_row["id"],
         "name": cat_row["name"],
@@ -2412,6 +2466,10 @@ def get_uran_category_detail(category_id: int, request: Request):
         "name_ru": cat_row["name_ru"] or "",
         "image": category_image_url,
         "description": cat_row["description"] or "",
+        "status": cat_status,
+        "is_unlocked": is_unlocked,
+        "is_blocked": not is_unlocked,
+        "is_block": not is_unlocked,
         "words_count": len(words_list),
         "words": words_list,
         "tests": tests_list,
@@ -2494,6 +2552,9 @@ def submit_uran_quiz(payload: UranQuizSubmitRequest, category_id: Optional[int] 
     total_planet_words = 0
     total_learned_words = 0
     remaining_new_words = 0
+    next_category_unlocked = False
+    next_category_id = None
+    next_category_name = None
 
     try:
         conn = get_db_connection()
@@ -2504,6 +2565,26 @@ def submit_uran_quiz(payload: UranQuizSubmitRequest, category_id: Optional[int] 
             INSERT INTO child_uran_quiz_results (user_id, child_id, category_id, score, total_questions, percentage)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (user_id, child_id, effective_category_id, score, total, percentage))
+
+        # 1.1. 60% dan yuqori ball to'plansa, keyingi kategoriya ochiladi (status = 'active')
+        if passed:
+            cursor.execute("SELECT id, order_num, name FROM uran_categories WHERE id = ?", (effective_category_id,))
+            curr_cat = cursor.fetchone()
+            if curr_cat:
+                curr_order = curr_cat["order_num"] or 0
+                cursor.execute("""
+                    SELECT id, name, name_en, status, order_num 
+                    FROM uran_categories 
+                    WHERE (order_num > ?) OR (order_num = ? AND id > ?)
+                    ORDER BY order_num ASC, id ASC 
+                    LIMIT 1
+                """, (curr_order, curr_order, effective_category_id))
+                next_cat = cursor.fetchone()
+                if next_cat:
+                    next_category_id = next_cat["id"]
+                    next_category_name = next_cat["name"]
+                    cursor.execute("UPDATE uran_categories SET status = 'active' WHERE id = ?", (next_category_id,))
+                    next_category_unlocked = True
 
         # 2. O'rganilgan so'zlarni saqlash (child_uran_learned_words)
         learned_words_to_mark = []
@@ -2571,23 +2652,28 @@ def submit_uran_quiz(payload: UranQuizSubmitRequest, category_id: Optional[int] 
     except Exception as e:
         print("Quiz natijasini saqlashda xatolik:", e)
 
-    # 7. Barakalla xabari: so'zlar statistikasi va Uran coinlari bilan
+    # 7. Barakalla xabari: so'zlar statistikasi, Uran coinlari va keyingi mavzu ochilishi bilan
     if passed:
+        unlock_msg = ""
+        if next_category_unlocked and next_category_name:
+            unlock_msg = f" 🔓 Ajoyib natija (60% dan yuqori)! Siz keyingi mavzuni ochdingiz: '{next_category_name}'!"
+
         congrat = (
             f"Barakalla! Sen Uran sayyorasidagi jami {total_planet_words} ta so'zdan "
             f"{total_learned_words} tasini muvaffaqiyatli yod olding! 🌟🌟🌟 "
             f"Ushbu testda +{coins_earned} Coin yutding! Uran sayyorasida to'plagan jami tangalaring: {uran_total_coins} Coin! 🚀"
+            f"{unlock_msg}"
         )
     else:
         congrat = (
-            f"Harakatdan to'xtama! Uran sayyorasida hozirgacha {total_learned_words}/{total_planet_words} ta so'zni yod olding. "
-            f"Ushbu testda +{coins_earned} Coin olding! Uran sayyorasidagi jami tangalaring: {uran_total_coins} Coin. "
-            f"So'zlarni yana bir bor takrorlab ko'r, albatta uddalaysan! 💪"
+            f"Harakatdan to'xtama! To'plagan natijang: {score}/{total} ({percentage}%). "
+            f"Keyingi mavzuni ochish uchun testdan kamida 60% to'plashingiz kerak. "
+            f"Ushbu testda +{coins_earned} Coin olding! Yana bir bor urinib ko'r, albatta uddalaysan! 💪"
         )
 
     return {
         "success": True,
-        "message": "Test natijasi muvaffaqiyatli saqlandi!",
+        "message": f"Test natijasi muvaffaqiyatli saqlandi! ({score}/{total}, {percentage}%)",
         "score": score,
         "total_questions": total,
         "percentage": percentage,
@@ -2602,7 +2688,10 @@ def submit_uran_quiz(payload: UranQuizSubmitRequest, category_id: Optional[int] 
         "mode": payload.mode or "learn",
         "congratulation": congrat,
         "next_learn_url": "/mobile/planets/uran/learn",
-        "next_review_url": "/mobile/planets/uran/review"
+        "next_review_url": "/mobile/planets/uran/review",
+        "next_category_unlocked": next_category_unlocked,
+        "next_category_id": next_category_id,
+        "next_category_name": next_category_name
     }
 
 
@@ -3606,8 +3695,8 @@ def get_coins_leaderboard(limit: int = Query(20, ge=1, le=100), request: Request
 # 7.13.4. ADMIN PANEL — URAN KATEGORIYALARI VA SO'ZLARI CRUD
 # ==============================================================================
 @app.get("/api/website/uran/categories", response_model=List[UranCategoryResponse], tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran Kategoriyalar Ro'yxati")
-def admin_get_uran_categories(request: Request):
-    return get_uran_categories(request)
+def admin_get_uran_categories(request: Request, status: Optional[str] = None):
+    return get_uran_categories(request, status=status, current_user=None)
 
 @app.post("/api/website/uran/categories", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Yangi Uran Kategoriyasi Qo'shish")
 def admin_create_uran_category(payload: UranCategoryCreate, request: Request):
@@ -3688,6 +3777,8 @@ def admin_update_uran_category(cat_id: int, payload: UranCategoryUpdate, request
 def admin_delete_uran_category(cat_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("DELETE FROM uran_words WHERE category_id = ?", (cat_id,))
+    cursor.execute("DELETE FROM child_uran_quiz_results WHERE category_id = ?", (cat_id,))
     cursor.execute("DELETE FROM uran_categories WHERE id = ?", (cat_id,))
     conn.commit()
     conn.close()
