@@ -298,7 +298,7 @@ def init_db():
             name TEXT NOT NULL,
             name_en TEXT DEFAULT '',
             name_ru TEXT DEFAULT '',
-            image TEXT DEFAULT '/images/categories/fruits.svg',
+            image TEXT DEFAULT '/images/categories/fruits.png',
             description TEXT DEFAULT '',
             status TEXT DEFAULT 'active',
             order_num INTEGER DEFAULT 0,
@@ -364,7 +364,7 @@ def init_db():
     if uran_cat_cnt == 0:
         initial_uran_data = [
             {
-                "category": ("Meva va Sabzavotlar", "Fruits & Vegetables", "Фрукты и Овощи", "/images/categories/fruits.svg", "Meva va sabzavotlarning inglizcha va o'zbekcha nomlarini o'rganamiz", "active", 1),
+                "category": ("Meva va Sabzavotlar", "Fruits & Vegetables", "Фрукты и Овощи", "/images/categories/fruits.png", "Meva va sabzavotlarning inglizcha va o'zbekcha nomlarini o'rganamiz", "active", 1),
                 "words": [
                     ("Olma", "Apple", "Яблоко", "[ˈæp.əl]", "An apple a day keeps the doctor away.", "Kuniga bitta olma shifokordan asraydi.", 1),
                     ("Banan", "Banana", "Банан", "[bəˈnæn.ə]", "Monkeys love sweet yellow bananas.", "Maymunlar shirin sariq bananlarni yaxshi ko'radi.", 2),
@@ -381,7 +381,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Hayvonlar olami", "Animals", "Животные", "/images/categories/animals.svg", "Yovvoyi va uy hayvonlarining nomlarini o'rganamiz", "active", 2),
+                "category": ("Hayvonlar olami", "Animals", "Животные", "/images/categories/animals.png", "Yovvoyi va uy hayvonlarining nomlarini o'rganamiz", "active", 2),
                 "words": [
                     ("Sher", "Lion", "Лев", "[ˈlaɪ.ən]", "The lion is the king of the savanna.", "Sher savanna podshohidir.", 1),
                     ("Fil", "Elephant", "Слон", "[ˈel.ɪ.fənt]", "The elephant is the largest land animal.", "Fil quruqlikdagi eng katta hayvondir.", 2),
@@ -398,7 +398,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Ranglar va Shakllar", "Colors & Shapes", "Цвета и Формы", "/images/categories/colors.svg", "Asosiy ranglar va geometrik shakllar", "active", 3),
+                "category": ("Ranglar va Shakllar", "Colors & Shapes", "Цвета и Формы", "/images/categories/colors.png", "Asosiy ranglar va geometrik shakllar", "active", 3),
                 "words": [
                     ("Qizil", "Red", "Красный", "[red]", "The red apple is ripe and sweet.", "Qizil olma pishgan va shirin.", 1),
                     ("Ko'k", "Blue", "Синий", "[bluː]", "The clear summer sky is bright blue.", "Musaffo yozgi osmon yorqin ko'k rangda.", 2),
@@ -413,7 +413,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Oila va Inson", "Family & People", "Семья и Люди", "/images/categories/family.svg", "Oila a'zolari va odamlar", "active", 4),
+                "category": ("Oila va Inson", "Family & People", "Семья и Люди", "/images/categories/family.png", "Oila a'zolari va odamlar", "active", 4),
                 "words": [
                     ("Ota", "Father", "Отец", "[ˈfɑː.ðər]", "My father helps me with my studies.", "Otam menga darslarimda yordam beradi.", 1),
                     ("Ona", "Mother", "Мать", "[ˈmʌð.ər]", "My mother gives the warmest hugs.", "Onam eng samimiy quchoq ochadi.", 2),
@@ -428,7 +428,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Maktab va O'qish", "School & Learning", "Школа и Учеба", "/images/categories/school.svg", "Maktab anjomlari va ta'lim so'zlari", "active", 5),
+                "category": ("Maktab va O'qish", "School & Learning", "Школа и Учеба", "/images/categories/school.png", "Maktab anjomlari va ta'lim so'zlari", "active", 5),
                 "words": [
                     ("Kitob", "Book", "Книга", "[bʊk]", "Reading books gives great wisdom.", "Kitob o'qish katta donolik beradi.", 1),
                     ("Ruchka", "Pen", "Ручка", "[pen]", "I write my exercises with a blue pen.", "Men mashqlarimni ko'k ruchkada yozaman.", 2),
@@ -443,7 +443,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Kiyim-kechak", "Clothes", "Одежда", "/images/categories/clothes.svg", "Kiyimlar va poyabzallar", "active", 6),
+                "category": ("Kiyim-kechak", "Clothes", "Одежда", "/images/categories/clothes.png", "Kiyimlar va poyabzallar", "active", 6),
                 "words": [
                     ("Ko'ylak", "Shirt", "Рубашка", "[ʃɜːt]", "I iron my clean white shirt.", "Men toza oq ko'ylagimni dazmollayman.", 1),
                     ("Futbolka", "T-shirt", "Футболка", "[ˈtiː.ʃɜːt]", "I wear a bright yellow T-shirt in summer.", "Yozda men yorqin sariq futbolka kiyaman.", 2),
@@ -458,7 +458,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Tabiat va Ob-havo", "Nature & Weather", "Природа и Погода", "/images/categories/nature.svg", "Tabiat hodisalari va koinot", "active", 7),
+                "category": ("Tabiat va Ob-havo", "Nature & Weather", "Природа и Погода", "/images/categories/nature.png", "Tabiat hodisalari va koinot", "active", 7),
                 "words": [
                     ("Quyosh", "Sun", "Солнце", "[sʌn]", "The bright sun warms the Earth.", "Yorqin quyosh Yerni isitadi.", 1),
                     ("Oy", "Moon", "Луна", "[muːn]", "The silver moon shines at night.", "Kumushrang oy kechasi nur sochadi.", 2),
@@ -473,7 +473,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Transport va Sayohat", "Transport & Travel", "Транспорт и Путешествия", "/images/categories/transport.svg", "Transport vositalari va sayohat", "active", 8),
+                "category": ("Transport va Sayohat", "Transport & Travel", "Транспорт и Путешествия", "/images/categories/transport.png", "Transport vositalari va sayohat", "active", 8),
                 "words": [
                     ("Mashina", "Car", "Машина", "[kɑːr]", "The fast electric car drives smoothly.", "Tezkor elektromobil ravon harakatlanadi.", 1),
                     ("Avtobus", "Bus", "Автобус", "[bʌs]", "The yellow bus carries passengers safely.", "Sariq avtobus yo'lovchilarni xavfsiz tashiydi.", 2),
@@ -488,7 +488,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Uy va Buyumlar", "Home & Objects", "Дом и Вещи", "/images/categories/home.svg", "Uy-ro'zg'or buyumlari va jihozlar", "active", 9),
+                "category": ("Uy va Buyumlar", "Home & Objects", "Дом и Вещи", "/images/categories/home.png", "Uy-ro'zg'or buyumlari va jihozlar", "active", 9),
                 "words": [
                     ("Uy", "House", "Дом", "[haʊs]", "Our warm house is very welcoming.", "Bizning issiq uyimiz juda mehmondo'st.", 1),
                     ("Xona", "Room", "Комната", "[ruːm]", "My bright room is tidy and organized.", "Mening yorug' xonam ozoda va tartibli.", 2),
@@ -503,7 +503,7 @@ def init_db():
                 ]
             },
             {
-                "category": ("Kasblar", "Professions", "Профессии", "/images/categories/professions.svg", "Kasblar va mutaxassisliklar", "active", 10),
+                "category": ("Kasblar", "Professions", "Профессии", "/images/categories/professions.png", "Kasblar va mutaxassisliklar", "active", 10),
                 "words": [
                     ("Shifokor", "Doctor", "Врач", "[ˈdɒk.tər]", "The doctor helps people stay healthy.", "Shifokor odamlarga sog'lom bo'lishga yordam beradi.", 1),
                     ("O'qituvchi", "Teacher", "Учитель", "[ˈtiː.tʃər]", "The teacher inspires students to learn.", "O'qituvchi o'quvchilarni o'rganishga ilhomlantiradi.", 2),

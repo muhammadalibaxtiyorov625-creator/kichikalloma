@@ -492,6 +492,10 @@ def to_full_image_url(image_path: Optional[str], request: Request) -> str:
     if (clean_path.startswith("http://") or clean_path.startswith("https://")) and not clean_path.startswith(base_url):
         return clean_path
         
+    # Agar kategoriyalar rasmi bo'lib, .svg bo'lsa, .png ga o'tkazamiz
+    if "/images/categories/" in clean_path and clean_path.endswith(".svg"):
+        clean_path = clean_path[:-4] + ".png"
+
     if clean_path.startswith("/"):
         return f"{base_url}{clean_path}"
     else:
@@ -2877,6 +2881,69 @@ def get_uran_review_session(category_id: Optional[int] = None, child_id: Optiona
     }
 
 
+# 7.13.6. URAN YANGI KATEGORIYA QO'SHISH (/mobile/planets/uran/category/)
+@app.post("/mobile/planets/uran/category/", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.6. Uran / Yangi Kategoriya Qo'shish (name, image, description)")
+@app.post("/mobile/planets/uran/category", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/planets/uranus/category/", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/planets/uranus/category", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/uran/category/", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/uran/category", response_model=UranCategoryResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+def mobile_create_uran_category(payload: UranCategoryCreate, request: Request):
+    return admin_create_uran_category(payload, request)
+
+
+# 7.13.7. URAN KATEGORIYA RASMINI YUKLASH (PNG) (/mobile/planets/uran/category/upload-image)
+@app.post("/mobile/planets/uran/category/upload-image", tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.7. Uran / Kategoriya Rasmini Yuklash (PNG formatda)")
+@app.post("/mobile/planets/uran/category/upload-image/", tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], include_in_schema=False)
+@app.post("/api/website/uran/upload-image", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: Uran Rasmini Yuklash (PNG)")
+async def upload_uran_category_image(request: Request, file: UploadFile = File(...)):
+    try:
+        ext = os.path.splitext(file.filename)[1].lower() or ".png"
+        unique_name = f"uran_{uuid.uuid4().hex[:10]}{ext}"
+        cat_dir = os.path.join(PUBLIC_DIR, "images", "categories")
+        os.makedirs(cat_dir, exist_ok=True)
+        file_path = os.path.join(cat_dir, unique_name)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        relative_url = f"/images/categories/{unique_name}"
+        full_url = to_full_image_url(relative_url, request)
+        return {
+            "success": True,
+            "filename": file.filename,
+            "url": full_url,
+            "relative_url": relative_url
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Rasm yuklashda xatolik: {str(e)}")
+
+
+# 7.13.8. URAN KATEGORIYASINI TAHRIRLASH (/mobile/planets/uran/category/{category_id})
+@app.put("/mobile/planets/uran/category/{category_id}", response_model=UranCategoryResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.8. Uran / Kategoriyani Tahrirlash")
+@app.put("/mobile/planets/uran/category/{category_id}/", response_model=UranCategoryResponse, include_in_schema=False)
+def mobile_update_uran_category(category_id: int, payload: UranCategoryUpdate, request: Request):
+    return admin_update_uran_category(category_id, payload, request)
+
+
+# 7.13.9. URAN KATEGORIYASINI O'CHIRISH (/mobile/planets/uran/category/{category_id})
+@app.delete("/mobile/planets/uran/category/{category_id}", tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.9. Uran / Kategoriyani O'chirish")
+@app.delete("/mobile/planets/uran/category/{category_id}/", include_in_schema=False)
+def mobile_delete_uran_category(category_id: int):
+    return admin_delete_uran_category(category_id)
+
+
+# 7.13.10. URAN KATEGORIYASIGA YANGI SO'Z QO'SHISH (/mobile/planets/uran/words)
+@app.post("/mobile/planets/uran/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.10. Uran / Yangi So'z Qo'shish")
+@app.post("/mobile/planets/uran/words/", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@app.post("/mobile/planets/uran/category/{category_id}/words", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.10. Uran / Kategoriya Ichiga Yangi So'z Qo'shish")
+@app.post("/mobile/planets/uran/category/{category_id}/words/", response_model=UranWordResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+def mobile_create_uran_word(payload: UranWordCreate, request: Request, category_id: Optional[int] = None):
+    if category_id:
+        payload.category_id = category_id
+    return admin_create_uran_word(payload, request)
+
+
 # ==============================================================================
 # 7.14. COIN & MUKOFOTLAR TIZIMI (COINS, MISSIONS, SHOP & LEADERBOARD)
 # ==============================================================================
@@ -3546,10 +3613,13 @@ def admin_get_uran_categories(request: Request):
 def admin_create_uran_category(payload: UranCategoryCreate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
+    img = (payload.image or "/images/categories/fruits.png").strip()
+    if img.endswith(".svg") and "/images/categories/" in img:
+        img = img[:-4] + ".png"
     cursor.execute("""
         INSERT INTO uran_categories (name, name_en, name_ru, image, description, status, order_num)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (payload.name, payload.name_en or "", payload.name_ru or "", payload.image or "/images/categories/fruits.svg", payload.description or "", payload.status or "active", payload.order_num or 0))
+    """, (payload.name, payload.name_en or "", payload.name_ru or "", img, payload.description or "", payload.status or "active", payload.order_num or 0))
     cat_id = cursor.lastrowid
     conn.commit()
     cursor.execute("SELECT * FROM uran_categories WHERE id = ?", (cat_id,))
@@ -3582,6 +3652,8 @@ def admin_update_uran_category(cat_id: int, payload: UranCategoryUpdate, request
     name_en = payload.name_en if payload.name_en is not None else row["name_en"]
     name_ru = payload.name_ru if payload.name_ru is not None else row["name_ru"]
     image = payload.image if payload.image is not None else row["image"]
+    if image and image.endswith(".svg") and "/images/categories/" in image:
+        image = image[:-4] + ".png"
     description = payload.description if payload.description is not None else row["description"]
     status_val = payload.status if payload.status is not None else row["status"]
     order_num = payload.order_num if payload.order_num is not None else row["order_num"]
@@ -3978,10 +4050,21 @@ def get_neptun_tree():
 def admin_create_uran_word(payload: UranWordCreate, request: Request):
     conn = get_db_connection()
     cursor = conn.cursor()
+    word_img = (payload.image or "").strip()
+    if not word_img:
+        cursor.execute("SELECT image FROM uran_categories WHERE id = ?", (payload.category_id,))
+        cat_row = cursor.fetchone()
+        if cat_row and cat_row["image"]:
+            word_img = cat_row["image"]
+        else:
+            word_img = "/images/categories/fruits.png"
+    elif word_img.endswith(".svg") and "/images/categories/" in word_img:
+        word_img = word_img[:-4] + ".png"
+
     cursor.execute("""
         INSERT INTO uran_words (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (payload.category_id, payload.word_uz, payload.word_en, payload.word_ru or "", payload.transcription or "", payload.image or "", payload.audio_url or "", payload.example_sentence or "", payload.example_translation or "", payload.order_num or 0))
+    """, (payload.category_id, payload.word_uz, payload.word_en, payload.word_ru or "", payload.transcription or "", word_img, payload.audio_url or "", payload.example_sentence or "", payload.example_translation or "", payload.order_num or 0))
     word_id = cursor.lastrowid
     conn.commit()
     cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
@@ -4018,6 +4101,8 @@ def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Reque
     word_ru = payload.word_ru if payload.word_ru is not None else row["word_ru"]
     transcription = payload.transcription if payload.transcription is not None else row["transcription"]
     image = payload.image if payload.image is not None else row["image"]
+    if image and image.endswith(".svg") and "/images/categories/" in image:
+        image = image[:-4] + ".png"
     audio_url = payload.audio_url if payload.audio_url is not None else row["audio_url"]
     example_sentence = payload.example_sentence if payload.example_sentence is not None else row["example_sentence"]
     example_translation = payload.example_translation if payload.example_translation is not None else row["example_translation"]
