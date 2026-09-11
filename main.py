@@ -2283,6 +2283,7 @@ def get_uran_categories(
     request: Request,
     status: Optional[str] = None,
     child_id: Optional[int] = None,
+    is_admin: bool = False,
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
     user_dict = current_user if isinstance(current_user, dict) else None
@@ -2311,7 +2312,7 @@ def get_uran_categories(
 
     result = []
     # 1-chi chiqqan kategoriya (idx == 0) har doim ochiq (active)
-    # Keyingilari esa avvalgi mavzuning testi >= 60% topshirilsa (yoki bazada active bo'lsa) ochiq
+    # Keyingilari esa FAQAT VA FAQAT avvalgi mavzuning testi >= 60% topshirilsa ochiladi!
     prev_cat_passed = False
 
     for idx, row in enumerate(rows):
@@ -2323,16 +2324,21 @@ def get_uran_categories(
 
         db_status = (row["status"] or "active").lower()
 
-        if idx == 0:
-            is_unlocked = True
-            cat_status = "active"
+        if is_admin:
+            is_unlocked = (db_status == "active")
+            cat_status = db_status
         else:
-            if prev_cat_passed or db_status == "active":
+            if idx == 0:
                 is_unlocked = True
                 cat_status = "active"
             else:
-                is_unlocked = False
-                cat_status = "inactive"
+                # Keyingilari FAQAT avvalgi kategoriya testidan >= 60% o'tsagina ochiladi!
+                if prev_cat_passed:
+                    is_unlocked = True
+                    cat_status = "active"
+                else:
+                    is_unlocked = False
+                    cat_status = "inactive"
 
         # Keyingi kategoriya ochilishi uchun ushbu kategoriyaning o'zi testdan >= 60% o'tgan bo'lishi kerak
         prev_cat_passed = cat_passed
