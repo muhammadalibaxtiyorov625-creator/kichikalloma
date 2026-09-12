@@ -240,10 +240,12 @@ def init_db():
 
         # 4. Boshlang'ich Jamoa a'zolari (Teams)
         initial_teams = [
-            ('Aziz', 'Rahimov', 'Bosh Ta\'lim Metodisti', '/images/team/member1.svg'),
-            ('Madina', 'Karimova', 'Bolalar Psixologi', '/images/team/member3.svg'),
-            ('Jasur', 'Aliyev', 'Mantiq va Dasturlash Murabbiyi', '/images/team/member2.svg'),
-            ('Nigora', 'Usmonova', 'Nutq va Til Rivojlantirish Mutaxassisi', '/images/team/member4.svg')
+            ('Shoxrux', 'Komiljonov', 'Founder, Project Manager', '/images/team/member1.svg'),
+            ('Muhammadsodiq', 'Kozimov', 'Mobil dasturchi', '/images/team/member2.svg'),
+            ('Jasurbek', 'Egamberdiyev', 'Filologiya fanlari doktori DSc', '/images/team/member3.svg'),
+            ('Bobur', 'Qurbonov', 'UX/UI dizayner', '/images/team/member4.svg'),
+            ('Oyatillo', 'Mahmudjonov', 'Grafik dizayner', '/images/team/member5.svg'),
+            ('Muhammadali', 'Baxtiyorov', 'Dasturchi', '/images/team/member6.svg')
         ]
         cursor.executemany(
             "INSERT INTO teams (first_name, last_name, role, image) VALUES (?, ?, ?, ?)",
