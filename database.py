@@ -200,14 +200,14 @@ def init_db():
     if not seeded_row:
         # 1. Boshlang'ich 8 ta rasmli sayyoralar
         initial_planets = [
-            ('FIKRLASH VA BILIM', 'Masalani tushunish, yechimni topish.', '/images/planets/earth.svg', 'active'),
-            ('NUTQ VA TIL', 'Fikrni aniq ifodalashni o\'rganish.', '/images/planets/mars.svg', 'active'),
-            ('O\'ZINI BOSHQARISH', 'Kichik odatlar katta natijalarga olib boradi.', '/images/planets/cyan-rings.svg', 'active'),
-            ('HISSIYOTLARNI ANGLASH', 'O\'zini his qilishni tushunish, anglash.', '/images/planets/coral.svg', 'active'),
-            ('IJODKORLIK VA TASAVVUR', 'Yangi g\'oyalar yaratish uchun makon.', '/images/planets/deep-blue.svg', 'active'),
-            ('IJTIMOIY KO\'NIKMALAR', 'Birgalikda o\'rganish va muloqot qilish.', '/images/planets/saturn.svg', 'active'),
-            ('HARAKAT VA SOG\'LIK', 'O\'rganish orasida harakat ham kerak.', '/images/planets/purple.svg', 'active'),
-            ('QADRIYAT VA MAS\'ULIYAT', 'Har bir tanlovning oqibati bor.', '/images/planets/teal-moon.svg', 'active')
+            ('Yer', 'Kognitiv ta\'lim — AI-ustoz bilan mustaqil fikrlash.', '/img/earth.png', 'active'),
+            ('Mars', 'Jismoniy faollik — Video asosida harakat va mashqlar.', '/img/mars.png', 'active'),
+            ('Uran', 'Ingliz tili — So\'z, talaffuz, test va mustahkamlash.', '/img/uran.png', 'active'),
+            ('Venera', 'Virtual do\'kon — Oltin tangalar orqali buyumlar.', '/img/venera.png', 'active'),
+            ('Neptun', 'Emotsional savodxonlik — Hissiyotlar daraxti va xotirjamlik.', '/img/neptun.png', 'active'),
+            ('Saturn', 'Matematika va mantiq — Bosqichli masalalar va testlar.', '/img/saturn.png', 'active'),
+            ('Merkuriy', 'Kelajak kasblari — Qiziqishlarni kashf etish va maqsad.', '/img/merkuriy.png', 'active'),
+            ('Yupiter', 'Taym-menejment — 20 daqiqa qoidasi va reja.', '/img/jupiter.png', 'active')
         ]
         cursor.executemany(
             "INSERT INTO planets (title, description, image, status) VALUES (?, ?, ?, ?)",
@@ -240,12 +240,12 @@ def init_db():
 
         # 4. Boshlang'ich Jamoa a'zolari (Teams)
         initial_teams = [
-            ('Shoxrux', 'Komiljonov', 'Founder, Project Manager', '/images/team/member1.svg'),
-            ('Muhammadsodiq', 'Kozimov', 'Mobil dasturchi', '/images/team/member2.svg'),
-            ('Jasurbek', 'Egamberdiyev', 'Filologiya fanlari doktori DSc', '/images/team/member3.svg'),
-            ('Bobur', 'Qurbonov', 'UX/UI dizayner', '/images/team/member4.svg'),
-            ('Oyatillo', 'Mahmudjonov', 'Grafik dizayner', '/images/team/member5.svg'),
-            ('Muhammadali', 'Baxtiyorov', 'Dasturchi', '/images/team/member6.svg')
+            ('Shoxrux', 'Komiljonov', 'Founder, Project Manager', '/img/team1.jpg'),
+            ('Muhammadsodiq', 'Kozimov', 'Mobil dasturchi', '/img/team2.jpg'),
+            ('Jasurbek', 'Egamberdiyev', 'Filologiya fanlari doktori DSc', '/img/team3.jpg'),
+            ('Bobur', 'Qurbonov', 'UX/UI dizayner', '/img/team4.jpg'),
+            ('Oyatillo', 'Mahmudjonov', 'Grafik dizayner', '/img/team5.jpg'),
+            ('Muhammadali', 'Baxtiyorov', 'Dasturchi', '/img/team6.jpg')
         ]
         cursor.executemany(
             "INSERT INTO teams (first_name, last_name, role, image) VALUES (?, ?, ?, ?)",
@@ -263,6 +263,8 @@ def init_db():
             "INSERT INTO gallery (title, image) VALUES (?, ?)",
             initial_gallery
         )
+
+        cursor.execute("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('seeded', '1')")
 
     # 11. FAQ (Ko'p so'raladigan savollar) jadvali
     cursor.execute("""

@@ -1,14 +1,33 @@
 /* ============ Yordamchi ============ */
 var kaAll = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
 var kaOne = function (sel, ctx) { return (ctx || document).querySelector(sel); };
+var getApiBaseUrl = function () {
+    if (window.location.protocol === 'file:') {
+        return 'http://127.0.0.1:3000';
+    }
+    if (window.location.port && window.location.port !== '3000' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        return 'http://127.0.0.1:3000';
+    }
+    return '';
+};
+
 var kaFixImgUrl = function (url, fallback) {
     if (!url) return fallback || '';
-    try {
-        var u = new URL(url, window.location.origin);
-        return u.pathname;
-    } catch (e) {
-        return url;
+    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+        if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3000')) {
+            return url;
+        }
+        try {
+            var u = new URL(url, window.location.origin);
+            return u.pathname;
+        } catch (e) {
+            return url;
+        }
     }
+    if (window.location.protocol === 'file:' && url.indexOf('/') === 0) {
+        return 'http://127.0.0.1:3000' + url;
+    }
+    return url;
 };
 
 /* ============ Navbar scroll ============ */
@@ -444,7 +463,7 @@ function initCosmosStats() {
     }
 
     // Backend statistikasini olish va real API ma'lumotlari bilan yangilash
-    fetch('/api/website/stats')
+    fetch(getApiBaseUrl() + '/api/website/stats')
         .then(function (res) { return res.ok ? res.json() : null; })
         .then(function (data) {
             if (!data) return;
@@ -473,7 +492,7 @@ function initCosmosStats() {
 
     // Saytga tashrifni serverda real hisoblab borish
     try {
-        fetch('/api/website/track-visit', { method: 'POST' })
+        fetch(getApiBaseUrl() + '/api/website/track-visit', { method: 'POST' })
             .then(function (res) { return res.ok ? res.json() : null; })
             .then(function (res) {
                 if (res && typeof res.totalVisitors === 'number') {
@@ -648,7 +667,7 @@ if (kaForm && kaSubmit) {
         kaSubmit.disabled = true;
         kaSubmit.innerHTML = 'Yuborilmoqda…';
 
-        fetch('/api/website/messages', {
+        fetch(getApiBaseUrl() + '/api/website/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -697,7 +716,7 @@ if (yearEl) {
     var marquee = kaOne('#teamMarquee');
     if (!marquee) return;
 
-    fetch('/api/website/teams')
+    fetch(getApiBaseUrl() + '/api/website/teams')
         .then(function (res) {
             if (!res.ok) throw new Error('teams api error');
             return res.json();
@@ -877,7 +896,7 @@ if (yearEl) {
    Mavjud sayyora kartalari va modalini API dan olingan haqiqiy 3D rasm va tavsiflar bilan yangilaydi.
 ============================================================================ */
 (function loadPlanetsFromApi() {
-    fetch('/api/website/planets')
+    fetch(getApiBaseUrl() + '/api/website/planets')
         .then(function (res) {
             if (!res.ok) throw new Error('planets api error');
             return res.json();
@@ -887,14 +906,14 @@ if (yearEl) {
 
             // Sayyora kaliti (data-planet) bilan API nomlari o'rtasidagi lug'at
             var planetKeyMap = {
-                merkuriy: ['kasb', 'ijod', 'merkur'],
-                venera: ['virtual', "do'kon", 'dokon', 'magazin', 'vener'],
-                yer: ['kognitiv', 'tutor', 'yer', 'earth'],
-                mars: ['jismoniy', 'faollik', 'sport', 'harakat', 'mars'],
-                yupiter: ['boshqarish', 'intizom', 'reja', 'vaqt', 'yupiter', 'jupiter'],
-                saturn: ['matematika', 'mantiq', 'saturn'],
-                uran: ['ingliz', "lug'at", 'lugat', 'til', 'uran'],
-                neptun: ['emotsional', 'hissiyot', 'savodxonlik', 'neptun']
+                merkuriy: ['merkur', 'kasb', 'ijod'],
+                venera: ['vener', 'virtual', "do'kon", 'dokon', 'magazin'],
+                yer: ['yer', 'earth', 'kognitiv', 'tutor'],
+                mars: ['mars', 'jismoniy', 'faollik', 'sport', 'harakat'],
+                yupiter: ['yupiter', 'jupiter', 'boshqarish', 'intizom', 'reja', 'vaqt'],
+                saturn: ['saturn', 'matematika', 'mantiq'],
+                uran: ['uran', 'ingliz', "lug'at", 'lugat', 'til'],
+                neptun: ['neptun', 'emotsional', 'hissiyot', 'savodxonlik']
             };
 
             var cards = kaAll('.planet-card-item[data-planet]');
@@ -1532,7 +1551,7 @@ if (yearEl) {
         var stepIndicator = kaOne('#uranStepIndicator');
         if (stepIndicator) stepIndicator.textContent = 'Yuklanmoqda...';
 
-        fetch('/api/website/uran/practice?count=3')
+        fetch(getApiBaseUrl() + '/api/website/uran/practice?count=3')
             .then(function (res) {
                 if (!res.ok) throw new Error('Api error');
                 return res.json();
@@ -1776,7 +1795,7 @@ if (yearEl) {
         var stepIndicator = kaOne('#saturnStepIndicator');
         if (stepIndicator) stepIndicator.textContent = 'Yuklanmoqda...';
 
-        fetch('/api/website/saturn/practice?count=3')
+        fetch(getApiBaseUrl() + '/api/website/saturn/practice?count=3')
             .then(function (res) {
                 if (!res.ok) throw new Error('API');
                 return res.json();
@@ -1969,7 +1988,7 @@ if (yearEl) {
         if (!box) return;
         box.style.display = 'block';
 
-        fetch('/api/website/venera/wardrobe')
+        fetch(getApiBaseUrl() + '/api/website/venera/wardrobe')
             .then(function (res) {
                 if (!res.ok) throw new Error('API');
                 return res.json();
@@ -2410,7 +2429,7 @@ if (yearEl) {
 
         renderYupiterCalendar();
 
-        fetch('/api/website/yupiter/calendar-presets')
+        fetch(getApiBaseUrl() + '/api/website/yupiter/calendar-presets')
             .then(function (res) {
                 if (!res.ok) throw new Error('API error');
                 return res.json();
