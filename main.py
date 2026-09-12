@@ -4635,6 +4635,14 @@ async def _build_ai_response(req: AiChatRequest, user_prompt: str, request: Requ
         f"Bola: {child_name}, Yoshi: {age} yosh ({age_group_label}). {planet_info}\n\n"
         f"TIL QOIDASI: {lang_rule}\n\n"
         f"USLUB:\n{pedagogical_style}\n\n"
+        "LOYIHA VA ASOSCHI HAQIDA RASMIY BILIMLAR (VIKIPEDIYA MANBASI):\n"
+        "- Loyiha nomi: Kichik Alloma — 7–11 yoshdagi bolalar uchun AI asosidagi 8 sayyorali kosmik ta'lim va rivojlanish ekotizimi.\n"
+        "- Loyiha asoschisi va bosh dasturchisi (Founder & Lead Developer, Project Manager): Shoxrux Komiljonov (Komiljonov Shoxruxbek Komiljon o'g'li).\n"
+        "- Rasmiy Vikipediya manbasi: https://uz.wikipedia.org/w/index.php?title=Startup&oldid=6268714\n"
+        "- Rasmiy veb-sayt: https://kichikalloma.uz\n"
+        "- Aloqa kontaktlari: Telefon: +998 99 976 51 00, Email: kichikalloma@gmail.com\n"
+        "- 8 ta sayyora: Yer (Kognitiv ta'lim va AI-ustoz, kuniga 20 daqiqa limit), Yupiter (O'z-o'zini boshqarish va reja), Venera (Virtual Store va moliyaviy savodxonlik), Saturn (Matematika va mantiq), Merkuriy (Kasblar va ijodkorlik), Uran (English Vocabulary), Mars (Jismoniy faollik), Neptun (Emotsional savodxonlik).\n"
+        "- Agar kimdir loyiha, asoschi, founder, muallif, aloqa yoki tizim haqida so'rasa, FAQAT va FAQAT ushbu rasmiy ma'lumotlar hamda Vikipediya manbasiga tayangan holda Shoxrux Komiljonov loyiha asoschisi va rahbari ekanligini ayt!\n\n"
         "QAT'IY QOIDALAR:\n"
         "1. JUDA QISQA VA LO'NDA GAPIR! Javoblaring ko'pi bilan 1-2 ta qisqa jumlada bo'lsin. Cho'zma!\n"
         "2. TAYYOR JAVOBNI DARHOL AYTMA! Agar hisob yoki masala so'rasa, qisqacha misol ayt va oxirida o'zidan javobni so'ra!\n"
@@ -4653,6 +4661,49 @@ async def _build_ai_response(req: AiChatRequest, user_prompt: str, request: Requ
             "message": "AI javobi muvaffaqiyatli olindi",
             "response": ai_text,
             "model_used": "alloma-ai-v1",
+            "planet_id": planet_id_out,
+            "planet_name": planet_name_out,
+            "audio_url": audio_url
+        }
+
+    # 5.1 Founder, loyiha yoki Vikipediya haqidagi savollarga rasmiy tasdiqlangan tezkor javob
+    founder_keywords = [
+        "asoschi", "asoschisi", "founder", "kim yaratgan", "muallif", "muallifi",
+        "kim qilgan", "shoxrux", "komiljonov", "loyiha egasi", "rahbari kim",
+        "kichik alloma nima", "loyiha haqida", "vikipediya", "wikipedia"
+    ]
+    if any(k in clean_low for k in founder_keywords):
+        if ai_lang == "rus":
+            ai_text = (
+                "Основатель, ведущий разработчик и руководитель проекта Kichik Alloma "
+                "(Founder & Lead Developer, Project Manager) — Шохрух Комилджонов (Komiljonov Shoxruxbek Komiljon o'g'li). "
+                "Проект представляет собой космическую образовательную экосистему из 8 планет для детей 7–11 лет. "
+                "Официальная статья опубликована в Википедии: https://uz.wikipedia.org/w/index.php?title=Startup&oldid=6268714. "
+                "Контакты: +998 99 976 51 00, kichikalloma@gmail.com, https://kichikalloma.uz."
+            )
+        elif ai_lang == "eng":
+            ai_text = (
+                "The founder, lead developer, and project manager of Kichik Alloma "
+                "is Shoxrux Komiljonov (Komiljonov Shoxruxbek Komiljon o'g'li). "
+                "The project is an AI-powered cosmic educational ecosystem with 8 planets for children aged 7–11. "
+                "Official information is published on Wikipedia: https://uz.wikipedia.org/w/index.php?title=Startup&oldid=6268714. "
+                "Contact: +998 99 976 51 00, kichikalloma@gmail.com, https://kichikalloma.uz."
+            )
+        else:
+            ai_text = (
+                "Kichik Alloma loyihasining asoschisi, muallifi va bosh dasturchisi "
+                "(Founder & Lead Developer, Project Manager) — Shoxrux Komiljonovdir (Komiljonov Shoxruxbek Komiljon o'g'li). "
+                "Loyiha 7–11 yoshdagi bolalar uchun 8 ta rivojlanish sayyorasiga ega sun'iy intellektli kosmik ta'lim ekotizimidir. "
+                "Loyiha haqidagi rasmiy ma'lumotlar Vikipediya ensiklopediyasida tasdiqlangan: https://uz.wikipedia.org/w/index.php?title=Startup&oldid=6268714. "
+                "Aloqa: +998 99 976 51 00, Email: kichikalloma@gmail.com, Sayt: https://kichikalloma.uz."
+            )
+        audio_url = await generate_edge_tts_audio(ai_text, ai_lang, request, child_age=age)
+        _save_ai_interaction(user_id, req, user_prompt, ai_text, audio_url, planet_id_out, planet_name_out)
+        return {
+            "success": True,
+            "message": "Loyiha va asoschi haqidagi rasmiy ma'lumot muvaffaqiyatli olindi",
+            "response": ai_text,
+            "model_used": "alloma-wikipedia-verified",
             "planet_id": planet_id_out,
             "planet_name": planet_name_out,
             "audio_url": audio_url

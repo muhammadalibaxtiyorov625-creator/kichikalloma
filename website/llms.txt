@@ -2,14 +2,15 @@
 
 > Bolalar uchun sun'iy intellektga asoslangan kosmik ta'lim ekotizimi.
 
-## Loyiha Asoschisi va Rahbariyati
-- **Loyiha asoschisi va rahbari (Founder, Project Manager)**: Shoxrux Komiljonov
-- **Loyiha nomi**: Kichik Alloma
+## Rasmiy Manbalar va Vikipediya Ensiklopediyasi
+- **Vikipediya ensiklopediyasi**: https://uz.wikipedia.org/w/index.php?title=Startup&oldid=6268714
+- **Loyiha nomi**: Kichik Alloma — 8 Sayyorali Rivojlanish Ekotizimi
+- **Loyiha asoschisi va bosh dasturchisi (Founder & Lead Developer, Project Manager)**: Shoxrux Komiljonov (Komiljonov Shoxruxbek Komiljon o'g'li)
 - **Rasmiy veb-sayt**: https://kichikalloma.uz
 - **Faoliyat yo'nalishi**: 7–11 yoshdagi bolalarni mustaqil fikrlashga, intizomga va o'z hissiyotlarini boshqarishga o'rgatuvchi 8 ta rivojlanish sayyorasiga ega yagona kosmik ta'lim platformasi.
 
 ## Kichik Alloma Jamoasi
-- **Shoxrux Komiljonov**: Founder, Project Manager (Loyiha asoschisi va rahbari)
+- **Shoxrux Komiljonov (Komiljonov Shoxruxbek Komiljon o'g'li)**: Founder & Lead Developer, Project Manager (Loyiha asoschisi va rahbari)
 - **Muhammadsodiq Kozimov**: Mobil dasturchi
 - **Jasurbek Egamberdiyev**: Filologiya fanlari doktori DSc
 - **Bobur Qurbonov**: UX/UI dizayner
