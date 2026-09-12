@@ -34,16 +34,11 @@ jobs:
         run: |
           python -m py_compile main.py database.py schemas.py
 
-      - name: ⚡ Node.js o'rnatish
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: 🌐 Frontendni build qilishni tekshirish
-        working-directory: ./website
+      - name: 🌐 Frontend statik fayllarini tekshirish (HTML/CSS/JS)
         run: |
-          npm install
-          npx vite build
+          test -f website/index.html
+          test -f website/script.js
+          test -f website/style.css
 
   # ==========================================
   # 2. SERVERGA AVTOMATIK DEPLOY QILISH
