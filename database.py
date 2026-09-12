@@ -315,6 +315,8 @@ def init_db():
             word_en TEXT NOT NULL,
             word_ru TEXT DEFAULT '',
             transcription TEXT DEFAULT '',
+            part_of_speech TEXT DEFAULT 'noun',
+            part_of_speech_uz TEXT DEFAULT 'Ot',
             image TEXT DEFAULT '',
             audio_url TEXT DEFAULT '',
             example_sentence TEXT DEFAULT '',
@@ -323,6 +325,21 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (category_id) REFERENCES uran_categories (id) ON DELETE CASCADE
         )
+    """)
+
+    # 13.1. Uran so'zlari jadvali migratsiyasi (part_of_speech va part_of_speech_uz)
+    cursor.execute("PRAGMA table_info(uran_words)")
+    uran_word_cols = [c["name"] for c in cursor.fetchall()]
+    if "part_of_speech" not in uran_word_cols:
+        cursor.execute("ALTER TABLE uran_words ADD COLUMN part_of_speech TEXT DEFAULT 'noun'")
+    if "part_of_speech_uz" not in uran_word_cols:
+        cursor.execute("ALTER TABLE uran_words ADD COLUMN part_of_speech_uz TEXT DEFAULT 'Ot'")
+
+    # Ranglar va sifatlarni to'g'ri belgilash
+    cursor.execute("""
+        UPDATE uran_words 
+        SET part_of_speech = 'adjective', part_of_speech_uz = 'Sifat' 
+        WHERE category_id = 3 AND word_en IN ('Red', 'Blue', 'Green', 'Yellow', 'White', 'Black', 'Orange')
     """)
 
     # 14. Uran / Test Natijalari (Child Quiz Results)

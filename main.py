@@ -2367,6 +2367,43 @@ def get_uran_categories(
     return result
 
 
+URAN_POS_UZ_MAP = {
+    "noun": "Ot",
+    "adjective": "Sifat",
+    "verb": "Fe'l",
+    "adverb": "Ravish",
+    "pronoun": "Olmosh",
+    "preposition": "Old ko'makchi",
+    "conjunction": "Bog'lovchi",
+    "other": "Boshqa"
+}
+
+def format_uran_word_row(row, request=None, fallback_image=None):
+    row_keys = row.keys() if hasattr(row, 'keys') else []
+    pos = row["part_of_speech"] if ("part_of_speech" in row_keys and row["part_of_speech"]) else "noun"
+    pos_uz = row["part_of_speech_uz"] if ("part_of_speech_uz" in row_keys and row["part_of_speech_uz"]) else URAN_POS_UZ_MAP.get(pos, "Ot")
+    raw_img = row["image"] or fallback_image or ""
+    word_img = to_full_image_url(raw_img, request) if request else raw_img
+    audio_url = to_full_image_url(row["audio_url"], request) if (row["audio_url"] and request) else (row["audio_url"] or None)
+
+    return {
+        "id": row["id"],
+        "category_id": row["category_id"],
+        "word_uz": row["word_uz"],
+        "word_en": row["word_en"],
+        "word_ru": row["word_ru"] or "",
+        "transcription": row["transcription"] or "",
+        "part_of_speech": pos,
+        "part_of_speech_uz": pos_uz,
+        "image": word_img,
+        "audio_url": audio_url,
+        "example_sentence": row["example_sentence"] or "",
+        "example_translation": row["example_translation"] or "",
+        "order_num": row["order_num"] or 0,
+        "created_at": str(row["created_at"]) if row["created_at"] else None
+    }
+
+
 # 7.13.2. URAN KATEGORIYA SO'ZLARI VA TEST SAVOLLARI (/mobile/planets/uran/category/{category_id})
 @app.get("/mobile/planets/uran/category/{category_id}", response_model=UranCategoryDetailResponse, tags=["Mobil Ilova — Uran Sayyorasi (Nutq & Til)"], summary="7.13.2. Uran / Kategoriya So'zlari va Test Savollari (Inglizcha-O'zbekcha va 4 Variantli Test)")
 @app.get("/mobile/planets/uran/category/{category_id}/", response_model=UranCategoryDetailResponse, include_in_schema=False)
@@ -2404,23 +2441,7 @@ def get_uran_category_detail(category_id: int, request: Request):
     other_uz_words = [w["word_uz"] for w in other_word_rows]
 
     for idx, w in enumerate(word_rows):
-        word_img = to_full_image_url(w["image"] or cat_row["image"], request)
-        audio_url = to_full_image_url(w["audio_url"], request) if w["audio_url"] else None
-
-        word_item = {
-            "id": w["id"],
-            "category_id": w["category_id"],
-            "word_uz": w["word_uz"],
-            "word_en": w["word_en"],
-            "word_ru": w["word_ru"] or "",
-            "transcription": w["transcription"] or "",
-            "image": word_img,
-            "audio_url": audio_url,
-            "example_sentence": w["example_sentence"] or "",
-            "example_translation": w["example_translation"] or "",
-            "order_num": w["order_num"] or 0,
-            "created_at": str(w["created_at"]) if w["created_at"] else None
-        }
+        word_item = format_uran_word_row(w, request, cat_row["image"])
         words_list.append(word_item)
 
         # 4 ta variantli test savoli tayyorlash:
@@ -2457,7 +2478,7 @@ def get_uran_category_detail(category_id: int, request: Request):
             "prompt": f"'{w['word_en']}' so'zining o'zbekcha tarjimasi qaysi?",
             "correct_answer": correct_ans,
             "options": options,
-            "image": word_img,
+            "image": word_item["image"],
             "explanation": f"'{w['word_en']}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
         }
         tests_list.append(test_item)
@@ -2805,22 +2826,7 @@ def get_uran_learn_session(category_id: Optional[int] = None, child_id: Optional
     conn.close()
 
     # So'zlar va testlar ro'yxatini shakllantirish
-    words_list = []
-    for w in selected_word_rows:
-        words_list.append({
-            "id": w["id"],
-            "category_id": w["category_id"],
-            "word_uz": w["word_uz"],
-            "word_en": w["word_en"],
-            "word_ru": w["word_ru"] or "",
-            "transcription": w["transcription"] or "",
-            "image": to_full_image_url(w["image"], request) if request else w["image"],
-            "audio_url": to_full_image_url(w["audio_url"], request) if (w["audio_url"] and request) else w["audio_url"],
-            "example_sentence": w["example_sentence"] or "",
-            "example_translation": w["example_translation"] or "",
-            "order_num": w["order_num"] or 0,
-            "created_at": str(w["created_at"]) if w["created_at"] else None
-        })
+    words_list = [format_uran_word_row(w, request) for w in selected_word_rows]
 
     tests_list = build_uran_quiz_questions(words_list, all_uz_pool, request)
 
@@ -2929,22 +2935,7 @@ def get_uran_review_session(category_id: Optional[int] = None, child_id: Optiona
 
     conn.close()
 
-    words_list = []
-    for w in selected_word_rows:
-        words_list.append({
-            "id": w["id"],
-            "category_id": w["category_id"],
-            "word_uz": w["word_uz"],
-            "word_en": w["word_en"],
-            "word_ru": w["word_ru"] or "",
-            "transcription": w["transcription"] or "",
-            "image": to_full_image_url(w["image"], request) if request else w["image"],
-            "audio_url": to_full_image_url(w["audio_url"], request) if (w["audio_url"] and request) else w["audio_url"],
-            "example_sentence": w["example_sentence"] or "",
-            "example_translation": w["example_translation"] or "",
-            "order_num": w["order_num"] or 0,
-            "created_at": str(w["created_at"]) if w["created_at"] else None
-        })
+    words_list = [format_uran_word_row(w, request) for w in selected_word_rows]
 
     tests_list = build_uran_quiz_questions(words_list, all_uz_pool, request)
 
@@ -3800,23 +3791,7 @@ def admin_get_uran_words(category_id: Optional[int] = None, request: Request = N
         cursor.execute("SELECT * FROM uran_words ORDER BY category_id ASC, order_num ASC, id ASC")
     rows = cursor.fetchall()
     conn.close()
-    return [
-        {
-            "id": r["id"],
-            "category_id": r["category_id"],
-            "word_uz": r["word_uz"],
-            "word_en": r["word_en"],
-            "word_ru": r["word_ru"] or "",
-            "transcription": r["transcription"] or "",
-            "image": to_full_image_url(r["image"], request) if request else r["image"],
-            "audio_url": to_full_image_url(r["audio_url"], request) if (r["audio_url"] and request) else r["audio_url"],
-            "example_sentence": r["example_sentence"] or "",
-            "example_translation": r["example_translation"] or "",
-            "order_num": r["order_num"] or 0,
-            "created_at": str(r["created_at"]) if r["created_at"] else None
-        }
-        for r in rows
-    ]
+    return [format_uran_word_row(r, request) for r in rows]
 
 @app.get("/api/website/uran/practice", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Uran: Random 3-4 ta so'z kartochkalari va test")
 def get_uran_practice(count: int = 3, request: Request = None):
@@ -3830,21 +3805,7 @@ def get_uran_practice(count: int = 3, request: Request = None):
         conn.close()
         return {"cards": [], "quiz": None}
 
-    cards = [
-        {
-            "id": r["id"],
-            "category_id": r["category_id"],
-            "word_uz": r["word_uz"],
-            "word_en": r["word_en"],
-            "word_ru": r["word_ru"] or "",
-            "transcription": r["transcription"] or "",
-            "image": to_full_image_url(r["image"], request) if request else r["image"],
-            "audio_url": to_full_image_url(r["audio_url"], request) if (r["audio_url"] and request) else r["audio_url"],
-            "example_sentence": r["example_sentence"] or "",
-            "example_translation": r["example_translation"] or "",
-        }
-        for r in selected_rows
-    ]
+    cards = [format_uran_word_row(r, request) for r in selected_rows]
 
     # Test uchun kartochkalardan bittasini tanlaymiz
     target = random.choice(cards)
@@ -4158,29 +4119,19 @@ def admin_create_uran_word(payload: UranWordCreate, request: Request):
     elif word_img.endswith(".svg") and "/images/categories/" in word_img:
         word_img = word_img[:-4] + ".png"
 
+    pos = payload.part_of_speech or "noun"
+    pos_uz = payload.part_of_speech_uz or URAN_POS_UZ_MAP.get(pos, "Ot")
+
     cursor.execute("""
-        INSERT INTO uran_words (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (payload.category_id, payload.word_uz, payload.word_en, payload.word_ru or "", payload.transcription or "", word_img, payload.audio_url or "", payload.example_sentence or "", payload.example_translation or "", payload.order_num or 0))
+        INSERT INTO uran_words (category_id, word_uz, word_en, word_ru, transcription, part_of_speech, part_of_speech_uz, image, audio_url, example_sentence, example_translation, order_num)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (payload.category_id, payload.word_uz, payload.word_en, payload.word_ru or "", payload.transcription or "", pos, pos_uz, word_img, payload.audio_url or "", payload.example_sentence or "", payload.example_translation or "", payload.order_num or 0))
     word_id = cursor.lastrowid
     conn.commit()
     cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
     row = cursor.fetchone()
     conn.close()
-    return {
-        "id": row["id"],
-        "category_id": row["category_id"],
-        "word_uz": row["word_uz"],
-        "word_en": row["word_en"],
-        "word_ru": row["word_ru"],
-        "transcription": row["transcription"],
-        "image": to_full_image_url(row["image"], request),
-        "audio_url": to_full_image_url(row["audio_url"], request) if row["audio_url"] else None,
-        "example_sentence": row["example_sentence"],
-        "example_translation": row["example_translation"],
-        "order_num": row["order_num"],
-        "created_at": str(row["created_at"])
-    }
+    return format_uran_word_row(row, request)
 
 @app.put("/api/website/uran/words/{word_id}", response_model=UranWordResponse, tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: So'zni Tahrirlash")
 def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Request):
@@ -4197,6 +4148,9 @@ def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Reque
     word_en = payload.word_en if payload.word_en is not None else row["word_en"]
     word_ru = payload.word_ru if payload.word_ru is not None else row["word_ru"]
     transcription = payload.transcription if payload.transcription is not None else row["transcription"]
+    row_keys = row.keys() if hasattr(row, 'keys') else []
+    pos = payload.part_of_speech if payload.part_of_speech is not None else (row["part_of_speech"] if "part_of_speech" in row_keys and row["part_of_speech"] else "noun")
+    pos_uz = payload.part_of_speech_uz if payload.part_of_speech_uz is not None else (row["part_of_speech_uz"] if "part_of_speech_uz" in row_keys and row["part_of_speech_uz"] else URAN_POS_UZ_MAP.get(pos, "Ot"))
     image = payload.image if payload.image is not None else row["image"]
     if image and image.endswith(".svg") and "/images/categories/" in image:
         image = image[:-4] + ".png"
@@ -4207,28 +4161,15 @@ def admin_update_uran_word(word_id: int, payload: UranWordUpdate, request: Reque
 
     cursor.execute("""
         UPDATE uran_words 
-        SET category_id = ?, word_uz = ?, word_en = ?, word_ru = ?, transcription = ?, image = ?, audio_url = ?, example_sentence = ?, example_translation = ?, order_num = ?
+        SET category_id = ?, word_uz = ?, word_en = ?, word_ru = ?, transcription = ?, part_of_speech = ?, part_of_speech_uz = ?, image = ?, audio_url = ?, example_sentence = ?, example_translation = ?, order_num = ?
         WHERE id = ?
-    """, (category_id, word_uz, word_en, word_ru, transcription, image, audio_url, example_sentence, example_translation, order_num, word_id))
+    """, (category_id, word_uz, word_en, word_ru, transcription, pos, pos_uz, image, audio_url, example_sentence, example_translation, order_num, word_id))
     conn.commit()
     cursor.execute("SELECT * FROM uran_words WHERE id = ?", (word_id,))
     updated_row = cursor.fetchone()
     conn.close()
 
-    return {
-        "id": updated_row["id"],
-        "category_id": updated_row["category_id"],
-        "word_uz": updated_row["word_uz"],
-        "word_en": updated_row["word_en"],
-        "word_ru": updated_row["word_ru"],
-        "transcription": updated_row["transcription"],
-        "image": to_full_image_url(updated_row["image"], request),
-        "audio_url": to_full_image_url(updated_row["audio_url"], request) if updated_row["audio_url"] else None,
-        "example_sentence": updated_row["example_sentence"],
-        "example_translation": updated_row["example_translation"],
-        "order_num": updated_row["order_num"],
-        "created_at": str(updated_row["created_at"])
-    }
+    return format_uran_word_row(updated_row, request)
 
 @app.delete("/api/website/uran/words/{word_id}", tags=["Web & Admin — Uran Sayyorasi Boshqaruvi"], summary="Admin: So'zni O'chirish")
 def admin_delete_uran_word(word_id: int):
@@ -4254,10 +4195,12 @@ def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
             f"1. word_uz: accurate, clean Uzbek translation (single clear word, e.g. Olma)\n"
             f"2. word_ru: accurate Russian translation\n"
             f"3. transcription: standard IPA transcription in brackets, e.g. [ˈæp.əl]\n"
-            f"4. example_sentence: a simple, fun, educational English sentence for kids containing this word.\n"
-            f"5. example_translation: Uzbek translation of that example sentence.\n\n"
+            f"4. part_of_speech: one of ['noun', 'adjective', 'verb', 'adverb', 'pronoun', 'preposition', 'other']\n"
+            f"5. part_of_speech_uz: Uzbek name for the part of speech ('Ot' for noun, 'Sifat' for adjective, 'Fe\'l' for verb, 'Ravish' for adverb, 'Olmosh' for pronoun, 'Old ko\'makchi' for preposition, 'Boshqa' for other)\n"
+            f"6. example_sentence: a simple, fun, educational English sentence for kids containing this word.\n"
+            f"7. example_translation: Uzbek translation of that example sentence.\n\n"
             f"Respond ONLY with a valid JSON object without markdown fences:\n"
-            f'{{"word_en": "{word}", "word_uz": "...", "word_ru": "...", "transcription": "...", "example_sentence": "...", "example_translation": "..."}}'
+            f'{{"word_en": "{word}", "word_uz": "...", "word_ru": "...", "transcription": "...", "part_of_speech": "noun", "part_of_speech_uz": "Ot", "example_sentence": "...", "example_translation": "..."}}'
         )
         response = model.generate_content(prompt)
         text = response.text.strip()
@@ -4265,11 +4208,18 @@ def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
             text = re.sub(r"^```[a-zA-Z]*\n", "", text)
             text = re.sub(r"\n```$", "", text).strip()
         data = json.loads(text)
+        pos = data.get("part_of_speech", "noun").strip().lower()
+        if pos not in URAN_POS_UZ_MAP:
+            pos = "noun"
+        pos_uz = data.get("part_of_speech_uz", "").strip() or URAN_POS_UZ_MAP.get(pos, "Ot")
+
         return {
             "word_en": word,
             "word_uz": data.get("word_uz", "").strip(),
             "word_ru": data.get("word_ru", "").strip(),
             "transcription": data.get("transcription", "").strip(),
+            "part_of_speech": pos,
+            "part_of_speech_uz": pos_uz,
             "example_sentence": data.get("example_sentence", "").strip(),
             "example_translation": data.get("example_translation", "").strip()
         }
@@ -4279,6 +4229,8 @@ def admin_uran_ai_suggest(payload: UranAiSuggestRequest):
             "word_uz": "",
             "word_ru": "",
             "transcription": f"[{word.lower()}]",
+            "part_of_speech": "noun",
+            "part_of_speech_uz": "Ot",
             "example_sentence": f"This is an {word}.",
             "example_translation": f"Bu {word}."
         }

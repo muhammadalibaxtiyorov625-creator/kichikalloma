@@ -2415,13 +2415,38 @@ function renderUranDetailWords() {
 
   grid.innerHTML = words.map((w, idx) => {
     const safeWordEn = escapeHtml(w.word_en || '');
+    const pos = (w.part_of_speech || 'noun').toLowerCase();
+    const posUz = w.part_of_speech_uz || (pos === 'adjective' ? 'Sifat' : (pos === 'verb' ? "Fe'l" : (pos === 'adverb' ? 'Ravish' : 'Ot')));
+
+    let posBg = 'rgba(16, 185, 129, 0.15)';
+    let posColor = '#34d399';
+    let posBorder = 'rgba(16, 185, 129, 0.3)';
+    if (pos === 'adjective') {
+      posBg = 'rgba(245, 158, 11, 0.15)';
+      posColor = '#fbbf24';
+      posBorder = 'rgba(245, 158, 11, 0.3)';
+    } else if (pos === 'verb') {
+      posBg = 'rgba(236, 72, 153, 0.15)';
+      posColor = '#f472b6';
+      posBorder = 'rgba(236, 72, 153, 0.3)';
+    } else if (pos === 'adverb') {
+      posBg = 'rgba(139, 92, 246, 0.15)';
+      posColor = '#a78bfa';
+      posBorder = 'rgba(139, 92, 246, 0.3)';
+    }
+
     return `
       <div class="card item-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #6366f1; padding: 18px; background: rgba(30, 41, 59, 0.7); border-radius: 12px;">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px;">
-              #${idx + 1}
-            </span>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+                #${idx + 1}
+              </span>
+              <span class="badge" style="background: ${posBg}; color: ${posColor}; border: 1px solid ${posBorder}; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+                ${escapeHtml(posUz)} (${escapeHtml(pos)})
+              </span>
+            </div>
             <span style="font-size: 11px; color: var(--text-muted);">ID: ${w.id}</span>
           </div>
 
@@ -2793,6 +2818,7 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
       if (document.getElementById('uran-word-uz')) document.getElementById('uran-word-uz').value = item.word_uz || '';
       if (document.getElementById('uran-word-ru')) document.getElementById('uran-word-ru').value = item.word_ru || '';
       if (document.getElementById('uran-word-transcription')) document.getElementById('uran-word-transcription').value = item.transcription || '';
+      if (document.getElementById('uran-word-pos')) document.getElementById('uran-word-pos').value = item.part_of_speech || 'noun';
       if (document.getElementById('uran-word-example')) document.getElementById('uran-word-example').value = item.example_sentence || '';
       if (document.getElementById('uran-word-example-uz')) document.getElementById('uran-word-example-uz').value = item.example_translation || '';
       if (document.getElementById('uran-word-image')) document.getElementById('uran-word-image').value = item.image || '';
@@ -2801,6 +2827,7 @@ function openUranWordModal(categoryId = null, categoryName = null, wordId = null
       if (deleteBtn) deleteBtn.style.display = 'inline-flex';
     }
   } else {
+    if (document.getElementById('uran-word-pos')) document.getElementById('uran-word-pos').value = 'noun';
     if (titleEl) titleEl.innerHTML = `<i class="bi bi-plus-circle text-yellow"></i> Yangi So'z Qo'shish`;
     if (deleteBtn) deleteBtn.style.display = 'none';
   }
@@ -2838,6 +2865,18 @@ async function handleSaveUranWord(event) {
   const word_uz = document.getElementById('uran-word-uz').value.trim();
   const word_ru = document.getElementById('uran-word-ru').value.trim();
   const transcription = document.getElementById('uran-word-transcription').value.trim();
+  const posSelect = document.getElementById('uran-word-pos');
+  const part_of_speech = posSelect ? posSelect.value : 'noun';
+  const posUzMap = {
+    'noun': 'Ot',
+    'adjective': 'Sifat',
+    'verb': "Fe'l",
+    'adverb': 'Ravish',
+    'pronoun': 'Olmosh',
+    'preposition': "Old ko'makchi",
+    'other': 'Boshqa'
+  };
+  const part_of_speech_uz = posUzMap[part_of_speech] || 'Ot';
   const example_sentence = document.getElementById('uran-word-example').value.trim();
   const example_translation = document.getElementById('uran-word-example-uz').value.trim();
   const image = document.getElementById('uran-word-image') ? document.getElementById('uran-word-image').value.trim() : '';
@@ -2858,6 +2897,8 @@ async function handleSaveUranWord(event) {
     word_en, word_uz,
     word_ru: word_ru || null,
     transcription: transcription || null,
+    part_of_speech,
+    part_of_speech_uz,
     example_sentence: example_sentence || null,
     example_translation: example_translation || null,
     image: image || null,
@@ -2955,6 +2996,9 @@ async function handleAiSuggestWord() {
     }
     if (data.transcription && document.getElementById('uran-word-transcription')) {
       document.getElementById('uran-word-transcription').value = data.transcription;
+    }
+    if (data.part_of_speech && document.getElementById('uran-word-pos')) {
+      document.getElementById('uran-word-pos').value = data.part_of_speech;
     }
     if (data.example_sentence && document.getElementById('uran-word-example')) {
       document.getElementById('uran-word-example').value = data.example_sentence;

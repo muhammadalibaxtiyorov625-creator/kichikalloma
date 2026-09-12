@@ -1316,14 +1316,26 @@
             </div>
           </div>
 
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
             <div class="form-group">
               <label for="uran-word-ru">Ruscha Tarjima:</label>
               <input type="text" id="uran-word-ru" class="form-control" placeholder="Masalan: Клубника">
             </div>
             <div class="form-group">
-              <label for="uran-word-transcription">Transkripsiya (Talaffuz belgisi):</label>
+              <label for="uran-word-transcription">Transkripsiya (Talaffuz):</label>
               <input type="text" id="uran-word-transcription" class="form-control" placeholder="Masalan: [ˈstrɔː.bər.i]">
+            </div>
+            <div class="form-group">
+              <label for="uran-word-pos">So'z Turkumi: <span class="required">*</span></label>
+              <select id="uran-word-pos" class="form-control" style="background: rgba(15, 23, 42, 0.8);">
+                <option value="noun" selected>Ot (Noun)</option>
+                <option value="adjective">Sifat (Adjective)</option>
+                <option value="verb">Fe'l (Verb)</option>
+                <option value="adverb">Ravish (Adverb)</option>
+                <option value="pronoun">Olmosh (Pronoun)</option>
+                <option value="preposition">Old ko'makchi (Preposition)</option>
+                <option value="other">Boshqa (Other)</option>
+              </select>
             </div>
           </div>
 

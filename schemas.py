@@ -447,6 +447,8 @@ class UranWordBase(BaseModel):
     word_en: str = Field(..., example="Apple", description="Inglizcha so'z")
     word_ru: Optional[str] = Field("", example="Яблоко", description="Ruscha so'z")
     transcription: Optional[str] = Field("", example="[ˈæp.əl]", description="Inglizcha talaffuz transkripsiyasi")
+    part_of_speech: Optional[str] = Field("noun", example="noun", description="So'z turkumi (noun, verb, adjective, adverb, pronoun va h.k.)")
+    part_of_speech_uz: Optional[str] = Field("Ot", example="Ot", description="So'z turkumi o'zbekcha (Ot, Fe'l, Sifat, Ravish va h.k.)")
     image: Optional[str] = Field("", example="/images/categories/fruits.svg", description="So'z rasmi")
     audio_url: Optional[str] = Field(None, example="http://localhost:3000/audio_cache/abc.mp3", description="Inglizcha talaffuz audio havolasi")
     example_sentence: Optional[str] = Field("", example="I like red apple.", description="Misol gap (inglizcha)")
@@ -462,6 +464,8 @@ class UranWordUpdate(BaseModel):
     word_en: Optional[str] = None
     word_ru: Optional[str] = None
     transcription: Optional[str] = None
+    part_of_speech: Optional[str] = None
+    part_of_speech_uz: Optional[str] = None
     image: Optional[str] = None
     audio_url: Optional[str] = None
     example_sentence: Optional[str] = None
@@ -559,6 +563,8 @@ class UranAiSuggestResponse(BaseModel):
     word_uz: str
     word_ru: str
     transcription: str
+    part_of_speech: Optional[str] = Field("noun", example="noun", description="So'z turkumi (noun, adjective, verb, adverb...)")
+    part_of_speech_uz: Optional[str] = Field("Ot", example="Ot", description="So'z turkumi o'zbekcha (Ot, Sifat, Fe'l, Ravish...)")
     example_sentence: str
     example_translation: str
 
