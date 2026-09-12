@@ -135,6 +135,7 @@ var i18nData = {
         form_note: "Ma'lumotlaringiz xavfsiz saqlanadi.",
         team_badge: "Jamoa",
         team_title: "Jamoamiz",
+        team_sub: "Loyiha asoschisi va rahbari (Founder, Project Manager) <strong>Shoxrux Komiljonov</strong> boshchiligidagi professional jamoamiz",
         role_ceo: "Founder, Project Manager",
         role_mobile: "Mobil dasturchi",
         role_phd: "Filologiya fanlari doktori DSc",
@@ -146,6 +147,8 @@ var i18nData = {
         cert_desc: "8 ta olam missiyalarini muvaffaqiyatli yakunlagan mitti kashfiyotchilar o'zlarining birinchi \"Kosmik Sertifikati\"ni qo'lga kiritadilar. Bu ularning kelajakdagi katta zafarlari sari ishonchli qadamdir.",
         cta_title: 'Minglab zamonaviy ota-onalar qatoriga qo\'shiling va <span class="hl">Kichik Alloma </span>bilan haqiqiy rivojlanishni bugun boshlang.',
         cta_btn: "Hozir boshlash",
+        footer_founder_label: "Loyiha asoschisi (Founder):",
+        footer_founder_credit: "Loyiha asoschisi va rahbari: <strong>Shoxrux Komiljonov</strong> (Founder, Project Manager)",
         footer_contact: "Aloqa uchun:",
         footer_rights: "Kichik Alloma. Barcha huquqlar himoyalangan."
     },
@@ -226,6 +229,7 @@ var i18nData = {
         form_note: "Ваши данные надежно защищены.",
         team_badge: "Команда",
         team_title: "Наша команда",
+        team_sub: "Команда Kichik Alloma во главе с основателем и руководителем проекта (Founder, Project Manager) <strong>Шохрухом Комилджоновым</strong>",
         role_ceo: "Founder, Project Manager",
         role_mobile: "Мобильный разработчик",
         role_phd: "Доктор филологических наук DSc",
@@ -237,6 +241,8 @@ var i18nData = {
         cert_desc: "Юные исследователи, успешно завершившие 8 космических миссий, получают свой первый «Космический сертификат». Это уверенный шаг к их будущим победам.",
         cta_title: 'Присоединяйтесь к тысячам современных родителей и начните настоящее развитие с <span class="hl">Kichik Alloma </span>уже сегодня.',
         cta_btn: "Начать сейчас",
+        footer_founder_label: "Основатель проекта (Founder):",
+        footer_founder_credit: "Основатель и руководитель проекта: <strong>Шохрух Комилджонов</strong> (Founder, Project Manager)",
         footer_contact: "Контакты:",
         footer_rights: "Kichik Alloma. Все права защищены."
     },
@@ -317,6 +323,7 @@ var i18nData = {
         form_note: "Your data is kept safe.",
         team_badge: "Team",
         team_title: "Our team",
+        team_sub: "Kichik Alloma professional team led by Founder & Project Manager <strong>Shoxrux Komiljonov</strong>",
         role_ceo: "Founder, Project Manager",
         role_mobile: "Mobile developer",
         role_phd: "Doctor of Philological Sciences DSc",
@@ -328,6 +335,8 @@ var i18nData = {
         cert_desc: "Little explorers who successfully complete all 8 space missions earn their first \"Cosmic Certificate\". This is a confident step toward their future triumphs.",
         cta_title: 'Join thousands of modern parents and start real growth with <span class="hl">Kichik Alloma </span>today.',
         cta_btn: "Start now",
+        footer_founder_label: "Project Founder:",
+        footer_founder_credit: "Founder & Project Manager: <strong>Shoxrux Komiljonov</strong>",
         footer_contact: "Contact us:",
         footer_rights: "Kichik Alloma. All rights reserved."
     }

@@ -283,17 +283,18 @@ def init_db():
     faq_cnt = cursor.fetchone()["cnt"]
     if faq_cnt == 0:
         initial_faqs = [
-            ("Kichik Alloma platformasi nima va u kimlar uchun mo'ljallangan?", "Kichik Alloma — 3 yoshdan 11 yoshgacha bo'lgan bolalarning aqliy, mantiqiy, nutqiy va ijodiy salohiyatini rivojlantiruvchi interaktiv ta'lim platformasidir. Platforma bolalarga sayyoralar bo'ylab qiziqarli o'yinlar, ertaklar, so'z boyligi va sun'iy intellekt orqali ta'lim beradi.", "active", 1),
-            ("Alloma AI yordamchisi qanday ishlaydi va uning ovozli muloqot xususiyati bormi?", "Alloma AI — Google Gemini ilg'or sun'iy intellekt texnologiyasi asosida yaratilgan pedagogik yordamchidir. Bola unga mikrofon orqali ovozli savollar berishi, darslar haqida so'rashi, ertaklar eshitishi yoki yangi bilimlarni xavfsiz va tushunarli tilda o'rganishi mumkin.", "active", 2),
-            ("Uran sayyorasida ingliz tilini qanday o'rganish mumkin (So'zlar, talaffuz va testlar)?", "Uran sayyorasi bolalarning chet tilini o'rganishi uchun mo'ljallangan bo'lib, 10 ta asosiy mavzu (Mevalar, Hayvonlar, Ranglar, Maktab, Oila va h.k.), har bir so'zning sof audio talaffuzi, rasmlar, transkripsiya va 4 ta variantli interaktiv test savollarini o'z ichiga oladi.", "active", 3),
-            ("Ota-onalar farzandining ta'lim jarayonini qanday nazorat qiladi (Ota-onalar burchagi)?", "Maxsus himoyalangan 'Ota-onalar burchagi' orqali bolaning qaysi sayyoralarni o'rganganligi, kunlik sarflagan vaqti, test natijalari, so'z boyligi o'sishi va muvaffaqiyat hisobotlarini real vaqtda kuzatib borish mumkin.", "active", 4),
-            ("Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?", "Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.", "active", 5)
+            ("Kichik Alloma loyihasining asoschisi (founderi) va rahbari kim?", "Kichik Alloma loyihasining asoschisi, muallifi va rahbari (Founder, Project Manager) — Shoxrux Komiljonovdir. Platforma 7–11 yoshdagi bolalarga 8 ta rivojlanish sayyorasi orqali sun'iy intellektli kosmik ta'lim berish uchun yaratilgan.", "active", 1),
+            ("Kichik Alloma platformasi nima va u kimlar uchun mo'ljallangan?", "Kichik Alloma — 3 yoshdan 11 yoshgacha bo'lgan bolalarning aqliy, mantiqiy, nutqiy va ijodiy salohiyatini rivojlantiruvchi interaktiv ta'lim platformasidir. Platforma bolalarga sayyoralar bo'ylab qiziqarli o'yinlar, ertaklar, so'z boyligi va sun'iy intellekt orqali ta'lim beradi.", "active", 2),
+            ("Alloma AI yordamchisi qanday ishlaydi va uning ovozli muloqot xususiyati bormi?", "Alloma AI — Google Gemini ilg'or sun'iy intellekt texnologiyasi asosida yaratilgan pedagogik yordamchidir. Bola unga mikrofon orqali ovozli savollar berishi, darslar haqida so'rashi, ertaklar eshitishi yoki yangi bilimlarni xavfsiz va tushunarli tilda o'rganishi mumkin.", "active", 3),
+            ("Uran sayyorasida ingliz tilini qanday o'rganish mumkin (So'zlar, talaffuz va testlar)?", "Uran sayyorasi bolalarning chet tilini o'rganishi uchun mo'ljallangan bo'lib, 10 ta asosiy mavzu (Mevalar, Hayvonlar, Ranglar, Maktab, Oila va h.k.), har bir so'zning sof audio talaffuzi, rasmlar, transkripsiya va 4 ta variantli interaktiv test savollarini o'z ichiga oladi.", "active", 4),
+            ("Ota-onalar farzandining ta'lim jarayonini qanday nazorat qiladi (Ota-onalar burchagi)?", "Maxsus himoyalangan 'Ota-onalar burchagi' orqali bolaning qaysi sayyoralarni o'rganganligi, kunlik sarflagan vaqti, test natijalari, so'z boyligi o'sishi va muvaffaqiyat hisobotlarini real vaqtda kuzatib borish mumkin.", "active", 5),
+            ("Mobil ilovadan internet bo'lmaganda ham foydalanish mumkinmi (Offline rejim)?", "Ha! Yuklab olingan barcha sayyora darslari, audio ertaklar va ingliz tili so'zlari offline rejimda, internetsiz ham to'liq va uzluksiz ishlaydi. Sayr yoki safarda internet talab etilmaydi.", "active", 6)
         ]
         cursor.executemany(
             "INSERT INTO faqs (name, description, status, order_num) VALUES (?, ?, ?, ?)",
             initial_faqs
         )
-        print("Boshlang'ich 5 ta FAQ savollari bazaga muvaffaqiyatli kiritildi.")
+        print("Boshlang'ich 6 ta FAQ savollari bazaga muvaffaqiyatli kiritildi.")
 
     # 12. Uran / Nutq va Til Sayyorasi — Kategoriyalar jadvali (Uran Categories)
     cursor.execute("""

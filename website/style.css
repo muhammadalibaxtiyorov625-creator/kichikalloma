@@ -2348,6 +2348,34 @@ footer {
     color: var(--muted);
 }
 
+.footer-founder {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+
+.footer-founder-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--primary, #fab003);
+}
+
+.footer-founder-val {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.footer-founder-val strong {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+}
+
 .footer-contact strong {
     font-size: 12px;
     font-weight: 700;
