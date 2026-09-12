@@ -2395,6 +2395,8 @@ def format_uran_word_row(row, request=None, fallback_image=None):
         "transcription": row["transcription"] or "",
         "part_of_speech": pos,
         "part_of_speech_uz": pos_uz,
+        "part_of_speach": pos,
+        "part_of_speach_uz": pos_uz,
         "image": word_img,
         "audio_url": audio_url,
         "example_sentence": row["example_sentence"] or "",
@@ -2470,6 +2472,9 @@ def get_uran_category_detail(category_id: int, request: Request):
         options = [correct_ans] + distractors[:3]
         random.shuffle(options)
 
+        pos = word_item.get("part_of_speech") or "noun"
+        pos_uz = word_item.get("part_of_speech_uz") or URAN_POS_UZ_MAP.get(pos, "Ot")
+
         test_item = {
             "id": idx + 1,
             "word_id": w["id"],
@@ -2477,6 +2482,10 @@ def get_uran_category_detail(category_id: int, request: Request):
             "question": w["word_en"],
             "prompt": f"'{w['word_en']}' so'zining o'zbekcha tarjimasi qaysi?",
             "correct_answer": correct_ans,
+            "part_of_speech": pos,
+            "part_of_speech_uz": pos_uz,
+            "part_of_speach": pos,
+            "part_of_speach_uz": pos_uz,
             "options": options,
             "image": word_item["image"],
             "explanation": f"'{w['word_en']}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
@@ -2527,16 +2536,23 @@ def build_uran_quiz_questions(selected_words: list, all_uz_pool: list, request: 
         options = [correct_ans] + distractors[:3]
         random.shuffle(options)
 
+        pos = (w.get("part_of_speech") if hasattr(w, "get") else getattr(w, "part_of_speech", None)) or "noun"
+        pos_uz = (w.get("part_of_speech_uz") if hasattr(w, "get") else getattr(w, "part_of_speech_uz", None)) or URAN_POS_UZ_MAP.get(pos, "Ot")
+
         test_item = {
             "id": idx + 1,
-            "word_id": w["id"],
-            "word_en": w["word_en"],
-            "question": w["word_en"],
-            "prompt": f"'{w['word_en']}' so'zining o'zbekcha tarjimasi qaysi?",
+            "word_id": w["id"] if hasattr(w, "__getitem__") else getattr(w, "id"),
+            "word_en": w["word_en"] if hasattr(w, "__getitem__") else getattr(w, "word_en"),
+            "question": w["word_en"] if hasattr(w, "__getitem__") else getattr(w, "word_en"),
+            "prompt": f"'{w['word_en'] if hasattr(w, '__getitem__') else getattr(w, 'word_en')}' so'zining o'zbekcha tarjimasi qaysi?",
             "correct_answer": correct_ans,
+            "part_of_speech": pos,
+            "part_of_speech_uz": pos_uz,
+            "part_of_speach": pos,
+            "part_of_speach_uz": pos_uz,
             "options": options,
             "image": word_img,
-            "explanation": f"'{w['word_en']}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
+            "explanation": f"'{w['word_en'] if hasattr(w, '__getitem__') else getattr(w, 'word_en')}' so'zi o'zbek tilida '{correct_ans}' deb tarjima qilinadi."
         }
         tests_list.append(test_item)
     return tests_list
@@ -3823,6 +3839,10 @@ def get_uran_practice(count: int = 3, request: Request = None):
     quiz = {
         "word_en": target["word_en"],
         "transcription": target["transcription"],
+        "part_of_speech": target.get("part_of_speech", "noun"),
+        "part_of_speech_uz": target.get("part_of_speech_uz", "Ot"),
+        "part_of_speach": target.get("part_of_speach", "noun"),
+        "part_of_speach_uz": target.get("part_of_speach_uz", "Ot"),
         "question": f"«{target['word_en']}» so'zining o'zbekcha tarjimasi nima?",
         "correct": correct_answer,
         "options": options,

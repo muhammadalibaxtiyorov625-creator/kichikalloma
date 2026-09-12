@@ -449,6 +449,8 @@ class UranWordBase(BaseModel):
     transcription: Optional[str] = Field("", example="[ˈæp.əl]", description="Inglizcha talaffuz transkripsiyasi")
     part_of_speech: Optional[str] = Field("noun", example="noun", description="So'z turkumi (noun, verb, adjective, adverb, pronoun va h.k.)")
     part_of_speech_uz: Optional[str] = Field("Ot", example="Ot", description="So'z turkumi o'zbekcha (Ot, Fe'l, Sifat, Ravish va h.k.)")
+    part_of_speach: Optional[str] = Field("noun", example="noun", description="part_of_speech muqobili")
+    part_of_speach_uz: Optional[str] = Field("Ot", example="Ot", description="part_of_speech_uz muqobili")
     image: Optional[str] = Field("", example="/images/categories/fruits.svg", description="So'z rasmi")
     audio_url: Optional[str] = Field(None, example="http://localhost:3000/audio_cache/abc.mp3", description="Inglizcha talaffuz audio havolasi")
     example_sentence: Optional[str] = Field("", example="I like red apple.", description="Misol gap (inglizcha)")
@@ -466,6 +468,8 @@ class UranWordUpdate(BaseModel):
     transcription: Optional[str] = None
     part_of_speech: Optional[str] = None
     part_of_speech_uz: Optional[str] = None
+    part_of_speach: Optional[str] = None
+    part_of_speach_uz: Optional[str] = None
     image: Optional[str] = None
     audio_url: Optional[str] = None
     example_sentence: Optional[str] = None
@@ -483,6 +487,10 @@ class UranQuizOption(BaseModel):
     question: str = Field(..., example="Apple", description="Inglizcha so'z savoli")
     prompt: str = Field(..., example="'Apple' so'zining o'zbekcha tarjimasi qaysi?", description="Savol matni")
     correct_answer: str = Field(..., example="Olma", description="To'g'ri o'zbekcha javob")
+    part_of_speech: Optional[str] = Field("noun", example="noun", description="So'z turkumi (noun, adjective, verb...)")
+    part_of_speech_uz: Optional[str] = Field("Ot", example="Ot", description="So'z turkumi o'zbekcha (Ot, Sifat, Fe'l...)")
+    part_of_speach: Optional[str] = Field("noun", example="noun", description="part_of_speech muqobili")
+    part_of_speach_uz: Optional[str] = Field("Ot", example="Ot", description="part_of_speech_uz muqobili")
     options: List[str] = Field(..., example=["Olma", "Nok", "Banan", "Uzum"], description="4 ta o'zbekcha javob varianti (1 tasi to'g'ri, 3 tasi noto'g'ri)")
     image: Optional[str] = Field("", example="/images/categories/fruits.svg", description="So'z/kategoriya rasmi")
     explanation: Optional[str] = Field("", example="'Apple' so'zi o'zbek tilida 'Olma' deb tarjima qilinadi.", description="Qisqacha izoh")
