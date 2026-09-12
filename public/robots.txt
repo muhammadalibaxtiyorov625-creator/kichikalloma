@@ -1,20 +1,13 @@
 User-agent: *
 Allow: /
-Allow: /img/
-Allow: /planets/
-Allow: /video/
-Allow: /assets/
 Disallow: /admin
 Disallow: /admin/
 Disallow: /docs
 Disallow: /redoc
 Disallow: /api/
 
-# AI Search & Crawlers (ChatGPT, Gemini, Claude, Perplexity, Bing)
+# AI Crawlers (ChatGPT, Gemini, Perplexity)
 User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
 Allow: /
 
 User-agent: Google-Extended
@@ -23,13 +16,5 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
 Sitemap: https://kichikalloma.uz/sitemap.xml
+

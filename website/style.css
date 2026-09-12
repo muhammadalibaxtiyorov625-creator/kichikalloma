@@ -511,38 +511,6 @@ section {
     font-weight: 600
 }
 
-.hero-founder-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 18px;
-    padding: 8px 20px;
-    border-radius: 999px;
-    background: rgba(250, 176, 3, 0.08);
-    border: 1.5px solid rgba(250, 176, 3, 0.35);
-    font-size: 13.5px;
-    color: var(--ink);
-    box-shadow: 0 4px 16px rgba(250, 176, 3, 0.08);
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.hero-founder-tag .founder-tag-badge {
-    font-weight: 600;
-    color: #8a5f00;
-}
-
-.hero-founder-tag .founder-tag-name {
-    font-family: 'Unbounded', sans-serif;
-    font-weight: 700;
-    color: var(--ink);
-}
-
-.hero-founder-tag .founder-tag-role {
-    font-weight: 600;
-    color: #b37400;
-}
-
 .hero-cta {
     display: flex;
     gap: 14px;
@@ -2207,21 +2175,6 @@ section {
     background: #ffffff
 }
 
-.team-sub-desc {
-    max-width: 680px;
-    margin: 14px auto 0;
-    font-size: 15px;
-    line-height: 1.65;
-    color: var(--muted);
-    font-weight: 500;
-    text-align: center;
-}
-
-.team-sub-desc strong {
-    color: var(--ink);
-    font-weight: 700;
-}
-
 .team-marquee-wrap {
     position: relative;
     margin-top: 48px;
@@ -2331,19 +2284,6 @@ section {
     color: var(--muted)
 }
 
-.team-founder-badge {
-    display: inline-block;
-    margin-top: 5px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(250, 176, 3, 0.16);
-    border: 1px solid rgba(250, 176, 3, 0.4);
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #b37400;
-    letter-spacing: 0.02em;
-}
-
 .cta-planet {
     position: absolute;
     width: 340px;
@@ -2368,492 +2308,74 @@ section {
     filter: blur(2px)
 }
 
-/* ============ FAQ SECTION (#faq) ============ */
-.faq-section {
-    padding: 90px 0 76px;
-    background: #ffffff;
-    position: relative;
-    border-top: 1.5px solid var(--line);
-}
-
-.faq-grid {
-    max-width: 840px;
-    margin: 40px auto 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.faq-item {
-    border-radius: 18px;
-    border: 1.5px solid var(--line);
-    background: #fffaf1;
-    overflow: hidden;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
-}
-
-.faq-item:hover {
-    border-color: rgba(250, 176, 3, 0.45);
-    box-shadow: 0 6px 20px rgba(18, 22, 43, 0.05);
-}
-
-.faq-item.active {
-    border-color: rgba(250, 176, 3, 0.7);
-    background: #ffffff;
-    box-shadow: 0 10px 30px rgba(250, 176, 3, 0.12);
-}
-
-.faq-question-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 20px 24px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-}
-
-.faq-q-text {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.45;
-}
-
-.faq-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(250, 176, 3, 0.16);
-    color: #995c00;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 700;
-    flex-shrink: 0;
-    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-}
-
-.faq-item.active .faq-icon {
-    background: var(--primary);
-    color: #ffffff;
-}
-
-.faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.faq-item.active .faq-answer {
-    max-height: 500px;
-}
-
-.faq-answer-inner {
-    padding: 0 24px 22px;
-    font-size: 14.5px;
-    line-height: 1.7;
-    color: var(--ink);
-    opacity: 0.9;
-}
-
-.faq-answer-inner strong {
-    color: var(--ink);
-    font-weight: 700;
-}
-
-.faq-answer-inner a {
-    color: #b37400;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
-.faq-answer-inner a:hover {
-    color: var(--primary);
-}
-
-.faq-planets-list {
-    margin-top: 10px;
-    padding-left: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.faq-planets-list li {
-    font-size: 14px;
-    line-height: 1.55;
-}
-
-/* ============ CONTACT SECTION (#aloqa) ============ */
-.contact-section {
-    padding: 96px 0 72px;
-    background: #ffffff;
-    position: relative;
-    border-top: 1.5px solid var(--line);
-}
-
-.contact-cards-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    margin-top: 36px;
-}
-
-.contact-info-card {
-    border-radius: 24px;
-    border: 1.5px solid var(--line);
-    background: #fffaf1;
-    padding: 32px 32px 28px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 10px 30px rgba(18, 22, 43, 0.03);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.contact-info-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(18, 22, 43, 0.08);
-}
-
-.contact-card-tag {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: rgba(250, 176, 3, 0.16);
-    color: #995c00;
-    border: 1px solid rgba(250, 176, 3, 0.35);
-}
-
-/* Founder Card */
-.founder-card-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 20px;
-}
-
-.founder-card-img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #ffffff;
-    box-shadow: 0 8px 24px rgba(250, 176, 3, 0.25);
-    flex-shrink: 0;
-}
-
-.founder-card-name {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 4px;
-}
-
-.founder-card-role {
-    font-size: 14px;
-    font-weight: 700;
-    color: #b37400;
-    margin-bottom: 4px;
-}
-
-.founder-card-badge {
-    display: inline-block;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--muted);
-}
-
-.founder-card-bio {
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--ink);
-    opacity: 0.85;
-    margin-bottom: 24px;
-    flex-grow: 1;
-}
-
-.founder-card-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.btn-contact-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.btn-contact-action.tg {
-    background: #229ED9;
-    color: #ffffff;
-}
-
-.btn-contact-action.tg:hover {
-    background: #1b86ba;
-    transform: translateY(-2px);
-}
-
-.btn-contact-action.phone {
-    background: #ffffff;
-    color: var(--ink);
-    border: 1.5px solid var(--line);
-}
-
-.btn-contact-action.phone:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-}
-
-/* Channels List Card */
-.channels-title {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 20px;
-}
-
-.channels-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.channel-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.channel-icon-pill {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1.5px solid var(--line);
-    color: var(--ink);
-    flex-shrink: 0;
-}
-
-.channel-icon-pill.tg { color: #229ED9; }
-.channel-icon-pill.mail { color: #EA4335; }
-.channel-icon-pill.insta { color: #E1306C; }
-.channel-icon-pill.yt { color: #FF0000; }
-.channel-icon-pill.loc { color: #34A853; }
-
-.channel-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 13px;
-}
-
-.channel-hint {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--muted);
-}
-
-.channel-link {
-    font-weight: 700;
-    color: var(--ink);
-    text-decoration: none;
-    transition: color 0.18s ease;
-}
-
-.channel-link:hover {
-    color: var(--primary);
-}
-
-.channel-val-static {
-    font-weight: 600;
-    color: var(--ink);
-}
-
-/* ============ 4-COLUMN RICH FOOTER ============ */
+/* ============ FOOTER ============ */
 footer {
     background: #fffaf1;
     color: var(--muted);
-    padding: 64px 0 32px;
-    border-top: 1.5px solid var(--line);
+    padding: 52px 0;
+    border-top: 1.5px solid var(--line)
 }
 
-.footer-rich-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1.1fr 0.9fr 1.1fr;
-    gap: 36px;
+.footer-inner {
+    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
 }
 
-.footer-col {
+.footer-left {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    align-items: flex-start;
+    gap: 16px;
 }
 
-.footer-tagline {
+.footer-logo {
+    width: auto;
+    display: flex;
+    align-items: center;
+}
+
+.footer-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 6px;
     font-size: 13.5px;
-    line-height: 1.55;
+    font-weight: 600;
     color: var(--muted);
 }
 
-.footer-founder-box {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: #ffffff;
-    border: 1.5px solid var(--line);
-}
-
-.footer-founder-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--muted);
-}
-
-.footer-founder-val {
-    font-size: 13.5px;
-    color: var(--ink);
-    font-weight: 700;
-}
-
-.footer-founder-role {
+.footer-contact strong {
     font-size: 12px;
-    color: #b37400;
-    font-weight: 600;
-}
-
-.footer-heading {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: .08em;
     color: var(--ink);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
-.footer-nav-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-}
-
-.footer-nav-list a {
-    font-size: 13px;
-    font-weight: 600;
+.footer-contact a {
     color: var(--muted);
-    text-decoration: none;
-    transition: color 0.18s ease;
+    transition: color .2s;
 }
 
-.footer-nav-list a:hover {
-    color: var(--primary);
-}
-
-.footer-contacts-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    font-size: 13px;
-}
-
-.f-contact-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.f-contact-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-}
-
-.f-contact-item a {
-    color: var(--ink);
-    font-weight: 700;
-    text-decoration: none;
-    transition: color 0.18s ease;
-}
-
-.f-contact-item a:hover {
+.footer-contact a:hover {
     color: var(--primary);
 }
 
 .footer-bottom {
-    margin-top: 40px;
-    padding-top: 20px;
+    margin-top: 24px;
+    padding-top: 18px;
     border-top: 1px solid var(--line);
-    text-align: center;
 }
 
 .footer-bottom p {
     font-size: 12.5px;
     font-weight: 600;
     color: var(--muted);
-    line-height: 1.6;
-}
-
-.footer-bottom p strong {
-    color: var(--ink);
-}
-
-@media (max-width: 900px) {
-    .contact-cards-grid {
-        grid-template-columns: 1fr;
-    }
-    .footer-rich-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 28px;
-    }
-}
-
-@media (max-width: 580px) {
-    .footer-rich-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
 }
 
 .socials {
