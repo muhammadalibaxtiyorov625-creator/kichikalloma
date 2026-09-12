@@ -115,9 +115,11 @@ var i18nData = {
         form_submit: "Yuborish",
         form_note: "Ma'lumotlaringiz xavfsiz saqlanadi.",
         nav_jamoa: "Jamoa",
+        nav_faq: "FAQ",
         nav_aloqa: "Aloqa",
         team_badge: "Jamoa",
         team_title: "Jamoamiz",
+        team_sub_desc: "Kichik Alloma kosmik ta'lim loyihasi asoschisi va loyiha rahbari (Founder, Project Manager) — Shoxrux Komiljonov boshchiligidagi malakali mutaxassislar jamoasi.",
         role_ceo: "Founder, Project Manager",
         role_founder_badge: "Loyiha egasi & Asoschi",
         role_mobile: "Mobil dasturchi",
@@ -125,6 +127,9 @@ var i18nData = {
         role_uiux: "UX/UI dizayner",
         role_graphic: "Grafik dizayner",
         role_dev: "Dasturchi",
+        faq_badge: "Savol-Javoblar",
+        faq_title: "Ko'p so'raladigan savollar",
+        faq_subtitle: "Kichik Alloma loyihasi, uning asoschisi va 8 ta sayyora ekotizimi haqida batafsil ma'lumotlar.",
         cert_badge: "E'tirof",
         cert_title: "Har bir yutuq munosib e'tirof etiladi.",
         cert_desc: "8 ta olam missiyalarini muvaffaqiyatli yakunlagan mitti kashfiyotchilar o'zlarining birinchi \"Kosmik Sertifikati\"ni qo'lga kiritadilar. Bu ularning kelajakdagi katta zafarlari sari ishonchli qadamdir.",
@@ -216,9 +221,11 @@ var i18nData = {
         form_submit: "Отправить",
         form_note: "Ваши данные надежно защищены.",
         nav_jamoa: "Команда",
+        nav_faq: "FAQ",
         nav_aloqa: "Контакты",
         team_badge: "Команда",
         team_title: "Наша команда",
+        team_sub_desc: "Профессиональная команда под руководством основателя и руководителя проекта (Founder, Project Manager) — Шохруха Комилжонова.",
         role_ceo: "Founder, Project Manager",
         role_founder_badge: "Основатель & Руководитель проекта",
         role_mobile: "Мобильный разработчик",
@@ -226,6 +233,9 @@ var i18nData = {
         role_uiux: "UX/UI дизайнер",
         role_graphic: "Графический дизайнер",
         role_dev: "Разработчик",
+        faq_badge: "Вопросы и ответы",
+        faq_title: "Часто задаваемые вопросы",
+        faq_subtitle: "Подробная информация о проекте Kichik Alloma, его основателе и экосистеме 8 планет.",
         cert_badge: "Признание",
         cert_title: "Каждое достижение по достоинству оценивается.",
         cert_desc: "Юные исследователи, успешно завершившие 8 космических миссий, получают свой первый «Космический сертификат». Это уверенный шаг к их будущим победам.",
@@ -248,6 +258,7 @@ var i18nData = {
         nav_panel: "Parents panel",
         nav_sertifikat: "Certificate",
         nav_jamoa: "Team",
+        nav_faq: "FAQ",
         nav_aloqa: "Contacts",
         nav_cta: "Start journey",
         hero_badge: "Cosmic education ecosystem",
@@ -319,9 +330,11 @@ var i18nData = {
         form_submit: "Submit",
         form_note: "Your data is kept safe.",
         nav_jamoa: "Team",
+        nav_faq: "FAQ",
         nav_aloqa: "Contacts",
         team_badge: "Team",
         team_title: "Our team",
+        team_sub_desc: "Professional team led by project founder and manager (Founder, Project Manager) — Shoxrux Komiljonov.",
         role_ceo: "Founder, Project Manager",
         role_founder_badge: "Project Founder & Manager",
         role_mobile: "Mobile developer",
@@ -329,6 +342,9 @@ var i18nData = {
         role_uiux: "UX/UI designer",
         role_graphic: "Graphic designer",
         role_dev: "Developer",
+        faq_badge: "Q & A",
+        faq_title: "Frequently Asked Questions",
+        faq_subtitle: "Detailed information about Kichik Alloma project, its founder, and the 8 planets ecosystem.",
         cert_badge: "Recognition",
         cert_title: "Every achievement is properly recognized.",
         cert_desc: "Little explorers who successfully complete all 8 space missions earn their first \"Cosmic Certificate\". This is a confident step toward their future triumphs.",
@@ -2992,3 +3008,36 @@ if (yearEl) {
         onScroll();
     });
 })();
+
+/* ============ FAQ (SAVOL-JAVOB) ACCORDION BOSHQARUVI ============ */
+window.toggleFaq = function (btn) {
+    if (!btn) return;
+    var item = btn.closest('.faq-item');
+    if (!item) return;
+
+    var isActive = item.classList.contains('active');
+    var icon = btn.querySelector('.faq-icon');
+
+    // Boshqa barcha ochiq FAQ larni yopish (bittalik akkordeon)
+    var allItems = document.querySelectorAll('.faq-item');
+    allItems.forEach(function (el) {
+        if (el !== item) {
+            el.classList.remove('active');
+            var b = el.querySelector('.faq-question-btn');
+            if (b) b.setAttribute('aria-expanded', 'false');
+            var ic = el.querySelector('.faq-icon');
+            if (ic) ic.textContent = '+';
+        }
+    });
+
+    if (isActive) {
+        item.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+        if (icon) icon.textContent = '+';
+    } else {
+        item.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
+        if (icon) icon.textContent = '−';
+    }
+};
+
